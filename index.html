@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operations Dashboard Demo | Nathan Sabony</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f2a44'/%3E%3Ctext x='32' y='42' font-family='Arial' font-size='28' font-weight='700' text-anchor='middle' fill='%23fff'%3ENS%3C/text%3E%3C/svg%3E">
+<style>
+  :root { --navy:#0f2a44; --accent:#1f7a5a; --red:#b3413b; --amber:#b07a12; --ink:#1b2430; --muted:#5b6776; --line:#e3e7ec; --bg:#f5f7fa; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif; color:var(--ink); background:var(--bg); line-height:1.5; }
+  header { background:var(--navy); color:#fff; padding:18px 20px; }
+  header .wrap { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  header a { color:#9fd3bf; text-decoration:none; font-size:.9rem; }
+  .wrap { max-width:1100px; margin:0 auto; }
+  main { padding:20px; }
+  .note { background:#fff8e6; border:1px solid #f0dca8; color:#6b5210; padding:10px 14px; border-radius:8px; font-size:.88rem; margin-bottom:18px; }
+  .controls { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:18px; align-items:center; }
+  select { padding:8px 10px; border-radius:8px; border:1px solid var(--line); font-size:.95rem; background:#fff; }
+  .kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:18px; }
+  .kpi { background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px; }
+  .kpi .label { font-size:.75rem; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); font-weight:600; }
+  .kpi .value { font-size:1.6rem; font-weight:700; color:var(--navy); margin-top:4px; }
+  .grid2 { display:grid; grid-template-columns:1.2fr 1fr; gap:14px; margin-bottom:18px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px; overflow:hidden; }
+  .card h2 { font-size:1rem; margin:0 0 12px; color:var(--navy); }
+  .bar-row { display:grid; grid-template-columns:110px 1fr 48px; gap:8px; align-items:center; font-size:.85rem; margin:6px 0; }
+  .bar { height:12px; background:#eef1f4; border-radius:6px; overflow:hidden; }
+  .bar span { display:block; height:100%; background:var(--accent); border-radius:6px; }
+  svg { width:100%; height:auto; display:block; }
+  .table-wrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:.88rem; min-width:620px; }
+  th, td { padding:9px 10px; border-bottom:1px solid var(--line); text-align:right; white-space:nowrap; }
+  th:first-child, td:first-child { text-align:left; }
+  th { font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+  .pill { padding:2px 8px; border-radius:999px; font-size:.75rem; font-weight:600; }
+  .ok { background:#e6f3ee; color:#155a42; } .warn { background:#fdf1d8; color:var(--amber); } .bad { background:#fbe7e5; color:var(--red); }
+  footer { text-align:center; color:var(--muted); font-size:.82rem; padding:20px; }
+  @media (max-width:760px) { .kpis { grid-template-columns:1fr 1fr; } .grid2 { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>Portfolio Operations Dashboard (Demo)</h1>
+  <a href="https://nathansabony.github.io/">&larr; Back to portfolio</a>
+</div></header>
+<main class="wrap">
+  <div class="note"><strong>Demo:</strong> every property, number, and trend on this page is made-up sample data. It shows how the internal tool works without any real company information.</div>
+
+  <div class="controls">
+    <label for="region">Region:</label>
+    <select id="region"><option value="All">All regions</option><option>North</option><option>Central</option><option>South</option></select>
+    <label for="month">Month:</label>
+    <select id="month"></select>
+  </div>
+
+  <section class="kpis">
+    <div class="kpi"><div class="label">Properties</div><div class="value" id="k-props">-</div></div>
+    <div class="kpi"><div class="label">Avg occupancy</div><div class="value" id="k-occ">-</div></div>
+    <div class="kpi"><div class="label">Monthly revenue</div><div class="value" id="k-rev">-</div></div>
+    <div class="kpi"><div class="label">Monthly NOI</div><div class="value" id="k-noi">-</div></div>
+  </section>
+
+  <section class="grid2">
+    <div class="card"><h2>NOI trend: last 12 months</h2><div id="trend"></div></div>
+    <div class="card"><h2>Occupancy by property</h2><div id="occ"></div></div>
+  </section>
+
+  <section class="card">
+    <h2>Expense variance tracker: actual vs. budget</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Property</th><th>Region</th><th>Budget opex</th><th>Actual opex</th><th>Variance</th><th>Status</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table></div>
+  </section>
+</main>
+<footer>Sample project by Nathan Sabony &middot; <a href="https://github.com/nathansabony/ops-dashboard-demo">View source</a></footer>
+
+<script src="data.js"></script>
+<script>
+  const fmt = n => '$' + Math.round(n).toLocaleString('en-US');
+  const monthSel = document.getElementById('month');
+  MONTHS.forEach((m, i) => { const o = document.createElement('option'); o.value = i; o.textContent = m; monthSel.appendChild(o); });
+  monthSel.value = MONTHS.length - 1;
+
+  function render() {
+    const region = document.getElementById('region').value;
+    const mi = +monthSel.value;
+    const props = PROPERTIES.filter(p => region === 'All' || p.region === region);
+
+    let rev = 0, noi = 0, occ = 0;
+    props.forEach(p => { const m = p.months[mi]; rev += m.revenue; noi += m.revenue - m.opex; occ += m.occupancy; });
+    document.getElementById('k-props').textContent = props.length;
+    document.getElementById('k-occ').textContent = (occ / props.length * 100).toFixed(1) + '%';
+    document.getElementById('k-rev').textContent = fmt(rev);
+    document.getElementById('k-noi').textContent = fmt(noi);
+
+    // occupancy bars
+    document.getElementById('occ').innerHTML = props.map(p => {
+      const v = p.months[mi].occupancy * 100;
+      return `<div class="bar-row"><span>${p.name}</span><div class="bar"><span style="width:${v}%"></span></div><span>${v.toFixed(0)}%</span></div>`;
+    }).join('');
+
+    // NOI trend line (inline SVG)
+    const series = MONTHS.map((_, i) => props.reduce((s, p) => s + p.months[i].revenue - p.months[i].opex, 0));
+    const W = 520, H = 200, pad = 34;
+    const max = Math.max(...series) * 1.08, min = Math.min(...series) * 0.9;
+    const x = i => pad + i * (W - pad * 2) / (series.length - 1);
+    const y = v => H - pad + 10 - (v - min) / (max - min) * (H - pad * 1.6);
+    const pts = series.map((v, i) => `${x(i)},${y(v)}`).join(' ');
+    const labels = MONTHS.map((m, i) => i % 2 === 0 ? `<text x="${x(i)}" y="${H - 4}" font-size="10" text-anchor="middle" fill="#5b6776">${m.split(' ')[0]}</text>` : '').join('');
+    document.getElementById('trend').innerHTML =
+      `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="NOI trend line">
+        <polyline fill="none" stroke="#1f7a5a" stroke-width="3" points="${pts}"/>
+        <circle cx="${x(mi)}" cy="${y(series[mi])}" r="5" fill="#0f2a44"/>
+        <text x="${x(mi)}" y="${y(series[mi]) - 10}" font-size="11" text-anchor="middle" fill="#0f2a44" font-weight="700">${fmt(series[mi])}</text>
+        ${labels}
+      </svg>`;
+
+    // variance table
+    document.getElementById('tbody').innerHTML = props.map(p => {
+      const m = p.months[mi];
+      const varPct = (m.opex - m.budget) / m.budget * 100;
+      const cls = varPct > 8 ? 'bad' : varPct > 3 ? 'warn' : 'ok';
+      const label = varPct > 8 ? 'Review' : varPct > 3 ? 'Watch' : 'On track';
+      return `<tr><td>${p.name}</td><td>${p.region}</td><td>${fmt(m.budget)}</td><td>${fmt(m.opex)}</td>
+        <td>${varPct >= 0 ? '+' : ''}${varPct.toFixed(1)}%</td><td><span class="pill ${cls}">${label}</span></td></tr>`;
+    }).join('');
+  }
+  document.getElementById('region').addEventListener('change', render);
+  monthSel.addEventListener('change', render);
+  render();
+</script>
+</body>
+</html>
