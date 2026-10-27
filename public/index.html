@@ -5936,7 +5936,7 @@ function homeDrawChart(c) {
   });
   // Chart.js can size itself before the page has finished laying out, leaving the chart
   // shorter than its rectangle. Fit it to the box again once the layout has settled.
-  const fit = () => { if (window._hmc) window._hmc.resize(); };
+  const fit = () => { if (window._hmc && typeof window._hmc.resize === 'function') window._hmc.resize(); };   // the local fallback chart has no resize
   requestAnimationFrame(fit); setTimeout(fit, 250); setTimeout(fit, 1200);
 }
 
