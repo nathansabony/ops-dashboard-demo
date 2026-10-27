@@ -19,6 +19,13 @@ That is all. `npm start` runs `scripts/demoServer.js`, which sets `DEMO_MODE=1`,
 credentials in the environment or a `.env` file, and starts `server.js`. There is no sign-in: the visitor
 is signed in automatically as an admin with every tool. `npm run dev` does the same with file watching.
 
+### Deploying (Render, free plan)
+
+`render.yaml` is a blueprint: in Render choose New > Blueprint, pick this repo, and set the
+`DEMO_ACCESS_PIN` environment variable in the dashboard. Visitors then see a PIN page first
+(a cookie remembers them for 30 days). Leave `DEMO_ACCESS_PIN` empty for a public demo. The free
+plan sleeps when idle, so the first visit after a pause takes up to a minute.
+
 Optional: set `ANTHROPIC_API_KEY` to let the Ask assistant and the contract scanner answer free-form
 (see "Ask without a key" below). The Underwriting tab's PDF/Excel parsers use Python
 (`python3 -m pip install openpyxl pymupdf formulas pandas xlrd`); without them that tab degrades but the rest

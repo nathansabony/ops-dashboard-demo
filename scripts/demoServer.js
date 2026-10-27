@@ -22,5 +22,11 @@ const app = require(path.join(__dirname, '..', 'server.js'));
 const PORT = Number(process.env.PORT);
 
 // server.js only listens when run directly, so listen here (and run its startup chores).
-const server = app.listen(PORT, app.onDemoListening);
+// Optional access PIN (DEMO_ACCESS_PIN on the host); unset means open. See demoGate.js.
+const express = require('express');
+const outer = express();
+outer.set('trust proxy', 1);
+outer.use(require('./demoGate').makeGate(process.env.DEMO_ACCESS_PIN || ''));
+outer.use(app);
+const server = outer.listen(PORT, app.onDemoListening);
 server.on('error', err => { console.error(err.message); process.exit(1); });

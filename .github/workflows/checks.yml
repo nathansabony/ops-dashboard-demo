@@ -30,6 +30,8 @@ jobs:
         run: npm run check:duplicate-payments
       - name: "Demo mode (automatic admin sign-in, canned Ask answers, no-op mailer, sample contract)"
         run: npm run check:demo
+      - name: Demo PIN gate (closed without the PIN, open with it)
+        run: npm run check:demo-gate
       - name: Sign-in and per-person tool access
         run: npm run check:access
       - name: Ask panel (what Claude is sent, the streamed answer)

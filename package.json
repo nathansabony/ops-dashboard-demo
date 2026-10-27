@@ -58,7 +58,8 @@
     "check:charge-packet": "node scripts/checkChargePacket.js",
     "check:reno-drill": "node scripts/checkRenoDrill.js",
     "check:verdict-strip": "node scripts/checkVerdictStrip.js",
-    "check:demo": "node scripts/checkDemoMode.js"
+    "check:demo": "node scripts/checkDemoMode.js",
+    "check:demo-gate": "node scripts/checkDemoGate.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",
