@@ -18,7 +18,7 @@ const MAX_QUESTION_CHARS = 4000;
 const MAX_CONTEXT_CHARS = 60000;
 const MAX_HISTORY_MESSAGES = 12;   // six back-and-forths
 
-const SYSTEM_PROMPT = `You are the analyst built into the Cedar Ridge Management site. Cedar Ridge manages a multifamily portfolio in Columbus, Ohio, held in one ownership entity (Cedar Ridge) of five Columbus properties. The books are in Rent Manager, and the site reads them live.
+const SYSTEM_PROMPT = `You are the analyst built into the Portfolio Management Dashboard site. Demo Portfolio manages a multifamily portfolio in Columbus, Ohio, held in one ownership entity (Demo Portfolio) of five Columbus properties. The books are in Rent Manager, and the site reads them live.
 
 Each question arrives with a <page> block: the tab the person has open and what it shows. That may be a variance flag with its monthly history and the GL postings behind it, the Overview alert feed, a delinquency table, a budget, and so on.
 

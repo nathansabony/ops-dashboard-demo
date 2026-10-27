@@ -1,5 +1,5 @@
 {
-  "_comment": "Gap-filler for the auto-assign super map. Rent Manager is the system of record and always wins - an entry here is only used for a property RM has no super set on. Key is the RM property name (case and spacing are normalized). Value is either the super's name as a string, or an object: {\"super\": \"Name\", \"entity\": \"Cedar Ridge\", \"name\": \"Building A\"}.",
+  "_comment": "Gap-filler for the auto-assign super map. Rent Manager is the system of record and always wins - an entry here is only used for a property RM has no super set on. Key is the RM property name (case and spacing are normalized). Value is either the super's name as a string, or an object: {\"super\": \"Name\", \"entity\": \"Demo Portfolio\", \"name\": \"Building A\"}.",
   "The Alder": "Sam Whitfield",
   "Maple Court": "Sam Whitfield",
   "Willow Creek": "Sam Whitfield",

@@ -192,7 +192,7 @@ const DEFAULT_ASSUMPTIONS = {
   mgmtFeePct: 0.04,          // #7 — only used when mgmtFeeMode === 'pctOfEgi'. House rate is 4%:
                              // the house budget workbooks (shared corporate folder) show Management Fee Rate 0.04.
                              // The 4.5% that used to sit here was the benchmark-doc midpoint,
-                             // not Cedar Ridge's actual rate.
+                             // not Demo Portfolio's actual rate.
   reservesPerUnitYr: 300,    // #14 — top of the agency range, older OH stock
   contingencyPct: 0,         // #16 — see note below
 
@@ -233,7 +233,7 @@ const DEFAULT_ASSUMPTIONS = {
 //   - small or newer buildings                   -> often exempt, use the 3% default
 // Set incomeGrowthPct per entity once you confirm which properties sit where.
 const ENTITY_OVERRIDES = {
-  // 'Cedar Ridge': { incomeGrowthPct: 0.04, note: 'Example: capped at the lesser of CPI or 4%' },
+  // 'Demo Portfolio': { incomeGrowthPct: 0.04, note: 'Example: capped at the lesser of CPI or 4%' },
 };
 
 // ── One-off dated items: not modelled, typed ─────────────────────────────────

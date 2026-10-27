@@ -171,7 +171,7 @@ function coverPage(pdf, fonts, { charge, backup }) {
 
   page.drawText('Payment record', { x: M, y, size: 20, font: bold, color: INK });
   y -= 15;
-  page.drawText('Produced by the Cedar Ridge Management management site from Rent Manager records.',
+  page.drawText('Produced by the Portfolio Management Dashboard site from Rent Manager records.',
     { x: M, y, size: 8.5, font: reg, color: MUTED });
   y -= 11;
   page.drawText('This is a summary of what Rent Manager holds. It is not a receipt issued by the vendor.',
@@ -230,7 +230,7 @@ function coverPage(pdf, fonts, { charge, backup }) {
     row('Bank account', backup.payment.bank.label);
   }
 
-  page.drawText(`Generated ${new Date().toISOString().slice(0, 10)} · Cedar Ridge Management`,
+  page.drawText(`Generated ${new Date().toISOString().slice(0, 10)} · Portfolio Management Dashboard`,
     { x: M, y: 34, size: 8, font: reg, color: MUTED });
   return page;
 }
@@ -283,8 +283,8 @@ async function build({ charge, backup, fetchDoc }) {
   pdf.setTitle(`Payment record — ${safe(charge.propertyName || '')} ${safe(charge.date || '')}`);
   // pdf-lib stamps its own Producer, so the authorship that matters goes on
   // Creator — this file must never be mistakable for the vendor's own paperwork.
-  pdf.setCreator('Cedar Ridge Management management site');
-  pdf.setProducer('Cedar Ridge Management management site');
+  pdf.setCreator('Portfolio Management Dashboard site');
+  pdf.setProducer('Portfolio Management Dashboard site');
   const fonts = {
     reg: await pdf.embedFont(StandardFonts.Helvetica),
     bold: await pdf.embedFont(StandardFonts.HelveticaBold),

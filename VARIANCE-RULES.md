@@ -1,6 +1,6 @@
 # Variance Flagging Model (v4) - how the Variances tab decides what to flag
 
-*Reference for the Cedar Ridge Management demo. The numbers on the tab are fictional; the rules are the real ones the site runs.*
+*Reference for the Portfolio Management Dashboard demo. The numbers on the tab are fictional; the rules are the real ones the site runs.*
 
 Report 45 (Rent Manager's monthly P&L) is pulled on **Basis 1 = Accrual**. To check any property, export its 12-Month Recap (Accrual, collapse parents off) and compare month by month; the tab matches it on every account.
 
@@ -131,7 +131,7 @@ Every flag card shows a contact for its category and entity (utility usage goes 
 
 ## Entities
 
-The demo has one entity, `Cedar Ridge`, holding five properties (The Alder, Maple Court, Willow Creek, Birchwood Commons, Summit Lofts). A live install can group properties into any number of entities, and `config/property-merges.json` can read several Rent Manager properties as one building.
+The demo has one entity, `Demo Portfolio`, holding five properties (The Alder, Maple Court, Willow Creek, Birchwood Commons, Summit Lofts). A live install can group properties into any number of entities, and `config/property-merges.json` can read several Rent Manager properties as one building.
 
 ## Open questions for tuning
 

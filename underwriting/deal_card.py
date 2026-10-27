@@ -10,7 +10,7 @@ back without Excel. This reads them back; nothing is recalculated here.
     python deal_card.py <model.xlsx> [<model2.xlsx> ...]
 
 Emits JSON {"cards": {"<path>": {...}}} - one entry per file. A file that is not
-a Cedar Ridge underwriting model (no Dashboard/Inputs tab) gets {"error": "..."}
+a house underwriting model (no Dashboard/Inputs tab) gets {"error": "..."}
 instead, so importing a random workbook is refused, not silently shown.
 A model that was never computed (no baked values) comes back computed=false;
 the card then says so rather than showing zeros.
@@ -89,7 +89,7 @@ def uncomputed_formulas(path, wb_values):
 def card_for(path):
     wb = load_workbook(path, data_only=True)
     if "Dashboard" not in wb.sheetnames or "Inputs" not in wb.sheetnames:
-        return {"error": "Not a Cedar Ridge underwriting model (no Dashboard / Inputs tab)."}
+        return {"error": "Not a house underwriting model (no Dashboard / Inputs tab)."}
     def get(sheet, row, col):
         return wb[sheet].cell(row, col).value
     facts = grab_facts(get)

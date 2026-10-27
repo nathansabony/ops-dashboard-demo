@@ -112,11 +112,11 @@ const escapeHtml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').r
 // button and as text (some mail clients strip buttons).
 function linkEmail({ kind, name, link, hours }) {
   const invite = kind === 'invite';
-  const subject = invite ? 'Your Cedar Ridge Management management site account' : 'Reset your Cedar Ridge Management password';
+  const subject = invite ? 'Your Portfolio Management Dashboard site account' : 'Reset your Portfolio Management Dashboard password';
   const hello = name ? `Hi ${name},` : 'Hi,';
   const lead = invite
-    ? 'An account has been set up for you on the Cedar Ridge Management management site. Choose your password to sign in:'
-    : 'Someone (hopefully you) asked to reset your password for the Cedar Ridge Management management site. Choose a new one here:';
+    ? 'An account has been set up for you on the Portfolio Management Dashboard site. Choose your password to sign in:'
+    : 'Someone (hopefully you) asked to reset your password for the Portfolio Management Dashboard site. Choose a new one here:';
   const tail = `This link works once and expires in ${hours} hour${hours === 1 ? '' : 's'}.${invite ? '' : ' If you did not ask for this, you can ignore this email — your password has not changed.'}`;
   const text = `${hello}\n\n${lead}\n\n${link}\n\n${tail}\n`;
   const html = `<div style="font-family:Arial,sans-serif;font-size:14px;color:#14342A;max-width:520px;">
@@ -130,10 +130,10 @@ function linkEmail({ kind, name, link, hours }) {
 // "Confirm your email" after a self sign-up.
 function verifyEmailMessage({ name, link }) {
   const hello = name ? `Hi ${name},` : 'Hi,';
-  const lead = 'Thanks for signing up for the Cedar Ridge Management management site. Confirm this is your email address:';
+  const lead = 'Thanks for signing up for the Portfolio Management Dashboard site. Confirm this is your email address:';
   const tail = 'An admin will give you access to the tools you need. If you did not sign up, you can ignore this email.';
   return {
-    subject: 'Confirm your email — Cedar Ridge Management',
+    subject: 'Confirm your email — Portfolio Management Dashboard',
     text: `${hello}\n\n${lead}\n\n${link}\n\n${tail}\n`,
     html: `<div style="font-family:Arial,sans-serif;font-size:14px;color:#14342A;max-width:520px;">
       <p>${escapeHtml(hello)}</p><p>${escapeHtml(lead)}</p>

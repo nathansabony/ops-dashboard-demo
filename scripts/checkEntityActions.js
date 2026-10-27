@@ -23,14 +23,14 @@ function check(name, ok, detail) {
 console.log('\nThe store');
 check('with nothing saved, nothing is handled', Object.keys(ea.load().handled).length === 0);
 
-let s = ea.handle('EA:Cedar Ridge:occupancy', '  Leasing push started, 6 applications in  ', 89.7, 'Regional Manager');
+let s = ea.handle('EA:Demo Portfolio:occupancy', '  Leasing push started, 6 applications in  ', 89.7, 'Regional Manager');
 check('a mark is kept with who, when, the note and the value', (() => {
-  const h = s.handled['EA:Cedar Ridge:occupancy'];
+  const h = s.handled['EA:Demo Portfolio:occupancy'];
   return h && h.by === 'Regional Manager' && h.note === 'Leasing push started, 6 applications in' && h.value === 89.7 && h.at && h.date;
 })());
 check('the file on disk is the sanitized shape', (() => {
   const raw = JSON.parse(fs.readFileSync(tmp, 'utf8'));
-  return raw.version === 1 && raw.handled['EA:Cedar Ridge:occupancy'].value === 89.7 && raw.updatedBy === 'Regional Manager';
+  return raw.version === 1 && raw.handled['EA:Demo Portfolio:occupancy'].value === 89.7 && raw.updatedBy === 'Regional Manager';
 })());
 
 s = ea.handle('EA:Willow Creek:dscr', 'Asked Dana about GL 6230', null, 'Owner');
@@ -38,26 +38,26 @@ check('a data item (no figure) is kept with a null value', s.handled['EA:Willow 
 check('an entity name with a space is a valid key', ea.validKey('EA:Maple Court:pl'));
 
 let threw = null;
-try { ea.handle('RR:Cedar Ridge:occupancy', 'x', 1, 'x'); } catch (err) { threw = err; }
+try { ea.handle('RR:Demo Portfolio:occupancy', 'x', 1, 'x'); } catch (err) { threw = err; }
 check('a Variances key is refused — this store is for entity items only', threw && threw.code === 'BAD_KEY');
 threw = null;
-try { ea.handle('EA:Cedar Ridge:margin', 'x', 1, 'x'); } catch (err) { threw = err; }
+try { ea.handle('EA:Demo Portfolio:margin', 'x', 1, 'x'); } catch (err) { threw = err; }
 check('an unknown rule is refused (margin and expense ratio share "pl")', threw && threw.code === 'BAD_KEY');
 check('a refused mark leaves the stored ones alone', Object.keys(ea.load().handled).length === 2);
 
-s = ea.handle('EA:Cedar Ridge:occupancy', 'x'.repeat(900), 90.1, 'Regional Manager');
-check('re-marking overwrites the mark and caps the note', s.handled['EA:Cedar Ridge:occupancy'].value === 90.1 && s.handled['EA:Cedar Ridge:occupancy'].note.length === 500);
+s = ea.handle('EA:Demo Portfolio:occupancy', 'x'.repeat(900), 90.1, 'Regional Manager');
+check('re-marking overwrites the mark and caps the note', s.handled['EA:Demo Portfolio:occupancy'].value === 90.1 && s.handled['EA:Demo Portfolio:occupancy'].note.length === 500);
 
-s = ea.unhandle('EA:Cedar Ridge:occupancy', 'Owner');
-check('putting an item back removes only that mark', !s.handled['EA:Cedar Ridge:occupancy'] && s.handled['EA:Willow Creek:dscr']);
+s = ea.unhandle('EA:Demo Portfolio:occupancy', 'Owner');
+check('putting an item back removes only that mark', !s.handled['EA:Demo Portfolio:occupancy'] && s.handled['EA:Willow Creek:dscr']);
 check('an unknown key on unhandle is a no-op, not an error', Object.keys(ea.unhandle('EA:Nowhere:pl', 'x').handled).length === 1);
 
 fs.writeFileSync(tmp, '{ not json');
 check('a corrupt file reads as nothing handled rather than an error', Object.keys(ea.load().handled).length === 0);
-fs.writeFileSync(tmp, JSON.stringify({ handled: { 'EA:Cedar Ridge:occupancy': { value: 'abc', by: 42 }, 'junk': { note: 'x' } } }));
+fs.writeFileSync(tmp, JSON.stringify({ handled: { 'EA:Demo Portfolio:occupancy': { value: 'abc', by: 42 }, 'junk': { note: 'x' } } }));
 check('junk keys are dropped and a non-numeric value reads as none', (() => {
   const h = ea.load().handled;
-  return Object.keys(h).length === 1 && h['EA:Cedar Ridge:occupancy'].value === null && h['EA:Cedar Ridge:occupancy'].by === null;
+  return Object.keys(h).length === 1 && h['EA:Demo Portfolio:occupancy'].value === null && h['EA:Demo Portfolio:occupancy'].by === null;
 })());
 
 console.log('\nWhen a handled item comes back');
@@ -103,7 +103,7 @@ if (labels) {
     JSON.stringify(pageRules) === JSON.stringify([...ea.RULES].sort()),
     `page: ${pageRules.join(',')} server: ${[...ea.RULES].sort().join(',')}`);
 }
-check('the page marks a flag with the key shape the server validates', /key: `EA:\$\{e\}:\$\{rule\}`/.test(PAGE) && ea.validKey('EA:Cedar Ridge:occupancy'));
+check('the page marks a flag with the key shape the server validates', /key: `EA:\$\{e\}:\$\{rule\}`/.test(PAGE) && ea.validKey('EA:Demo Portfolio:occupancy'));
 check('a merged data flag has no key, so it can never be marked handled', /key: null, ents, e: ents\.join/.test(PAGE));
 
 console.log('\nWho may mark');

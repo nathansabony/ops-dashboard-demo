@@ -1,14 +1,14 @@
-# Cedar Ridge Management - Demo. One free web service; set DEMO_ACCESS_PIN in the dashboard.
+# Portfolio Management Dashboard Demo. One free web service; set DEMO_ACCESS_PIN in the dashboard.
 # (Works on any host that reads a render.yaml blueprint; otherwise just run `npm start`.)
 services:
   - type: web
-    name: cedar-ridge-demo
+    name: portfolio-dashboard-demo
     runtime: node
     plan: free
     # pip packages power the Underwriting tab's parsers/generator. The host's python3
     # lives in a virtualenv (no --user installs), so install directly - and fail the
     # build loudly rather than ship a silently broken tab.
-    buildCommand: npm install && python3 -m pip install openpyxl pymupdf formulas pandas xlrd
+    buildCommand: npm install && python3 -m pip install openpyxl pymupdf formulas pandas xlrd && node scripts/buildDemoCaches.js
     startCommand: npm start
     envVars:
       - key: NODE_ENV

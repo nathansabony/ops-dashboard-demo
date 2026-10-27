@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "cedar-ridge-demo",
+      "name": "portfolio-dashboard-demo",
       "runtimeExecutable": "node",
       "runtimeArgs": ["scripts/demoServer.js"],
       "port": 3001

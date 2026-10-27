@@ -30,7 +30,7 @@ function check(name, ok, detail) {
 
 const A = 'prop:12|water_sewer|Aug 26|mom';
 const B = 'prop:40|insurance|Sep 26|singleMonth';
-const G = 'group:water_sewer:Aug 26:Cedar Ridge|water_sewer|Aug 26|varGroup';
+const G = 'group:water_sewer:Aug 26:Demo Portfolio|water_sewer|Aug 26|varGroup';
 const Z = 'group:gas:Jun 26|gas|Jun–Jul 26|zeroGroup';
 
 console.log('\nFirst date sticks');
@@ -48,7 +48,7 @@ r = fsn.record([A, G, Z], '2026-10-21T09:00:00.000Z');
 check('a second call keeps the FIRST date for an id already seen', r[A] === '2026-08-03T12:00:00.000Z', JSON.stringify(r));
 check('...and stamps only the new ones with now', r[G] === '2026-10-21T09:00:00.000Z' && r[Z] === '2026-10-21T09:00:00.000Z');
 check('...and answers only for the ids asked about, not the whole file', !(B in r) && Object.keys(r).length === 3);
-check('ids with spaces, an en dash and an entity group key are valid', fsn.validId(Z) && fsn.validId(G) && fsn.validId('Cedar Ridge Holdings|mgmt_fee||trend'));
+check('ids with spaces, an en dash and an entity group key are valid', fsn.validId(Z) && fsn.validId(G) && fsn.validId('Demo Portfolio|mgmt_fee||trend'));
 
 const before = fs.statSync(tmp).mtimeMs;
 const again = fsn.record([A, B]);

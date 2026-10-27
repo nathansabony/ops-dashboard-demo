@@ -185,9 +185,9 @@ const SPEC = [
 
 // Non-P&L accounts (balance sheet side), in chart order.
 const BS_SPEC = [
-  { ref: '1010', name: 'Cedar Ridge Operating - 4471', type: 'Bank' },
-  { ref: '1020', name: 'Cedar Ridge Reserve - 8820', type: 'Bank' },
-  { ref: '1030', name: 'Cedar Ridge Security Deposits - 3095', type: 'Bank' },
+  { ref: '1010', name: 'Demo Portfolio Operating - 4471', type: 'Bank' },
+  { ref: '1020', name: 'Demo Portfolio Reserve - 8820', type: 'Bank' },
+  { ref: '1030', name: 'Demo Portfolio Security Deposits - 3095', type: 'Bank' },
   { ref: '1200', name: 'Tenant Receivables', type: 'Receivable' },
   { ref: '1500', name: 'Land & Buildings', type: 'Fixed Asset' },
   { ref: '1510', name: 'Accumulated Depreciation', type: 'Fixed Asset' },
@@ -250,7 +250,7 @@ const leafByRef = new Map(leafNodes.map(n => [n.ref, n]));
 
 // ── vendors ─────────────────────────────────────────────────────────────────
 const VENDOR_DEFS = {
-  mgmt: ['Cedar Ridge Management Co.'],
+  mgmt: ['Portfolio Management Dashboard Co.'],
   advertising: ['Apartment Finder Online', 'Local Listing Media'],
   bank: ['First Heartland Bank'],
   legal: ['Harlan & Pruitt LLP', 'Metro Eviction Services'],
@@ -281,7 +281,7 @@ const VENDOR_DEFS = {
   waste: ['Capital Waste Services'],
   electric: ['Ohio Power & Light'],
   payroll: ['Keystone Payroll Services'],
-  commission: ['Cedar Ridge Leasing Team'],
+  commission: ['Demo Portfolio Leasing Team'],
   roof: ['Summit Ridge Roofing', 'Heritage Roofing & Exteriors'],
   flooring: ['Tri-County Flooring', 'Central Ohio Flooring Supply'],
   cabinets: ['Heritage Kitchen & Cabinets'],

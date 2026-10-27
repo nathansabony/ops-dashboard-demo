@@ -138,7 +138,7 @@ async function buildDelinquency() {
   for (const r of grid1) {
     const propertyId = Number(r.EntitiesEntityID);
     const mapped = map.byId.get(propertyId);
-    // A property outside the entity map (e.g. a Cedar Ridge property not on the
+    // A property outside the entity map (e.g. a Demo Portfolio property not on the
     // confirmed whitelist) is counted in `unmapped` rather than silently
     // dropped — otherwise the roll-ups would quietly stop tying to `official`.
     if (!mapped) { unmapped += 1; continue; }

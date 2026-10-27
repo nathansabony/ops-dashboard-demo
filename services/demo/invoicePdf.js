@@ -99,9 +99,9 @@ async function invoiceBuffer(bill) {
   meta.forEach(([k, v], i) => { T(k, 380, metaY - i * 14, 9, reg, MUTED); R(v, 572, metaY - i * 14, 9.5, bold); });
 
   T('BILL TO', 40, 668, 8, bold, MUTED);
-  T('Cedar Ridge Holdings, LLC', 40, 654, 10.5, bold);
+  T('Demo Portfolio', 40, 654, 10.5, bold);
   T('Attn: Accounts Payable', 40, 641, 9.5);
-  T('Cedar Ridge Management', 40, 629, 9.5);
+  T('Portfolio Management Dashboard', 40, 629, 9.5);
   T('Columbus, OH', 40, 617, 9.5);
 
   T('SERVICE LOCATION', 40, 586, 8, bold, MUTED);
@@ -175,7 +175,7 @@ async function proposalBuffer(bill) {
   T('Accepted by:', 40, y, 10, bold); y -= 30;
   page.drawLine({ start: { x: 40, y }, end: { x: 250, y }, thickness: 0.7, color: rgb(0.3, 0.3, 0.3) });
   page.drawLine({ start: { x: 330, y }, end: { x: 540, y }, thickness: 0.7, color: rgb(0.3, 0.3, 0.3) });
-  T('Jordan Reyes, Regional Manager - Cedar Ridge', 40, y - 13, 8.5, reg, rgb(0.42, 0.45, 0.5));
+  T('Jordan Reyes, Regional Manager - Demo Portfolio', 40, y - 13, 8.5, reg, rgb(0.42, 0.45, 0.5));
   T(`${e.vendor}, authorized signatory`, 330, y - 13, 8.5, reg, rgb(0.42, 0.45, 0.5));
   T('Demo document - fictional vendor and figures', 40, 38, 7, reg, rgb(0.65, 0.68, 0.72));
   return Buffer.from(await doc.save());

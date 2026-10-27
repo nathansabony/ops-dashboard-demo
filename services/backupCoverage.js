@@ -233,7 +233,7 @@ async function build({ onProgress } = {}) {
   // ── the cuts that actually decide what to show ────────────────────────────
   // The per-property table came back almost flat: 22–34% for 84 of 86 buildings.
   // That is not noise, it is the answer — a renovation invoice is one bill split
-  // across the properties it covers (FY Construction's MAJOR/Cedar Ridge/37Du hits ten of
+  // across the properties it covers (FY Construction's MAJOR/Demo Portfolio/37Du hits ten of
   // them), so whether a document exists is a property of the VENDOR and the
   // MONTH, not of the building. Every property therefore ends up with much the
   // same mix, and choosing between them barely moves what is on screen.

@@ -71,14 +71,14 @@ const txt = textOf(html);
   check('the six headline tiles are The owner\'s price-test six', full.tiles.map(t => t.label.split(' @')[0]).join('|') === 'PRICE RUN|UNITS|T12 NOI|IN-PLACE CAP RATE|LEVERED IRR|MAX PRICE');
   check('price, units, T12 NOI, IRR and max price read right', txt.includes('$11.21M') && txt.includes('$229K') === false ? txt.includes('$228,741 per unit') : txt.includes('$11.21M'));
   check('IRR 4.6% is below the 16% target and says so', txt.includes('4.6%') && txt.includes('below 16% target'));
-  check('the gap to max price is stated, in dollars and percent, and labelled an estimate', /−\$3\.08M \(−27%\) vs price run — Cedar Ridge estimate/.test(txt));
-  check('in-place cap rate is T12 NOI over price and is labelled a Cedar Ridge estimate', txt.includes('5.50%') && /Cedar Ridge estimate: T12 NOI ÷ price run/.test(txt));
+  check('the gap to max price is stated, in dollars and percent, and labelled an estimate', /−\$3\.08M \(−27%\) vs price run — house estimate/.test(txt));
+  check('in-place cap rate is T12 NOI over price and is labelled a house estimate', txt.includes('5.50%') && /house estimate: T12 NOI ÷ price run/.test(txt));
   check('the verdict sentence uses the model\'s own numbers', /levered IRR over the 8-year hold is 4\.6%, below the 16% target/.test(txt) && /put[s]? the most that could be paid .* at \$8\.13M/.test(txt));
   check('the T12 section names the months covered', txt.includes('Jun 2025 – May 2026 (12 months)'));
   check('zero-value T12 lines are left out and said so', !txt.includes('Turnover Costs $0') && txt.includes('Lines at $0 are not shown (Turnover Costs)'));
-  check('expense shares of EGI are labelled as our estimate', txt.includes('% of EGI*') && txt.includes('Cedar Ridge estimate: the line divided by effective gross income'));
+  check('expense shares of EGI are labelled as our estimate', txt.includes('% of EGI*') && txt.includes('house estimate: the line divided by effective gross income'));
   check('the scenario table drops the "Notes" column and the cash-on-cash row', !/>Notes</.test(html) && full.scenarios.length === 2);
-  check('annual loss-to-lease is monthly x 12 and labelled an estimate', txt.includes('$175,640') && /Cedar Ridge estimate: monthly × 12/.test(txt));
+  check('annual loss-to-lease is monthly x 12 and labelled an estimate', txt.includes('$175,640') && /house estimate: monthly × 12/.test(txt));
   check('the unit mix shows market vs in-place rent per type', txt.includes('1BR') && txt.includes('$200') && txt.includes('$400'));
 }
 
@@ -121,8 +121,8 @@ console.log('\nA deal flagged NEEDS REVIEW');
   const good = textOf(report.renderHtml(report.buildReport(facts(), {})));
   check('a scored deal\'s PDF explains its score, factor by factor, and a flagged one prints none', /Deal score: \d+ \/ 100/.test(good) && /Levered IRR vs target/.test(good) && /How soon the target is hit/.test(good) && !/Deal score:/.test(tb));
   check('a healthy deal has no banner and keeps its numbers', !/NEEDS REVIEW/.test(good) && /\$11\.21M/.test(good));
-  const adj = textOf(report.renderHtml(report.buildReport(facts(), { provenance: { sources: [{ kind: 't12', filename: 'T12.xlsx', method: 'row-mapped (pandas)', notes: ['ADJUSTED MONTH: Oct 2025 has no gross potential rent. It is left out and every T12 figure is annualized (x12/11). This is a Cedar Ridge estimate.'] }] } })));
-  check('a T12 the reader annualized says so under "Adjusted by us (Cedar Ridge estimate)"', /Adjusted by us \(Cedar Ridge estimate\)/.test(adj) && /ADJUSTED MONTH: Oct 2025/.test(adj));
+  const adj = textOf(report.renderHtml(report.buildReport(facts(), { provenance: { sources: [{ kind: 't12', filename: 'T12.xlsx', method: 'row-mapped (pandas)', notes: ['ADJUSTED MONTH: Oct 2025 has no gross potential rent. It is left out and every T12 figure is annualized (x12/11). This is a house estimate.'] }] } })));
+  check('a T12 the reader annualized says so under "Adjusted by us (house estimate)"', /Adjusted by us \(house estimate\)/.test(adj) && /ADJUSTED MONTH: Oct 2025/.test(adj));
 }
 
 console.log('\nWhatever the facts look like');
@@ -165,7 +165,7 @@ async function disk() {
   const calls = [];
   const runPython = async (script, args) => {
     calls.push(script);
-    if (script === 'deal_facts.py') { if (/Bad-/.test(args[0])) return { error: 'Not a Cedar Ridge underwriting model' }; await new Promise(r => setTimeout(r, 15)); return facts(); }
+    if (script === 'deal_facts.py') { if (/Bad-/.test(args[0])) return { error: 'Not a house underwriting model' }; await new Promise(r => setTimeout(r, 15)); return facts(); }
     if (script === 'html_to_pdf.py') { fs.writeFileSync(args[1], '%PDF-1.4 ' + 'x'.repeat(900)); return { pages: 3, bytes: 909 }; }
     throw new Error('unexpected ' + script);
   };
@@ -199,7 +199,7 @@ async function disk() {
   fs.unlinkSync(reports.pdfPath(model));
   const bf = await reports.backfill();
   check('backfill builds what is missing, and names what it could not read with the reason',
-    bf.total === 2 && bf.generated.length === 1 && bf.failed.length === 1 && /Not a Cedar Ridge underwriting model/.test(bf.failed[0].reason), JSON.stringify(bf));
+    bf.total === 2 && bf.generated.length === 1 && bf.failed.length === 1 && /Not a house underwriting model/.test(bf.failed[0].reason), JSON.stringify(bf));
   const bf2 = await reports.backfill();
   check('backfill is safe to re-run: the current report is skipped, the failure is reported again', bf2.generated.length === 0 && bf2.skipped.length === 1 && bf2.failed.length === 1);
   const bf3 = await reports.backfill({ force: true });

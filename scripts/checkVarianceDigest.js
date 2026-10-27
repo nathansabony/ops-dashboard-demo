@@ -128,9 +128,9 @@ check('a property blank for three months or more becomes a line; two months does
 
 check('a jump across an entity\'s buildings becomes a line pointing at Variances', () => {
   const ctx = sandbox();
-  const out = ctx.varDigestItems([varGroup('Management Wages', 5, 'Cedar Ridge', 60000)], []);
+  const out = ctx.varDigestItems([varGroup('Management Wages', 5, 'Demo Portfolio', 60000)], []);
   assert.strictEqual(out.length, 1);
-  assert.strictEqual(out[0].head, 'Management Wages moved at 5 Cedar Ridge properties at once');
+  assert.strictEqual(out[0].head, 'Management Wages moved at 5 Demo Portfolio properties at once');
   assert.strictEqual(out[0].cat, 'variance');
 });
 

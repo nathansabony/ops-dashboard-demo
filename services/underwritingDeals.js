@@ -302,8 +302,8 @@ function shapeCard(raw) {
     t12_noi: noi,
     year1_noi: finite(raw.year1_noi),
     capex: finite(raw.capex),
-    cap_rate: price && noi != null ? noi / price : null,          // Cedar Ridge estimate
-    cap_note: 'T12 NOI / the model\'s purchase price - a Cedar Ridge estimate, not a quoted cap rate',
+    cap_rate: price && noi != null ? noi / price : null,          // house estimate
+    cap_note: 'T12 NOI / the model\'s purchase price - a house estimate, not a quoted cap rate',
     irr, irr_target: target, irr_failed: irrFailed,
     meets_target: irrFailed ? false : irr != null ? irr >= target : null,   // an IRR that cannot be solved is not a pass
     equity_multiple: finite(raw.equity_multiple),

@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Cedar Ridge Underwriting Deal File",
+  "title": "Demo Portfolio Underwriting Deal File",
   "description": "Structured data extracted from an OM + T12 + rent roll. The generator consumes this to fill Underwriting Model TEMPLATE.xlsx. Field names ending in a template named-range match that range exactly (see SCHEMA.md).",
   "type": "object",
   "required": ["property", "assumptions", "t12", "rent_roll"],
@@ -27,7 +27,7 @@
 
     "assumptions": {
       "type": "object",
-      "description": "House underwriting rules. Pre-filled with Cedar Ridge's standing defaults; editable per deal on the review screen before generation.",
+      "description": "House underwriting rules. Pre-filled with Demo Portfolio's standing defaults; editable per deal on the review screen before generation.",
       "properties": {
         "purchase_cap_rate": {"type": "number", "default": 0.055},
         "purchase_price_override": {"type": "number", "default": 0, "description": "0 = derive price from T12 NOI / cap rate. >0 = use this price everywhere instead."},

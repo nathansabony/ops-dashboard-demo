@@ -1,6 +1,5 @@
 // Demo mode end to end: boots server.js with DEMO_MODE=1 and checks that a visitor is
-// signed in as an admin with every tool and no PIN, that the seeded accounts live in the
-// Admin tab, that email is a no-op, that the Ask panel answers its canned questions from the
+// signed in as an admin with every tool and no PIN, that there is no Admin tab or accounts, that the Ask panel answers its canned questions from the
 // fake data without an API key (and says so), and that the Scanner returns a sample analysis.
 // Everything runs against the built-in fake Rent Manager: no network, no credentials.
 
@@ -45,21 +44,14 @@ async function ask(base, question) {
 
     const auth = await getJson(base, '/api/auth/status');
     const u = auth.json && auth.json.user;
-    check('the visitor is the demo admin with every tool', !!u && u.admin === true && u.email === 'demo@cedarridge.example' && u.tools.length >= 9);
+    check('the visitor is the demo admin with every tool', !!u && u.admin === true && u.email === '' && u.tools.length >= 9);
 
     const page = await fetch(base + '/');
     const html = await page.text();
     check('the page is served with the admin user written in', page.status === 200 && /window\.__OP_USER=/.test(html) && /"admin":true/.test(html) && /"demo":true/.test(html));
-    check('the page is branded Cedar Ridge Management - Demo with the fictional-data ribbon', /<title>Cedar Ridge Management - Demo<\/title>/.test(html) && /all data is fictional/.test(html));
+    check('the page is branded Portfolio Management Dashboard Demo with the fictional-data ribbon', /<title>Portfolio Management Dashboard Demo<\/title>/.test(html) && /all data is fictional/.test(html));
 
-    const users = await getJson(base, '/api/admin/users');
-    check('the Admin tab lists the seeded people', users.status === 200 && users.json.users.length >= 4 && users.json.users.some(x => x.name === 'Priya Natarajan'));
-    check('email is "on" but a no-op in demo', users.json.mailEnabled === true && /not sent/i.test(users.json.mailInfo));
-    const made = await getJson(base, '/api/admin/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'new.person@cedarridge.example', name: 'New Person', invite: true, tools: ['entities'] }) });
-    check('inviting a person works with no mail server', made.status === 200 && made.json.invited === true, JSON.stringify(made.json));
-    const me = users.json.users.find(x => x.email === 'demo@cedarridge.example');
-    const del = await getJson(base, `/api/admin/users/${me.id}`, { method: 'DELETE' });
-    check('the demo admin cannot delete itself', del.status === 400);
+    check('there is no Admin tab and no seeded people', !/id="tab-admin"/.test(html) && !/page-admin/.test(html));
 
     const occ = await ask(base, 'What is our occupancy?');
     check('Ask answers occupancy from the demo data', occ.status === 200 && /Occupancy is \d/.test(occ.text) && occ.done, occ.text.slice(0, 200));

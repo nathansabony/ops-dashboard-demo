@@ -30,7 +30,7 @@ const canOnly = (...tools) => t => tools.includes(t);
 
 const full = {
   scorecard: { score: 78, grade: 'B', count: 13, atB: 8,
-    best: [{ e: 'Cedar Ridge', grade: 'A', score: 94, note: 'Strong coverage' }, { e: 'The Alder', grade: 'A', score: 90, note: '' }],
+    best: [{ e: 'Demo Portfolio', grade: 'A', score: 94, note: 'Strong coverage' }, { e: 'The Alder', grade: 'A', score: 90, note: '' }],
     worst: [{ e: 'Willow Creek', grade: 'D', score: 51, note: 'Occupancy' }] },
   chart: { months: ['Jan 26', 'Feb 26', 'Mar 26'], noi: [100, 110, 120], debt: [60, 60, 60], dscr: [1.4, 1.5, 1.6] },
   variances: [{ dot: 'R', scope: 'Willow Creek', line: 'Water & Sewer', month: 'Sep 26', tag: 'x', score: 5, impact: 99999 }],

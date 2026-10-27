@@ -1577,7 +1577,7 @@ function worksheetCheck(bill, charge) {
 
   // ── the line is this PROPERTY's line, not the whole invoice ───────────────
   // A renovation invoice is one bill split across the buildings it covers: FY
-  // Construction's MAJOR/Cedar Ridge/37Du is $20,000 in ten lines, all on GL 5156, one per
+  // Construction's MAJOR/Demo Portfolio/37Du is $20,000 in ten lines, all on GL 5156, one per
   // property — 77 Birchwood Lane $1,900, 90 Maple Court $1,900, and so on.
   //
   // Filtering on the GL account alone summed all ten and compared $20,000 against

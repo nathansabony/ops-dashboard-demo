@@ -397,15 +397,15 @@ console.log('\nImportance score (1–5) and the audit readings');
   check('...a blank month nobody caught up stays where it was', !!z2 && !z2.adjTag && z2.urgency === 'high');
 
   // Entity-wide and booked-to-one.
-  const pf = (id, extra) => Object.assign({ scope: { key: `prop:${id}`, type: 'Property', label: id, entity: 'Cedar Ridge' }, key: 'propTax', label: 'Property Taxes',
+  const pf = (id, extra) => Object.assign({ scope: { key: `prop:${id}`, type: 'Property', label: id, entity: 'Demo Portfolio' }, key: 'propTax', label: 'Property Taxes',
     reason: 'zero', category: 'zero', monthLabel: 'Jul 26', zeroMonthLabels: ['Jul 26'], giMonth: GI['Jul 26'], urgency: 'high' }, extra || {});
   const ew = [pf('1'), pf('2'), pf('3'), pf('4', { scope: { key: 'prop:4', type: 'Property', label: '4', entity: 'Willow Creek' } })];
   sandbox.varCrossScopeReadings(ew);
   check('the same blank at 3 properties of one entity is marked entity-wide on each',
-    ew.slice(0, 3).every(f => f.entityWide && f.entityWide.n === 3 && /Same on 2 other Cedar Ridge properties/.test(f.note)) && !ew[3].entityWide);
+    ew.slice(0, 3).every(f => f.entityWide && f.entityWide.n === 3 && /Same on 2 other Demo Portfolio properties/.test(f.note)) && !ew[3].entityWide);
   const ent = base(33000);                               // the entity's normal month
   const savedFS = sandbox.fullSeries;
-  sandbox.fullSeries = (k) => (k === 'Cedar Ridge' ? ent : savedFS(k));
+  sandbox.fullSeries = (k) => (k === 'Demo Portfolio' ? ent : savedFS(k));
   const booked = pf('108', { key: 'mgmtFees', label: 'Management Fees', reason: 'mom', category: 'variance', curr: 33467, prev: 480, histAvg: 530 });
   sandbox.varCrossScopeReadings([booked]);
   sandbox.fullSeries = savedFS;

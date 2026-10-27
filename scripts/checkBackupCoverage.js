@@ -37,25 +37,25 @@ function check(name, ok, detail) {
 
 const CHARGES = [
   // A CARD charge — no bill exists for it; the receipt is on the transaction.
-  { propertyName: 'Grand Ave', propertyId: 107, entity: 'Cedar Ridge', vendorId: 11, invoiceNo: null, amount: 548.99,
+  { propertyName: 'Grand Ave', propertyId: 107, entity: 'Demo Portfolio', vendorId: 11, invoiceNo: null, amount: 548.99,
     date: '2026-08-05', month: '2026-08', txnType: 'CC CHG', txnId: 37750 },
-  { propertyName: 'Grand Ave', propertyId: 107, entity: 'Cedar Ridge', vendorId: 11, invoiceNo: null, amount: 100,
+  { propertyName: 'Grand Ave', propertyId: 107, entity: 'Demo Portfolio', vendorId: 11, invoiceNo: null, amount: 100,
     date: '2026-08-05', month: '2026-08', txnType: 'CC CHG', txnId: 37751 },
   // A CHECK ITEM whose description never named an invoice — reachable only
   // through the check's own detail lines.
-  { propertyName: 'Grand Ave', propertyId: 107, entity: 'Cedar Ridge', vendorId: 11, invoiceNo: null, amount: 2325,
+  { propertyName: 'Grand Ave', propertyId: 107, entity: 'Demo Portfolio', vendorId: 11, invoiceNo: null, amount: 2325,
     date: '2026-08-25', month: '2026-08', txnType: 'CHKITM', txnId: 158811, accountId: 466 },
   // Grand Ave — one found by invoice number WITH a document, one without.
-  { propertyName: 'Grand Ave', propertyId: 107, entity: 'Cedar Ridge', vendorId: 11, invoiceNo: '100134', amount: 2445, date: '2026-08-25', month: '2026-08' },
-  { propertyName: 'Grand Ave', propertyId: 107, entity: 'Cedar Ridge', vendorId: 11, invoiceNo: '100135', amount: 300, date: '2026-08-25', month: '2026-08' },
+  { propertyName: 'Grand Ave', propertyId: 107, entity: 'Demo Portfolio', vendorId: 11, invoiceNo: '100134', amount: 2445, date: '2026-08-25', month: '2026-08' },
+  { propertyName: 'Grand Ave', propertyId: 107, entity: 'Demo Portfolio', vendorId: 11, invoiceNo: '100135', amount: 300, date: '2026-08-25', month: '2026-08' },
   // Maple Court — no invoice number, but the amount lands on a bill two days away.
-  { propertyName: 'Maple Court Ave', propertyId: 109, entity: 'Cedar Ridge', vendorId: 11, invoiceNo: null, amount: 777, date: '2026-08-20', month: '2026-08' },
+  { propertyName: 'Maple Court Ave', propertyId: 109, entity: 'Demo Portfolio', vendorId: 11, invoiceNo: null, amount: 777, date: '2026-08-20', month: '2026-08' },
   // Maple Court — same, but the only same-amount bill is four months away.
-  { propertyName: 'Maple Court Ave', propertyId: 109, entity: 'Cedar Ridge', vendorId: 11, invoiceNo: null, amount: 888, date: '2026-08-20', month: '2026-08' },
+  { propertyName: 'Maple Court Ave', propertyId: 109, entity: 'Demo Portfolio', vendorId: 11, invoiceNo: null, amount: 888, date: '2026-08-20', month: '2026-08' },
   // A vendor whose bills refuse to load.
-  { propertyName: 'Sold Street', propertyId: 999, entity: 'Cedar Ridge', vendorId: 66, invoiceNo: 'X1', amount: 50, date: '2026-08-01', month: '2026-08' },
+  { propertyName: 'Sold Street', propertyId: 999, entity: 'Demo Portfolio', vendorId: 66, invoiceNo: 'X1', amount: 50, date: '2026-08-01', month: '2026-08' },
   // No vendor on the posting at all.
-  { propertyName: 'Sold Street', propertyId: 999, entity: 'Cedar Ridge', vendorId: null, invoiceNo: null, amount: 25, date: '2026-08-01', month: '2026-08' },
+  { propertyName: 'Sold Street', propertyId: 999, entity: 'Demo Portfolio', vendorId: null, invoiceNo: null, amount: 25, date: '2026-08-01', month: '2026-08' },
 ];
 
 const BILLS_11 = [

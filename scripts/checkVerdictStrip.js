@@ -94,7 +94,7 @@ console.log('\nThe cases that are not failures must not look like failures');
   // A permit fee paid straight to a municipality has no invoice and never will.
   // Six of the fifty sampled charges are exactly this.
   const direct = strip({ attachments: [], bill: null,
-    payment: { direct: true, reconciled: true, bank: { known: true, label: '1095 Cedar Ridge - First Commerce' } } });
+    payment: { direct: true, reconciled: true, bank: { known: true, label: '1095 Demo Portfolio - First Commerce' } } });
   check('a directly-paid charge says "no invoice — paid directly", not a warning',
     has(direct, 'No invoice — paid directly') && !has(direct, 'No scan'), direct);
   check('...and still names the account and the clearance',

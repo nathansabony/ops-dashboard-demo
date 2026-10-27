@@ -5,13 +5,13 @@
 // gate in front of delinquency, collections, cohorts, move activity, unit counts and
 // property financials, so every one of them agrees on what an entity is.
 //
-// The demo portfolio is a single entity, "Cedar Ridge", billed to
-// "Cedar Ridge Holdings, LLC". (The production site carries a dozen entities and a
+// The demo portfolio is a single entity, "Demo Portfolio", billed to
+// "Demo Portfolio". (The production site carries a dozen entities and a
 // property-group whitelist for one of them; none of that applies here, so the
 // group / fallback / disk-cache machinery was removed. The exported API is unchanged.)
 
 // Ordered list of management-site entities.
-const ENTITY_NAMES = ['Cedar Ridge'];
+const ENTITY_NAMES = ['Demo Portfolio'];
 
 // Kept for callers that import it: with one entity there is no whitelist to apply.
 const GAH_PROPERTY_IDS = new Set();
@@ -23,7 +23,7 @@ const GAH_CACHE_FILE = null;
 function entityFromBilling(name) {
   if (!name) return null;
   const n = String(name).toLowerCase();
-  if (n.includes('cedar ridge')) return 'Cedar Ridge';
+  if (n.includes('demo portfolio')) return 'Demo Portfolio';
   return null;
 }
 

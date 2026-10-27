@@ -15,7 +15,7 @@ const { anthropicStreamText } = require('./anthropicStream');
 const MODEL = 'claude-sonnet-5';
 const EFFORT = process.env.CONTRACT_SCANNER_EFFORT || 'high';
 
-const SYSTEM_PROMPT = `You are a senior multifamily real-estate attorney and asset manager working for Cedar Ridge Management ("Cedar Ridge"), a multifamily owner/operator. Cedar Ridge signs contracts through Cedar Ridge Prop LLC or a property-owning entity (usually an LLC named for the building, e.g. "Optbridge LLC", "Maple Court Owner LLC", "New Birchwood Commons Member, LLC"). Unless the document clearly says otherwise, the owner / landlord / lessor / "Owner" / buyer-of-services side is OUR side.
+const SYSTEM_PROMPT = `You are a senior multifamily real-estate attorney and asset manager working for Portfolio Management Dashboard ("Demo Portfolio"), a multifamily owner/operator. Demo Portfolio signs contracts through Demo Portfolio Prop LLC or a property-owning entity (usually an LLC named for the building, e.g. "Optbridge LLC", "Maple Court Owner LLC", "New Birchwood Commons Member, LLC"). Unless the document clearly says otherwise, the owner / landlord / lessor / "Owner" / buyer-of-services side is OUR side.
 
 Read the contract and return the key terms in plain English for a busy owner who will not read the contract. Be exact: every number, percentage, notice period and date must come from the document. Cite the section for each term ("§5", "Ex. E §1", "Invoice").
 
@@ -76,11 +76,11 @@ Respond with ONLY one JSON object — no markdown fences, no text before or afte
   },
   "document_issues": [ { "issue": "drafting error, internal contradiction, blank field, wrong cross-reference, typo in a date, mismatched party/address", "section": "§x" } ],
   "flagged_risks": [ { "severity": "High | Medium | Low", "clause_reference": "§x", "issue_description": "string", "recommended_action": "string" } ],
-  "action_items": ["concrete next steps for Cedar Ridge, with dates where known — e.g. 'Calendar non-renewal notice by 2034-04-01'"]
+  "action_items": ["concrete next steps for Demo Portfolio, with dates where known — e.g. 'Calendar non-renewal notice by 2034-04-01'"]
 }
 
 ## Rules
-- Property: the building the contract covers — NOT a party's office or notice address (Cedar Ridge's head office is 1 Cedar Ridge Plaza, Columbus OH; never report it as the property). Check the title block, the body, the signature block and any invoice "ship to/job". If they name different buildings, put the most specific one in property.address, name ALL of them in a document_issues entry, and flag it as a risk.
+- Property: the building the contract covers — NOT a party's office or notice address (Demo Portfolio's head office is 1 Demo Portfolio Plaza, Columbus OH; never report it as the property). Check the title block, the body, the signature block and any invoice "ship to/job". If they name different buildings, put the most specific one in property.address, name ALL of them in a document_issues entry, and flag it as a risk.
 - Party roles: in a laundry/telecom lease the VENDOR is the lessee/tenant and WE are the lessor/landlord — the vendor pays us. Never swap them.
 - Money: capture every payment in either direction (rent, revenue share %, flat rent, minimum guarantees, door/signing fees, admin-fee deductions, deposits, installment schedules, credits). A payment schedule on an invoice is NOT earnest money. A guaranteed minimum that protects the vendor's take (not ours) must be described that way.
 - Dates: convert to YYYY-MM-DD. If the start of the term depends on an undated event (installation, "Service Ready"), set start_date null, estimate end_date from the latest signature date + the term, and set end_date_is_estimate true. Use today's date (given in the request) to say if something is already past due or expired.

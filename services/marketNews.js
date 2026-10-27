@@ -50,7 +50,7 @@ const KEEP_DAYS = 5;                   // ...but not for longer than this
 const MAX_AGE_DAYS = 7;                // candidates older than this are ignored
 const MAX_PER_SOURCE = 2;
 const MIN_RELEVANCE = 4;
-const UA = 'Mozilla/5.0 (compatible; CedarRidgeDemo/1.0)';
+const UA = 'Mozilla/5.0 (compatible; PortfolioDashboardDemo/1.0)';
 
 const gnews = (q) => `https://news.google.com/rss/search?q=${encodeURIComponent(q + ' when:3d')}&hl=en-US&gl=US&ceid=US:en`;
 

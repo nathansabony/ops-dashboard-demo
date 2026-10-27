@@ -1,9 +1,9 @@
-# Cedar Ridge Management - Demo
+# Portfolio Management Dashboard Demo
 
 A property-management operations site, running entirely on **fictional data**. It shows what the
 product does once it is connected to a Rent Manager account: portfolio grades, variance flagging,
 delinquency and collections, budgeting, renovations, service requests, deal underwriting, a contract
-scanner and an "Ask" assistant. Nothing here is real: the company ("Cedar Ridge"), the five Columbus, OH
+scanner and an "Ask" assistant. Nothing here is real: the company ("Demo Portfolio"), the five Columbus, OH
 buildings, the tenants, the staff and every figure are generated.
 
 A small **Demo - all data is fictional** badge sits in the header and corner of every page.
@@ -17,7 +17,7 @@ npm start            # http://localhost:3001   (PORT=5604 npm start to change th
 
 That is all. `npm start` runs `scripts/demoServer.js`, which sets `DEMO_MODE=1`, blanks any Rent Manager
 credentials in the environment or a `.env` file, and starts `server.js`. There is no sign-in: the visitor
-is signed in automatically as an admin with every tool. `npm run dev` does the same with file watching.
+is the single built-in demo user with every tool. `npm run dev` does the same with file watching.
 
 ### Deploying (Render, free plan)
 
@@ -36,8 +36,8 @@ works.
 | Piece | How |
 |---|---|
 | **Rent Manager** | `services/demo/` is a fake Rent Manager. `services/rentManagerClient.js` hands every call to it when `DEMO_MODE=1`, and it answers with the exact response shapes the real API returns (properties, units, tenants, leases, charges, GL reports, work orders...). The real pipelines (P&L snapshots, variance engine, delinquency, budget model) run unmodified on that data. |
-| **The world** | `services/demo/world.js`: one entity, **Cedar Ridge**, five properties in Columbus, OH (The Alder, Maple Court, Willow Creek, Birchwood Commons, Summit Lofts), 56 units, about 50 current tenants, a handful delinquent. Generated from a fixed seed and anchored to today's date, so it always looks current. Four staff: Jordan Reyes (regional manager), Priya Natarajan (property manager), Sam Whitfield (maintenance supervisor), Dana Okoye (accounting). |
-| **Accounts** | `services/userStore.js` keeps users in memory in demo mode, seeded with a demo admin and the four staff. The **Admin** tab works (tick tools per person, add or turn off people) but changes reset when the server restarts. |
+| **The world** | `services/demo/world.js`: one entity, **Demo Portfolio**, five properties in Columbus, OH (The Alder, Maple Court, Willow Creek, Birchwood Commons, Summit Lofts), 56 units, about 50 current tenants, a handful delinquent. Generated from a fixed seed and anchored to today's date, so it always looks current. Four staff: Jordan Reyes (regional manager), Priya Natarajan (property manager), Sam Whitfield (maintenance supervisor), Dana Okoye (accounting). |
+| **Accounts** | None. The demo has one built-in visitor with every tool, so there is no sign-in and no Admin tab. |
 | **Email** | `services/mailer.js` is a no-op in demo mode: invite and reset buttons succeed without sending anything. |
 | **Market news** | Tries the real public feeds (Treasury, NY Fed, Freddie Mac, RSS); if offline, shows a built-in sample set of rates and headlines (clearly labelled "Sample"). |
 | **Underwriting** | Runs on a fictional sample deal (Riverbend Apartments) when no API key is set. |
@@ -77,7 +77,6 @@ The demo and the real product are the same code. The only swap is the data sourc
 - **Renovations**: non-operating spend by property, unit and vendor, with invoice backup.
 - **Scanner**: a contract analyzer that pulls out terms, renewal deadlines and risks.
 - **Service Requests**: open work orders, where they pile up and how long they have waited.
-- **Admin**: people and the tools each may open.
 
 The refresh buttons re-run the pulls against the fake Rent Manager, so they are harmless.
 
@@ -85,7 +84,7 @@ The refresh buttons re-run the pulls against the fake Rent Manager, so they are 
 
 ```bash
 npm run check:frontend   # every inline script parses; every API path the page calls exists
-npm run check:demo       # demo mode end to end: auto sign-in, Admin, Ask, scanner, no-op mailer
+npm run check:demo       # demo mode end to end: one built-in visitor, Ask, scanner
 ```
 
 The full list is in `.github/workflows/checks.yml` (each is also an `npm run check:*` script).
@@ -96,7 +95,7 @@ The full list is in `.github/workflows/checks.yml` (each is also an `npm run che
 server.js                 Express app: auth gate, every /api route
 public/index.html         The whole front end (one page)
 scripts/demoServer.js     Official demo boot (npm start)
-services/demo/            The fake Rent Manager and the Cedar Ridge world
+services/demo/            The fake Rent Manager and the Demo Portfolio world
 services/rentManagerClient.js   Swap point: fake in demo mode, real Rent Manager otherwise
 services/assistant*.js    Ask assistant (Claude) and its keyless demo answers
 underwriting/             Python parsers and the Excel model generator
