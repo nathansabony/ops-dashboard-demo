@@ -1,0 +1,4 @@
+{
+  "_note": "Buildings Rent Manager carries as separate properties that the Variance tab should read as one. `primary` is the property id the combined building keeps; `members` are added into it month by month. The Cedar Ridge demo has no split buildings, so the list is empty. Example group: {\"name\": \"Example\", \"primary\": 101, \"members\": [999]}.",
+  "groups": []
+}

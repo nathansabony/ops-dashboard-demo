@@ -1,0 +1,8 @@
+{
+  "defaults": {
+    "margin": { "target": 55, "floor": 40 }
+  },
+  "entities": {},
+  "updatedAt": "2026-10-20T14:00:00.000Z",
+  "updatedBy": "Jordan Reyes"
+}

@@ -1,0 +1,13 @@
+# Keep the working copy LF on every platform.
+#
+# scripts/checkVarianceJumps.js and the other checks that test page logic lift
+# consts straight out of public/index.html with regexes that end in ";\n". With
+# core.autocrlf on, a fresh checkout on Windows is CRLF, so those checks fail
+# with "const _MONTH_ABBR not found in index.html" on a tree nobody has touched
+# — and the usual fix, converting the file back to CRLF to clear a stubborn
+# "M public/index.html", silently breaks them again.
+#
+# Git stores LF either way, so this changes nothing in history; it only stops
+# the checkout from rewriting the endings the checks depend on.
+public/index.html text eol=lf
+scripts/*.js      text eol=lf

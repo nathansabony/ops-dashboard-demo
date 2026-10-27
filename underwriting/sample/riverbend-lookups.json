@@ -1,0 +1,56 @@
+{
+ "tax": {
+  "found": true,
+  "county": "Montgomery County, OH",
+  "current_taxable_value": 6900000,
+  "current_millage_rate": 23.97,
+  "millage_breakdown": {
+   "county": 6.8,
+   "municipal": 4.4,
+   "school": 12.77,
+   "other": 0.0
+  },
+  "non_ad_valorem_tax": 0,
+  "current_annual_tax": 165393,
+  "reassessment_on_sale_pct": 0.5,
+  "reassessment_rule": "Ohio re-appraises on a county cycle and a sale alone does not reset the assessment, but a school district can file a complaint citing the sale price; modeled as half the step-up to the purchase price. Values here are the appraised (market) value with the effective rate on it.",
+  "sources": [
+   {
+    "field": "current_millage_rate",
+    "url": "https://example.com/demo/montgomery-county-millage",
+    "title": "Demo data: Montgomery County millage table (fictional)"
+   }
+  ],
+  "confidence": 0.8,
+  "warnings": [
+   "Demo mode: this is sample data for a fictional property, not a live county lookup."
+  ],
+  "usage": {
+   "input_tokens": 0,
+   "output_tokens": 0,
+   "cost_usd": 0,
+   "searches": 0
+  }
+ },
+ "occupancy": {
+  "found": true,
+  "market": "Dayton, OH metro",
+  "occupancy": 0.934,
+  "as_of": "Q3 2026",
+  "sources": [
+   {
+    "url": "https://example.com/demo/dayton-multifamily-report",
+    "title": "Demo data: Dayton multifamily market report (fictional)"
+   }
+  ],
+  "notes": "Demo mode: sample figure for a fictional market. Class B garden stock is tight, with limited new supply under construction.",
+  "confidence": 0.7,
+  "warnings": [],
+  "usage": {
+   "input_tokens": 0,
+   "output_tokens": 0,
+   "cost_usd": 0,
+   "searches": 0
+  }
+ }
+}

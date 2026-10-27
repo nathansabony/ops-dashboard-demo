@@ -1,0 +1,19 @@
+{
+  "_note": "How a deal is scored 0-100. Edit the weights (they should add up to 100) and the thresholds, then redeploy: every card, the PDF and Home pick it up. Made up as a starting point on 2026-10-22; change freely.",
+  "weights": { "irr": 25, "timing": 15, "price": 15, "coc": 15, "em": 10, "dscr": 10, "risk": 10 },
+  "irr": { "pointsBelowTargetForZero": 0.06, "pointsAboveTargetForFull": 0.10 },
+  "timing": {
+    "_note": "How soon the IRR target is hit: the earliest plain sale year that clears it. Needing a refinance or a year-8 exit means more money, more work and more time, so it scores less.",
+    "byYear": { "3": 1.0, "4": 0.9, "5": 0.75, "6": 0.6, "7": 0.5, "8": 0.4 },
+    "afterYear8": 0.3, "onlyWithRefi": 0.25, "neverClears": 0
+  },
+  "price": { "headroomForFull": 0.2, "overpayForZero": 0.3, "noSolvedMaxButMeetsTarget": 0.7 },
+  "coc": { "zeroAt": 0.02, "fullAt": 0.10 },
+  "em": { "zeroAt": 1.0, "fullAt": 2.5 },
+  "dscr": { "zeroAt": 1.0, "fullAt": 1.5 },
+  "risk": {
+    "_note": "Occupancy (a stabilised building) and how many of the model's own checks still need an input.",
+    "occupancyZeroAt": 0.7, "occupancyFullAt": 0.93, "needsInputPenaltyEach": 0.2, "occupancyShare": 0.5
+  },
+  "grades": { "A": 85, "B": 75, "C": 65, "D": 55 }
+}

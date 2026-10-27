@@ -1,0 +1,195 @@
+{
+ "property": {
+  "name": "Riverbend Apartments",
+  "address": "4100 Millrace Pointe Drive, Dayton, OH 45415",
+  "city": "Dayton, OH",
+  "year_built": 1987,
+  "site_acres": 7.4,
+  "units": 96,
+  "avg_unit_size_sf": 945
+ },
+ "value_add": {
+  "value_add_units": 72,
+  "value_add_premium_per_unit_month": 170,
+  "plan_note": "Interior renovation of 72 classic units at turnover (plank flooring, quartz-look counters, stainless appliances, lighting) for a $170 monthly premium, plus a clubhouse refresh and new monument signage."
+ },
+ "tax": {
+  "county_pin": "R72 00811 0006, R72 00811 0007",
+  "current_taxable_value": 6900000,
+  "current_millage_rate": 23.97,
+  "non_ad_valorem_tax": 0
+ },
+ "properties": [
+  {
+   "name": "Riverbend Apartments",
+   "address": "4100 Millrace Pointe Drive, Dayton, OH 45415",
+   "units": 96,
+   "year_built": 1987,
+   "source_page": 3
+  }
+ ],
+ "asking_price": 8950000,
+ "rent_comps": [
+  {
+   "property_name": "Stillwater Crossing",
+   "address_market": "Dayton, OH - Northridge",
+   "units": 112,
+   "year_built": 1989,
+   "avg_unit_size_sf": 930,
+   "market_rent": 1165,
+   "achieved_rent": 1130,
+   "rent_psf": 1.22,
+   "occupancy": 0.94,
+   "source_status": "OM p.9",
+   "notes": "Renovated interiors, similar finishes"
+  },
+  {
+   "property_name": "The Oaks at Miamisburg Pike",
+   "address_market": "Miamisburg, OH",
+   "units": 88,
+   "year_built": 1985,
+   "avg_unit_size_sf": 905,
+   "market_rent": 1140,
+   "achieved_rent": 1105,
+   "rent_psf": 1.22,
+   "occupancy": 0.95,
+   "source_status": "OM p.9",
+   "notes": "Partial interior upgrades"
+  },
+  {
+   "property_name": "Kettering Green",
+   "address_market": "Kettering, OH",
+   "units": 120,
+   "year_built": 1991,
+   "avg_unit_size_sf": 960,
+   "market_rent": 1235,
+   "achieved_rent": 1200,
+   "rent_psf": 1.25,
+   "occupancy": 0.93,
+   "source_status": "OM p.9",
+   "notes": "Fully renovated, pool and fitness"
+  },
+  {
+   "property_name": "Brookhaven Terrace",
+   "address_market": "Huber Heights, OH",
+   "units": 104,
+   "year_built": 1988,
+   "avg_unit_size_sf": 915,
+   "market_rent": 1090,
+   "achieved_rent": 1060,
+   "rent_psf": 1.19,
+   "occupancy": 0.92,
+   "source_status": "OM p.9",
+   "notes": "Classic finishes, no renovation"
+  },
+  {
+   "property_name": "Westbrook Landing",
+   "address_market": "Centerville, OH",
+   "units": 96,
+   "year_built": 1993,
+   "avg_unit_size_sf": 985,
+   "market_rent": 1295,
+   "achieved_rent": 1255,
+   "rent_psf": 1.28,
+   "occupancy": 0.95,
+   "source_status": "OM p.9",
+   "notes": "Newer vintage, attached garages"
+  }
+ ],
+ "sale_comps": [
+  {
+   "property_name": "Stillwater Crossing",
+   "location": "Dayton, OH",
+   "units": 112,
+   "year_built": 1989,
+   "sale_date": "2026-03",
+   "sale_price": 9520000,
+   "price_per_unit": 85000,
+   "source": "OM p.10",
+   "notes": "6.4% cap, value-add"
+  },
+  {
+   "property_name": "Pine Hollow Apartments",
+   "location": "Springboro, OH",
+   "units": 80,
+   "year_built": 1990,
+   "sale_date": "2025-11",
+   "sale_price": 7440000,
+   "price_per_unit": 93000,
+   "source": "OM p.10",
+   "notes": "6.1% cap"
+  },
+  {
+   "property_name": "Courtyard at Wolf Creek",
+   "location": "Trotwood, OH",
+   "units": 128,
+   "year_built": 1984,
+   "sale_date": "2025-09",
+   "sale_price": 9730000,
+   "price_per_unit": 76016,
+   "source": "OM p.10",
+   "notes": "6.8% cap, light value-add"
+  },
+  {
+   "property_name": "Kettering Green",
+   "location": "Kettering, OH",
+   "units": 120,
+   "year_built": 1991,
+   "sale_date": "2026-06",
+   "sale_price": 12000000,
+   "price_per_unit": 100000,
+   "source": "OM p.10",
+   "notes": "5.9% cap, renovated"
+  }
+ ],
+ "confidence": {
+  "property.name": 1.0,
+  "property.address": 1.0,
+  "property.year_built": 1.0,
+  "property.units": 1.0,
+  "property.site_acres": 0.95,
+  "value_add.value_add_units": 0.9,
+  "value_add.value_add_premium_per_unit_month": 0.85,
+  "tax.current_taxable_value": 0.8,
+  "tax.current_millage_rate": 0.8,
+  "tax.county_pin": 0.9
+ },
+ "source_pages": {
+  "property.name": 1,
+  "property.address": 1,
+  "property.year_built": 3,
+  "property.units": 3,
+  "property.site_acres": 3,
+  "value_add.value_add_units": 7,
+  "value_add.value_add_premium_per_unit_month": 7,
+  "tax.current_taxable_value": 11,
+  "tax.current_millage_rate": 11,
+  "tax.county_pin": 11
+ },
+ "demo_assumptions": {
+  "purchase_cap_rate": 0.062,
+  "purchase_price_override": 0,
+  "ltv": 0.7,
+  "loan_interest_rate": 0.055,
+  "hold_period_years": 5,
+  "exit_cap_rate": 0.06,
+  "income_growth": 0.03,
+  "expense_growth": 0.03,
+  "tax_growth": 0.03,
+  "stabilized_occupancy_target": 0.96,
+  "value_add_units": 72,
+  "value_add_premium_per_unit_month": 170,
+  "interior_renovation_cost_per_unit": 8800,
+  "common_exterior_capex": 250000,
+  "misc_expense_annual": 10000,
+  "units_renovated_per_month": 6,
+  "max_opex_pct_egi": 0.56,
+  "irr_target": 0.16,
+  "refi_cap_rate": 0.0595,
+  "refi_interest_rate": 0.0545
+ },
+ "_meta": {
+  "pages": 14,
+  "chars": 3996
+ }
+}
