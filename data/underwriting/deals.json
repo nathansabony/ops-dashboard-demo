@@ -1,0 +1,122 @@
+{
+ "version": 1,
+ "models": {
+  "Riverbend-Apartments-2026-10-20-14-32-08.xlsx": {
+   "sources": [
+    {
+     "kind": "rent_roll",
+     "filename": "Riverbend Apartments - Rent Roll.xlsx",
+     "method": "deterministic (openpyxl)",
+     "warnings": 0,
+     "notes": [
+      "Parsed 96 units; the report says 96."
+     ]
+    },
+    {
+     "kind": "t12",
+     "filename": "Riverbend Apartments - T12.xlsx",
+     "method": "deterministic (openpyxl)",
+     "warnings": 0,
+     "notes": [
+      "EGI - OpEx ties to the statement's NOI."
+     ]
+    },
+    {
+     "kind": "om",
+     "filename": "Riverbend Apartments - Offering Memorandum.pdf",
+     "method": "read by Claude",
+     "pages": 14,
+     "notes": []
+    }
+   ],
+   "confirmed_by_hand": 2,
+   "confirmed_fields": [
+    "Hold period (yrs, 1-8 — sets the sale year) (edited)",
+    "Exit cap rate % (edited)"
+   ],
+   "report": {
+    "v": 10,
+    "at": "2026-10-27T01:16:22.605Z",
+    "pages": 3
+   },
+   "mtime": 1793063776697.2434,
+   "v": 6,
+   "card": {
+    "computed": true,
+    "name": "Riverbend Apartments",
+    "address": "4100 Millrace Pointe Drive, Dayton, OH 45415",
+    "year_built": 1987,
+    "units": 96,
+    "occupancy": 0.9375,
+    "avg_rent": 1089.5833333333333,
+    "price": 8442177.41935484,
+    "price_per_door": 87939.34811827958,
+    "t12_noi": 523415,
+    "year1_noi": 484834.8818373657,
+    "capex": 883600,
+    "cap_rate": 0.06199999999999999,
+    "cap_note": "T12 NOI / the model's purchase price - a Cedar Ridge estimate, not a quoted cap rate",
+    "irr": 0.1904325573907768,
+    "irr_target": 0.16,
+    "irr_failed": false,
+    "meets_target": true,
+    "equity_multiple": 2.209921225120345,
+    "coc": 0.10061882593926758,
+    "dscr": 1.4916902581419489,
+    "hold_years": 5,
+    "max_price": 8912387.386848105,
+    "gap_to_max": 470209.96749326587,
+    "gap_pct": 0.05569771211100653,
+    "checks": {
+     "ok": 12,
+     "needs_input": 2,
+     "review": 0
+    },
+    "scenarios": [
+     {
+      "scenario": "Sale Year 3",
+      "irr": 0.2221319730711171,
+      "equity_multiple": 1.7815366343943966
+     },
+     {
+      "scenario": "Sale Year 5",
+      "irr": 0.1904325573907768,
+      "equity_multiple": 2.209921225120345
+     },
+     {
+      "scenario": "Sale Year 8",
+      "irr": 0.17158252373255345,
+      "equity_multiple": 2.9223389217164066
+     },
+     {
+      "scenario": "Refi Yr3 + Sale Yr5",
+      "irr": 0.21428408246271613,
+      "equity_multiple": 2.109588336368814
+     },
+     {
+      "scenario": "Refi Yr3 + Sale Yr8",
+      "irr": 0.2071723356267623,
+      "equity_multiple": 2.706483275221838
+     },
+     {
+      "scenario": "Refi Yr5 + Sale Yr8",
+      "irr": 0.19016912794009544,
+      "equity_multiple": 2.7588605988713835
+     },
+     {
+      "scenario": "Year 2 Cash-on-Cash",
+      "irr": 0.10061882593926758,
+      "equity_multiple": null
+     }
+    ],
+    "non_revenue_units": 0,
+    "uncomputed_formulas": 0,
+    "revenue_units": 96,
+    "revenue_occupancy": null,
+    "review_reasons": [],
+    "needs_review": false,
+    "review_fix": []
+   }
+  }
+ }
+}

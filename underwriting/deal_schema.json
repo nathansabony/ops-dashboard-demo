@@ -1,0 +1,225 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Cedar Ridge Underwriting Deal File",
+  "description": "Structured data extracted from an OM + T12 + rent roll. The generator consumes this to fill Underwriting Model TEMPLATE.xlsx. Field names ending in a template named-range match that range exactly (see SCHEMA.md).",
+  "type": "object",
+  "required": ["property", "assumptions", "t12", "rent_roll"],
+  "properties": {
+
+    "property": {
+      "type": "object",
+      "description": "Deal-identifying facts. Source: OM cover/property overview page + county records.",
+      "required": ["name", "address", "units", "year_built"],
+      "properties": {
+        "name": {"type": "string", "example": "Elms of Brook Park"},
+        "address": {"type": "string", "example": "4747 W Waters Ave, Tampa, FL 33614"},
+        "year_built": {"type": "integer", "example": 1985},
+        "site_acres": {"type": "number", "example": 34.86},
+        "units": {"type": "integer", "description": "Must equal rent_roll.units.length once parsed; Checks tab verifies this.", "example": 404},
+        "om_source_file": {"type": "string", "description": "Filename of the uploaded OM, for audit trail."},
+        "extraction_confidence": {
+          "type": "object",
+          "description": "Per-field confidence from the OM parser (0-1). Low-confidence fields get flagged on the review screen before generation.",
+          "additionalProperties": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    },
+
+    "assumptions": {
+      "type": "object",
+      "description": "House underwriting rules. Pre-filled with Cedar Ridge's standing defaults; editable per deal on the review screen before generation.",
+      "properties": {
+        "purchase_cap_rate": {"type": "number", "default": 0.055},
+        "purchase_price_override": {"type": "number", "default": 0, "description": "0 = derive price from T12 NOI / cap rate. >0 = use this price everywhere instead."},
+        "ltv": {"type": "number", "default": 0.70},
+        "loan_interest_rate": {"type": "number", "default": 0.06, "description": "Placeholder until a lender quote is obtained."},
+        "hold_period_years": {"type": "integer", "default": 8, "description": "1-8. Drives where the sale lands on Debt & Exit, the Dashboard, and the Max Price Solver; the pro forma itself always runs eight years."},
+        "exit_cap_rate": {"type": "number", "default": 0.055},
+        "income_growth": {"type": "number", "default": 0.03},
+        "expense_growth": {"type": "number", "default": 0.03},
+        "tax_growth": {"type": "number", "default": 0.03},
+        "bad_debt_pct": {"type": "number", "default": 0.02},
+        "management_fee_pct_egi": {"type": "number", "default": 0.03},
+        "asset_management_fee_pct_egi": {"type": "number", "default": 0.02},
+        "other_rental_deduction_pct": {"type": "number", "default": 0.0139, "description": "Concessions/other-deduction assumption. Locked below typical T12 actuals per house policy."},
+        "additional_other_income": {"type": "number", "default": 0, "description": "Extra ancillary income not currently charged (parking, pet, storage, etc.), annual $. Layered onto the Other Income line from Year 1, then grown with income growth. 0 = none."},
+        "stabilized_occupancy_target": {"type": "number", "description": "Occupancy % the deal is expected to reach (e.g. 0.96). Default: equal to current rent-roll occupancy, i.e. no assumed improvement."},
+        "occupancy_stabilize_year": {"type": "integer", "default": 1, "description": "Year (1-5) occupancy ramps to the target by. 1 = no ramp, target applies immediately (matches pre-2026-07-13 flat-occupancy behavior)."},
+        "value_add_units": {"type": "integer", "description": "Units planned for interior renovation. Source: OM value-add plan."},
+        "value_add_premium_per_unit_month": {"type": "number", "description": "Monthly rent premium per renovated unit. Source: OM value-add plan."},
+        "interior_renovation_cost_per_unit": {"type": "number", "default": 15000},
+        "common_exterior_capex": {"type": "number", "default": 500000},
+        "misc_expense_annual": {"type": "number", "default": 100000, "description": "One-time expense charged in Year 1 only (does not recur or grow)."},
+        "units_renovated_per_month": {"type": "integer", "default": 15},
+        "renovation_downtime_months": {"type": "number", "default": 1.0, "description": "Months of rent lost per renovated unit (reno at lease turnover); also drives the offline schedule display. Replaced renovation_duration_months + extra_downtime_months_per_unit 2026-07-22; old keys still accepted."},
+        "renovation_online_start_month": {"type": "integer", "default": 3, "description": "First month renovated units start coming back online."},
+        "benchmark_repairs_maintenance": {"type": "number", "default": 750, "description": "Benchmark $/unit/YEAR for Repairs & Maintenance. House number (2026-08-10). 0 = unused, line falls back to T12; >0 switches Pro Forma to benchmark x units from Year 1, then grows with expense growth."},
+        "benchmark_turnover_per_turned_unit": {"type": "number", "default": 330, "description": "Benchmark $ per TURNED unit for Turnover / make-ready (2026-08-10). Written to Inputs, not to the Pro Forma benchmark column: that column charges every unit, so the Pro Forma multiplies this by unit_turnover_rate to get $/unit/yr. 0 = unused, line falls back to T12."},
+        "unit_turnover_rate": {"type": "number", "default": 0.3333, "description": "Share of units that turn each year. Drives both the concession estimate and the turnover benchmark conversion above."},
+        "benchmark_labor": {"type": "number", "default": 1250, "description": "Benchmark $/unit/YEAR for Labor Costs (on-site payroll). House number (2026-08-10)."},
+        "benchmark_advertising": {"type": "number", "default": 0, "description": "Benchmark $/unit/YEAR for Advertising & Promotions."},
+        "benchmark_general_admin": {"type": "number", "default": 0, "description": "Benchmark $/unit/YEAR for General & Administrative."},
+        "benchmark_utilities": {"type": "number", "default": 0, "description": "Benchmark $/unit/YEAR for Utility Costs."},
+        "benchmark_insurance": {"type": "number", "default": 1100, "description": "Benchmark $/unit/YEAR for Insurance and Bonds. House number (2026-08-10)."},
+        "benchmark_property_taxes": {"type": "number", "default": 0, "description": "Benchmark $/unit/YEAR for Property Taxes."},
+        "benchmark_other_property_expenses": {"type": "number", "default": 0, "description": "Benchmark $/unit/YEAR for Other Property Expenses."},
+        "benchmark_management_fee": {"type": "number", "default": 0, "description": "Benchmark $/unit/YEAR for Management Fee."},
+        "benchmark_asset_management_fee": {"type": "number", "default": 0, "description": "Benchmark $/unit/YEAR for Asset Management Fee."},
+        "replacement_reserves_per_unit_yr": {"type": "number", "default": 250, "description": "Replacement reserves $/unit/YEAR (2026-08-10). Charged BELOW NOI on the Pro Forma — it does not change NOI, the purchase price, the exit values or the IRR, only cash flow after reserves. Grows with expense growth. 0 = no reserve line."},
+        "max_opex_pct_egi": {"type": "number", "default": 0.50, "description": "House ceiling on total operating expenses as a share of EGI (2026-08-10). Not an input to any formula — Year 1 opex is scored against it on the Checks tab. 0 = not scored."},
+        "irr_target": {"type": "number", "default": 0.16},
+        "year2_cash_on_cash_target": {"type": "number", "default": 0.03},
+        "refi_cap_rate": {"type": "number", "default": 0.055},
+        "refi_ltv": {"type": "number", "default": 0.70},
+        "refi_closing_cost_pct": {"type": "number", "default": 0.01},
+        "refi_interest_rate": {"type": "number", "default": 0.06},
+        "loss_to_lease_capture_year1_pct": {"type": "number", "default": 0.50},
+        "amortization_period_years": {"type": "integer", "default": 0, "description": "0 = interest-only."},
+        "upfront_closing_cost_pct": {"type": "number", "default": 0.03},
+        "disposition_cost_pct": {"type": "number", "default": 0.05}
+      }
+    },
+
+    "t12": {
+      "type": "object",
+      "description": "T12 summary line items. Source: uploaded T12 Excel export, mapped by header fuzzy-match. This is what actually drives the model (Pro Forma reads these, not the raw detail below).",
+      "required": ["net_operating_income"],
+      "properties": {
+        "gross_potential_rent": {"type": "number"},
+        "vacancy_concessions_bad_debt": {"type": "number", "description": "Negative number."},
+        "net_rental_income": {"type": "number"},
+        "other_income": {"type": "number"},
+        "effective_gross_income": {"type": "number"},
+        "controllable_expenses": {"type": "number"},
+        "repairs_maintenance": {"type": ["number", "null"], "description": "Controllable sub-section (optional): Total Repairs and Maintenance."},
+        "turnover_costs": {"type": ["number", "null"], "description": "Controllable sub-section (optional): Total Turnover Costs."},
+        "labor_costs": {"type": ["number", "null"], "description": "Controllable sub-section (optional): Total Labor Costs / payroll."},
+        "advertising_promotions": {"type": ["number", "null"], "description": "Controllable sub-section (optional): Total Advertising and Promotions."},
+        "general_admin": {"type": ["number", "null"], "description": "Controllable sub-section (optional): Total General and Administrative Costs."},
+        "utilities": {"type": "number"},
+        "management_fee_actual": {"type": "number", "description": "Reference only; model replaces with management_fee_pct_egi."},
+        "insurance": {"type": "number"},
+        "property_taxes_actual": {"type": "number", "description": "Reference only; model replaces with the county sale-reset tax estimate."},
+        "other_property_expenses": {"type": "number", "description": "NOT reference-only: Pro Forma grows this 3%/yr as a Year 1 expense base."},
+        "total_operating_expenses": {"type": "number"},
+        "net_operating_income": {"type": "number"},
+        "actual_vacancy_loss": {"type": "number"},
+        "actual_bad_debt": {"type": "number"},
+        "actual_concessions": {"type": "number"},
+        "month_headers": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Optional column labels for the raw monthly detail (e.g. 'Jun 2025'), oldest first. Written to the audit-table header so the months shown match the statement."
+        },
+        "raw_monthly_detail": {
+          "type": "array",
+          "description": "Optional GL account-level detail for the audit table. Not used by any formula.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source_row": {"type": "integer"},
+              "account": {"type": "string"},
+              "label": {"type": "string"},
+              "months": {"type": "array", "items": {"type": "number"}, "description": "12 monthly values, oldest first."}
+            }
+          }
+        }
+      }
+    },
+
+    "tax": {
+      "type": "object",
+      "description": "County tax roll data. Source: automated county-record web search (with source URLs), else OM tax summary page.",
+      "properties": {
+        "county_pin": {"type": "string"},
+        "site_address": {"type": "string"},
+        "current_taxable_value": {"type": "number"},
+        "current_millage_rate": {"type": "number"},
+        "non_ad_valorem_tax": {"type": "number"},
+        "t12_property_tax_expense": {"type": "number"},
+        "county_source_url": {"type": "string", "description": "URL of the county record the automated tax lookup sourced its values from. Written to the Tax tab's 'County source URL' cell."},
+        "tax_rule_note": {"type": "string", "description": "Reassessment-on-sale rule for the jurisdiction, from the automated tax lookup. Written to the Tax tab's 'Tax rule/source URL' cell."},
+        "reassessment_on_sale_pct": {"type": "number", "default": 1.0, "minimum": 0, "maximum": 1, "description": "Share of the step-up from current taxable value to purchase price that flows into the new assessment after a sale. Written to Tax!B19; drives the Tax tab AND every column of the Max Price Solver. 1.0 = full reset to purchase price, correct where the state reassesses on transfer (e.g. Florida non-homestead commercial, FS 193.1555); it is the default so pre-2026-08-20 deals reproduce exactly. 0.0 = no reset: Year 1 tax holds at today's taxable value and only grows by tax_growth. Use 0.0 where the state bars sale-triggered reassessment — New Jersey treats reassessing solely because a property sold as unconstitutional spot assessment (Township of West Milford v. Van Decker), so NJ assessments move only on district-wide revaluation. To model a revaluation landing at market in such a state, set 1.0 AND supply current_taxable_value as the EQUALIZED (true) value with current_millage_rate as the EFFECTIVE (equalized) rate, so the current-tax line still reproduces the real bill."}
+      }
+    },
+
+    "rent_roll": {
+      "type": "object",
+      "description": "Source: uploaded rent roll Excel export.",
+      "required": ["as_of_date", "official_units", "units"],
+      "properties": {
+        "as_of_date": {"type": "string", "format": "date"},
+        "official_units": {"type": "integer", "description": "Unit count per the rent roll's own summary page."},
+        "official_occupied_units": {"type": "integer"},
+        "official_vacant_units": {"type": "integer"},
+        "official_occupancy": {"type": "number"},
+        "units": {
+          "type": "array",
+          "description": "One row per physical unit. 'occupied_flag' = 1 if rent_charge > 0.",
+          "items": {
+            "type": "object",
+            "required": ["unit_number", "unit_type", "sqft", "market_rent", "rent_charge", "occupied_flag"],
+            "properties": {
+              "unit_number": {"type": "string"},
+              "unit_type": {"type": "string", "description": "Floorplan code, e.g. 'a1ujs'."},
+              "sqft": {"type": "number"},
+              "resident_id": {"type": "string"},
+              "resident_name": {"type": "string"},
+              "market_rent": {"type": "number"},
+              "rent_charge": {"type": "number", "description": "0 if vacant."},
+              "total_charges": {"type": "number"},
+              "move_in": {"type": "string", "format": "date"},
+              "lease_expiration": {"type": "string", "format": "date"},
+              "move_out": {"type": "string", "format": "date"},
+              "balance": {"type": "number"},
+              "occupied_flag": {"type": "integer", "enum": [0, 1]}
+            }
+          }
+        }
+      }
+    },
+
+    "rent_comps": {
+      "type": "array",
+      "description": "Optional. From OM rent-comp pages plus any online-verified additions. Filled/edited on the review screen, not auto-extracted with full confidence.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "property_name": {"type": "string"},
+          "address_market": {"type": "string"},
+          "units": {"type": ["integer", "string"]},
+          "year_built": {"type": ["string", "integer"]},
+          "avg_unit_size_sf": {"type": ["number", "string"], "description": "String allowed for range descriptions like '550-1,000 (studio-2BR)'."},
+          "market_rent": {"type": "number"},
+          "achieved_rent": {"type": "number"},
+          "rent_psf": {"type": "number"},
+          "occupancy": {"type": "number"},
+          "source_status": {"type": "string", "example": "OM p.68"},
+          "notes": {"type": "string"},
+          "fair_comp_verdict": {"type": "string", "enum": ["FAIR", "FAIR (caveat)", "STRETCH", "NOT COMPARABLE"]}
+        }
+      }
+    },
+
+    "sale_comps": {
+      "type": "array",
+      "description": "Optional. Auto-searched online (recent closed sales in the metro, with source URLs) merged with any OM comps; user-editable on the review screen. Max 6 (template placeholder rows).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "property_name": {"type": "string"},
+          "location": {"type": "string"},
+          "units": {"type": ["integer", "string"]},
+          "year_built": {"type": ["integer", "string"]},
+          "sale_date": {"type": "string"},
+          "sale_price": {"type": ["number", "string"]},
+          "price_per_unit": {"type": "number"},
+          "buyer_seller": {"type": "string"},
+          "source": {"type": "string"},
+          "fair_comp_verdict": {"type": "string"},
+          "notes": {"type": "string"}
+        }
+      }
+    }
+  }
+}

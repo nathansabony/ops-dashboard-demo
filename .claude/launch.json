@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "cedar-ridge-demo",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["scripts/demoServer.js"],
+      "port": 3001
+    }
+  ]
+}

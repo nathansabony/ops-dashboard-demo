@@ -1,0 +1,20 @@
+# Cedar Ridge Management - Demo. One web service, no secrets required.
+# (Works on any host that reads a render.yaml blueprint; otherwise just run `npm start`.)
+services:
+  - type: web
+    name: cedar-ridge-demo
+    runtime: node
+    plan: starter
+    # pip packages power the Underwriting tab's parsers/generator. The host's python3
+    # lives in a virtualenv (no --user installs), so install directly - and fail the
+    # build loudly rather than ship a silently broken tab.
+    buildCommand: npm install && python3 -m pip install openpyxl pymupdf formulas pandas xlrd
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DEMO_MODE
+        value: "1"
+      # Optional: free-form answers in the Ask assistant and the contract analyzer.
+      - key: ANTHROPIC_API_KEY
+        sync: false

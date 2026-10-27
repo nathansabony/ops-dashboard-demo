@@ -1,0 +1,57 @@
+# Budget Tool — Default Benchmark Recommendations
+
+*How to read this: these are national/regional starting defaults for the 12-month budgeting tool, drawn from the most recent published industry surveys (mostly 2024 operating data, the latest full-year benchmark set available as of mid-2026). Each expense is given as $/unit/year and as % of Effective Gross Income (EGI) because underwriters use both. Local realities (property taxes, rising insurance, and any municipal rent control) can push several lines above the national benchmark — those are flagged in the row and detailed in the local-market notes. Treat every number as a default to be tuned per-property with the owner and against your own actuals from Rent Manager.*
+
+**Anchor dataset:** The NAA / IREM / BOMA **2024 Income/Expense IQ** (4,666 conventional properties, ~1.09M units) reports, per unit/year, national conventional apartments: total income **$21,017**, total operating expenses **$8,657** (≈41% of income), i.e. a national NOI margin near ~59% *before* the local tax/insurance premium. That single dataset underpins most expense rows below.
+
+| Benchmark | Recommended Default | Source & Rationale |
+|---|---|---|
+| **1. Rent / income growth (annual %)** | **National: 0.5–1.0%** near-term, normalizing to **~2.5–3%** long-run. **Columbus, OH (no rent control): market-driven**, about **3%**; where a rent-control cap applies, cap at that ceiling. Use **3%** as the default. | Yardi Matrix projects ~0.5% advertised-rent growth in 2026, ~1% 2027, 2.3% 2028 (Yardi/MHN). Local markets are cooling where new supply is delivering; where rent control exists, its cap is the binding constraint on in-place units. |
+| **2. Vacancy — physical & economic** | **Market-rate: 5–7% physical** (use **5%** stabilized floor; **7%** in supply-heavy submarkets). **Affordable/Section 8: 3–5%.** Economic vacancy (incl. concessions + credit): **5–8%**, default **6.5%**. | Institutional standard is a 5% stabilized floor, 5–10% range; a Class-B model should carry 5–8% economic vacancy (PropRise; AdventuresinCRE). State-level rental vacancy runs in the mid single digits, while new-supply submarkets can run well above that (state housing data; FRED). Section 8 ran ~9% vacancy nationally but payment is government-backed, so use a lower economic-loss factor (HUD). |
+| **3. Bad debt / collection loss** | **Market-rate: 0.5–1.5%** of EGI (default **1%**). **Section 8: ~0.25–0.5%** on the HAP-covered portion. | NAA 2024 national bad debt was only **$75/unit (~0.35% of rent)**, down 30% YoY, but that reflects premium-managed stock; workforce/urban local runs higher, so 1% is prudent (NAA 2024). *Tune with owner from actual RM collections.* |
+| **4. Operating Expense Ratio (OER)** | **National default 40–45%.** **Older Midwest multifamily: 50–60%+** (high taxes/insurance). Use **~50%** as the portfolio starting default; higher for pre-war walk-ups. | NAA 2024: $8,657 opex / $21,017 income ≈ **41%** nationally. Stabilized OERs run 35–55%; small multifamily (2–20 units) 50–65%; a Northeast pre-war mid-rise "can easily push past 60%" (Capstone; PropRise). |
+| **5. Repairs & Maintenance** | **$1,100–$1,400/unit/yr** (default **$1,250**); **~5–6% of EGI**. Older walk-ups skew to top of range. | NAA 2024 national R&M = **$1,098/unit (+3.7% YoY; +28% since 2021)** (NAA 2024). Older, small buildings run above the conventional average, hence the uplift. |
+| **6. Turnover / make-ready** | **$3,500–$4,000 per turn** (default **$3,800**); **annual turnover 45–50%.** Budget line ≈ turnover rate × cost/turn. | NAA benchmark total turnover cost ≈ **$3,872/move-out** (+17.5% YoY); make-ready alone $3,000–5,000 (Multifamily Dive; Lula). National retention ~54% ⇒ turnover ~46% (RealPage). Retention in older stock can be higher (~70%), so local turnover may be lower — verify from RM. |
+| **7. Property management fee** | **4–5% of collected income** for a ~13-entity institutional portfolio (default **4.5%**). Only use 8–10% if a property is individually managed like scattered small units. | Large/portfolio multifamily typically 4–7%; small/scattered residential 8–12%; overall 3–15% with tiered discounts as unit count grows (MRI; AllPropertyMgmt). *If self-managed, book an internal management fee for true NOI.* |
+| **8. Payroll / on-site staff** | **$1,000–$2,300/unit/yr**, scaling with building size. Small walk-ups (no on-site staff): **$500–$1,000**; larger buildings with a super/porter: **$1,500–$2,300**. Default **$1,200**. | NAA 2024 combined Administrative + Payroll = **$2,323/unit (+3.8%)**; payroll alone +3.6% YoY (NAA 2024). Small buildings carry far less on-site labor, so scale down by building size — this line is the most size-sensitive. |
+| **9. Insurance** | **$750–$1,100/unit/yr** (default **$900**, higher than national in dense or coastal markets); **~4–5% of EGI**. Model as a **fast-growing** line (see #15). | NAA 2024 national insurance = **$777/unit, +10.8% YoY**; NMHC survey shows national per-unit cost rose from **$502 (2021) to $777 (2024), +55%** (NAA 2024; NMHC). Dense urban local + some Miami/coastal exposure justifies pricing above the national average. |
+| **10. Property taxes** | **Do not use a national default — pull each entity's actual assessed value × local rate** (it varies widely by county and levy). Budget a **reassessment-risk buffer** and grow modestly (2–3%/yr) unless a revaluation is pending. | Taxes are ~30% of total opex nationally and are the single biggest line in many markets — often the largest budget item. Post-sale or post-revaluation reassessment can spike this; flag per entity. |
+| **11. Utilities (water/sewer, gas, electric, trash)** | **$1,000–$1,600/unit/yr owner-paid** (default **$1,300**); **~6% of EGI.** *Split matters:* if tenants pay their own gas/electric, drop to **$400–$700/unit** (owner keeps water/sewer + common areas + trash). | NAA 2024 total utilities = **$1,304/unit, −3.2% YoY** (gas/heating pullback) (NAA 2024). Older local buildings are often master-metered (owner-paid heat), pushing to the high end — set the owner-paid/tenant-paid flag per property. |
+| **12. General & Administrative** | **$500–$900/unit/yr** (default **$650**); **~2–3% of EGI.** | Bundled in NAA's Admin+Payroll ($2,323); admin-only portion typically runs ~$500–900/unit after separating on-site labor (NAA 2024). *Industry rule of thumb for the split — confirm against your own G&A actuals.* |
+| **13. Marketing / advertising** | **$150–$350/unit/yr** (default **$250**); **~1% of EGI.** Lower for rent-controlled/high-retention assets. | NAA 2024 leasing expense = **$292/unit, +4.6%** (NAA 2024). High retention (~70%) means fewer units to re-market, so default toward the lower end. |
+| **14. Replacement reserves / recurring CapEx** | **$250–$300/unit/yr** (default **$300** given older stock). | Fannie Mae requires **$250/unit** (non-senior); Freddie **$200–300**, generally the greater of engineer's rec or **$250/unit** (Fannie Mae Guide; Apartment.loans). Older buildings warrant the top of the agency range or higher per a PCA. |
+| **15. Annual expense growth / inflation** | **General opex: 3%/yr.** Grow faster: **Insurance 7–10%/yr**, **Property taxes 2–4%/yr** (spikes on reassessment), **Payroll 3–4%/yr**. Utilities volatile — use 3%. | Opex growth peaked at **8.6% (2023)**, easing since; insurance annualized ~7%+ in Q1 2025 (down from 33.5% a year prior but still elevated); CPI ~2.4–3% (RealPage; CRE Daily). Insurance and taxes are the structural over-inflation lines — do not grow them at the general rate. |
+| **16. Management / expense contingency** | **3–5% contingency** on controllable opex (default **5%** in year 1 while tuning defaults). | Industry rule of thumb, not a survey figure — a standard underwriting cushion for estimate error and unbudgeted repairs. *Mark as needing owner confirmation; retire it as real actuals replace defaults.* |
+
+## Stabilized NOI margin — what "good" looks like
+
+For stabilized Class-B/workforce multifamily, a healthy NOI margin is **~50–55% of EGI** (OER ~45–50%), matching the "47% expense / 53% NOI" Class-B benchmark. National conventional stock runs richer (~59% NOI) because it skews to newer, lower-tax Sun Belt product. **For this portfolio, target ~45–52% NOI margin** — older walk-ups carrying a heavy tax and insurance load will realistically land in the mid-to-high-40s, and anything modeled above ~55% for pre-war product should be treated with suspicion. (Capstone; Baselane)
+
+## Local-market notes (Columbus, OH for the demo)
+
+- **Rent control caps the income-growth assumption where it applies.** Ohio has no statewide rent control, so the demo grows income at the 3% default. In a rent-controlled city, cap in-place units at the municipal limit (often the lesser of CPI or a fixed percentage) and do not let the tool grow rents above it - this is the biggest structural difference from a generic national model.
+- **Property taxes are a dominant line and a real risk.** Pull each entity's actual bill. A sale or a county revaluation can reset the assessment sharply upward, so build per-entity reassessment risk into the budget year rather than assuming flat taxes.
+- **Insurance has repriced hard and stays elevated.** National per-unit cost rose ~55% (2021 to 2024); price this line above the $777 national average and grow it at 7-10%/yr, not general inflation.
+- **New supply is a near-term drag on rents and vacancy** in submarkets where many units are delivering - keep near-term rent-growth defaults conservative even where rent control does not bind.
+- **Section 8 units:** underwrite lower economic vacancy and bad debt on the HAP-covered rent (government-backed payment), even though physical vacancy can be similar to market-rate.
+
+## Two lines that must NOT be defaulted (pull per-entity)
+
+- **Property taxes (#10)** — assessments vary wildly by municipality/entity; pull each entity's actual bill.
+- **Payroll (#8)** — scales with building size (a 6-unit walk-up vs. a 60-unit building with an on-site super).
+
+Items sourced only to an industry rule of thumb (need owner confirmation): the G&A/payroll split within NAA's combined $2,323 (#12), and the 5% contingency (#16).
+
+## Sources
+
+- **NAA / IREM / BOMA — 2024 Income/Expense IQ** ("From Momentum to Management," NAA): naahq.org — primary per-unit expense benchmarks.
+- **NMHC — 2024 State of Multifamily Risk Survey** (insurance): nmhc.org; NAA Premium Pulse.
+- **Fannie Mae Multifamily Guide — Replacement Reserves** ($250/unit): mfguide.fanniemae.com; Freddie/agency practice: apartment.loans.
+- **Yardi Matrix — 2026 rent-growth forecast**: multihousingnews.com; **RealPage — 2Q25 Opex moderation**: realpage.com; **CRE Daily**: credaily.com.
+- **Capstone Commercial — OER by property type**: capstonecre.com; **PropRise — Multifamily Underwriting Guide**: proprise.ai; **AdventuresinCRE — vacancy/credit loss**: adventuresincre.com.
+- **Multifamily Dive — turnover cost ~$3,872**: multifamilydive.com; **RealPage retention**: realpage.com.
+- **MRI / AllPropertyManagement — management fees**: mrisoftware.com, allpropertymanagement.com.
+- **Local property taxes** - county auditor / treasurer sites for each property's actual bill.
+- **Rent control** - check the municipal code for each property.
+- **Local market data** - Yardi Matrix and RealPage market reports; FRED for state rental vacancy.
+- **Section 8 occupancy** — HUD voucher success study: huduser.gov.

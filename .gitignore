@@ -1,0 +1,72 @@
+node_modules/
+.env
+*.log
+demo-watch/
+# Underwriting models carry rent-roll resident names and real deal numbers - real ones never go in git. This demo ships exactly
+# ONE deal (the fictional Riverbend Apartments, scripts/seedDemoUnderwriting.js), so everything in the folder is ignored except that
+# deal's model, PDF report and card sidecar. Runs people make on the live demo (and the usage log, scoring edits) stay local.
+data/underwriting/*
+!data/underwriting/Riverbend-Apartments-2026-10-20-14-32-08.xlsx
+!data/underwriting/Riverbend-Apartments-2026-10-20-14-32-08.pdf
+!data/underwriting/deals.json
+# operational logs (work-order titles, property names) — not for git history
+data/*.jsonl
+# rebuildable Rent Manager snapshot caches — regenerated at boot, never commit
+data/property-pl-cache.json
+data/live-overview-cache.json
+data/charged-collections-cache.json
+data/unit-counts-cache.json
+# per-tenant delinquency rows (names + units) — PII, rebuildable in one report run
+data/delinquency-cache.json
+# billing-month cohort roll-ups — rebuildable (24 report runs, ~30s)
+data/billing-cohorts-cache.json
+__pycache__/
+# local pre-edit backups of the underwriting template — working artifacts, not for git
+underwriting/*BACKUP*.xlsx
+data/issues-cache.json
+data/debt-service-cache.json
+# renovation (non-operating) expense detail — rebuildable from RM on refresh
+data/renovation-expenses-cache.json
+# rebuildable property→super map (carries staff names) — config/property-supers.json
+# is the hand-maintained gap-filler and IS committed; this is just the RM pull
+data/supers-cache.json
+data/duplicate-payments-cache.json
+# invoice-coverage sweep over the renovation charges — rebuildable (services/backupCoverage.js)
+data/backup-coverage-cache.json
+data/refresh-schedule.json
+# accumulated vacancy trend (NOT rebuildable — lives on the host's persistent disk;
+# a local copy is a different environment's history, don't mix them via git)
+data/vacancy-history.json
+# resolved variance flags — same deal: the team's real review lives on the host's
+# persistent disk and is NOT rebuildable. Committing a local copy would let a
+# deploy overwrite everyone's resolutions with whatever a dev box happened to have.
+data/variance-resolutions.json
+# Handled entity action items (services/entityActions.js) — the team's marks, same
+# reasoning as the resolutions above (2026-10-21).
+data/entity-actions.json
+data/home-snapshot.json
+# When each variance flag was first seen (services/varianceFirstSeen.js) — the
+# dates behind "still open since", same persistent-disk reasoning (2026-10-21).
+data/variance-first-seen.json
+# edited variance rules (services/varianceRuleOverrides.js) — the team's tuning,
+# live on the same persistent disk, same reason. The DEFAULTS are in
+# services/varianceConfig.js and those are what git tracks.
+data/variance-rules.json
+# budget tool: T12 seed + generated per-entity model workbooks hold real financials — never commit
+data/t12-budget-seed.json
+budget/models/
+budget/*.xlsx
+# Generated budget set (rebuildable via npm run budget:build)
+data/budget/
+
+# Python virtualenv for the budget / underwriting workbook scripts.
+# Point UNDERWRITING_PYTHON at venv/bin/python3 — it carries openpyxl (workbook
+# generation) and formulas (the build-time workbook verifier).
+venv/
+# per-person sign-in accounts (hashed passwords) — lives on the host disk, never in git
+data/users.json
+data/users.json.tmp-*
+# contract scanner test output (scripts/testContractScanner.js) — real contract terms
+data/contract-scanner-test/
+data/market-news.json
+data/issues-backlog-cache.json

@@ -1,0 +1,72 @@
+name: Checks
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Frontend syntax check
+        run: npm run check:frontend
+      - name: Verify no embedded tenant PII
+        run: npm run verify:no-tenant-data
+      - name: Renovation (non-operating) expense pipeline
+        run: npm run check:renovations
+      - name: Variance P&L counts each dollar once (subtotal rows)
+        run: npm run check:pl-subtotals
+      - name: Variance jump readings (credit back, new run rate)
+        run: npm run check:variance-jumps
+      - name: Split buildings read as one (property merges)
+        run: npm run check:property-merges
+      - name: Duplicate payments (a check repeating a bill)
+        run: npm run check:duplicate-payments
+      - name: "Demo mode (automatic admin sign-in, canned Ask answers, no-op mailer, sample contract)"
+        run: npm run check:demo
+      - name: Sign-in and per-person tool access
+        run: npm run check:access
+      - name: Ask panel (what Claude is sent, the streamed answer)
+        run: npm run check:assistant
+      - name: Ask panel lookups (scopes, access, the tool loop)
+        run: npm run check:assistant-tools
+      - name: Scorecard targets (defaults, saves, who may change them)
+        run: npm run check:scorecard-targets
+      - name: Variances digest - Worth a look rolls up existing flags only
+        run: npm run check:variance-digest
+      - name: Variances Going well - favourable moves that passed the red-flag tests and held
+        run: npm run check:variance-good-news
+      - name: Variances dashboard - The pattern this month (biggest-dollar grouping, varGroups counted once)
+        run: npm run check:variance-pattern
+      - name: Variances dashboard - still open since (first-seen store keeps the first date)
+        run: npm run check:variance-first-seen
+      - name: Entities board (shared grading model, debt gap, manual occupancy, action items)
+        run: npm run check:entity-board
+      - name: "Entity action items (handled marks: who, when, when they come back)"
+        run: npm run check:entity-actions
+      - name: Debt service (loan accounts by parent, interest from the P&L)
+        run: npm run check:debt-service
+      - name: Budget vs actual (live actuals over the frozen set)
+        run: npm run check:budget-actuals
+      - name: Underwriting past deals (cards, repeat runs, hide, access)
+        run: npm run check:underwriting-deals
+      - name: "Market news (feed parsing, relevance, daily rotation, fallbacks)"
+        run: npm run check:market-news
+      - name: Home snapshot (one Home for everyone, sections by tool)
+        run: npm run check:home-snapshot
+      - name: "Portfolio insights on Home (4 good, 4 bad, numbers, why, next step, access)"
+        run: npm run check:portfolio-insights
+      - name: "Delinquency collections brief (ranking, drivers, regions, escaping, the PDF)"
+        run: npm run check:delinquency-report
+      - name: "Underwriting PDF report (canned deal in, sections out, nothing undefined or NaN)"
+        run: npm run check:underwriting-report
+      - name: "Underwriting Excel template fixes (solver range, n/a IRR) and no uncomputed formulas"
+        run: python3 -m pip install openpyxl pandas && python3 scripts/checkUnderwritingModels.py
+      - name: "Variance investigation: what the postings in Rent Manager show (each classification, the change explained, could not determine, nothing invented)"
+        run: npm run check:variance-investigation
