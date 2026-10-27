@@ -51,7 +51,7 @@ data/variance-first-seen.json
 # edited variance rules (services/varianceRuleOverrides.js) — the team's tuning,
 # live on the same persistent disk, same reason. The DEFAULTS are in
 # services/varianceConfig.js and those are what git tracks.
-data/variance-rules.json
+# data/variance-rules.json ships in the demo: the tuned thresholds that let the Going well list fill in
 # budget tool: T12 seed + generated per-entity model workbooks hold real financials — never commit
 data/t12-budget-seed.json
 budget/models/

@@ -1,0 +1,8 @@
+{
+  "items": {
+    "electric": { "values": { "pct": 0.15, "minImpact": 3000 }, "by": "Demo", "at": "2026-10-20T14:05:00.000Z" },
+    "repairsMaint": { "values": { "pct": 0.15, "minImpact": 4000 }, "by": "Demo", "at": "2026-10-20T14:07:00.000Z" }
+  },
+  "model": {},
+  "updatedAt": "2026-10-20T14:07:00.000Z"
+}
