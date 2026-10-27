@@ -1541,7 +1541,8 @@ a.hm-ins-link:focus-visible{outline:2px solid #14532D;outline-offset:1px;}
 .hm-pill{display:inline-block;padding:3px 11px;border-radius:999px;border:1px solid #D8D1C2;background:#F5F2EB;color:#3E3A33;font-size:12px;font-weight:700;}
 .hm-pill.ok{background:#E7F4EA;border-color:#9DC4AC;color:#14532D;}
 .hm-pill.bad{background:#FBE7E7;border-color:#D9A3A3;color:#8C2020;}
-.hm-chart-wrap{position:relative;height:340px;margin-top:10px;}
+.hm-chart-wrap{position:relative;height:380px;margin-top:10px;}
+.hm-chart-wrap canvas{max-height:none;width:100% !important;height:100% !important;display:block;}
 .hm-chart-note{margin-top:8px;font-size:12px;color:#6B645A;font-family:'JetBrains Mono',monospace;}
 /* The Ask box gets more room on Home (the owner: "takes up more space now"). */
 .dd-band.dd-big{padding:22px 26px;margin-top:4px;}
@@ -1549,7 +1550,7 @@ a.hm-ins-link:focus-visible{outline:2px solid #14532D;outline-offset:1px;}
 .dd-band.dd-big p{font-size:14px;}
 .dd-band.dd-big .dd-form input{height:48px;font-size:15.5px;}
 .dd-band.dd-big .dd-go{font-size:15px;}
-@media (max-width:900px){.hm-chart-wrap{height:300px;}}
+@media (max-width:900px){.hm-chart-wrap{height:320px;}}
 
 /* ══ Variance tracker (2026-08-20) ═══════════════════════════════════════════
    The tab used to open as one white box holding a five-button bar, two narrow
@@ -5879,6 +5880,21 @@ function homeRender(s) {
     const n = c ? Math.min(3, Math.max(c.best.length, c.worst.length)) : 0;
     let lines = '';
     for (let k = 0; k < n; k++) lines += `<div class="hm-sc-line">${cell(c.best[k])}${cell(c.worst[k])}</div>`;
+    // Demo only: the one real demo entity is the only one with a breakdown behind it, so the
+    // card is filled out with other made-up entities (display only, they open nothing) at a
+    // spread of grades. Ordered best first, two to a line.
+    if (c && OP_USER && OP_USER.demo && c.count === 1 && c.best[0]) {
+      const fake = [
+        { e: 'Lakeshore Partners', grade: 'A', score: 91 }, { e: 'Pinecrest Group', grade: 'B', score: 86 },
+        { e: 'Granite Hill Holdings', grade: 'B', score: 77 }, { e: 'Riverside Commons', grade: 'C', score: 68 },
+        { e: 'Oakmont Capital', grade: 'D', score: 58 },
+      ].map(r => ({ ...r, note: 'Sample entity for the demo: no breakdown behind it' }));
+      const all = [...fake, c.best[0]].sort((a, b) => b.score - a.score);
+      const show = r => r.e === c.best[0].e ? cell(r)
+        : `<span class="hm-sc-cell" title="${esc(r.note)}"><span class="rc-grade ${ebGradeClass(r.grade)}">${esc(r.grade)}</span><span class="hm-sc-name">${esc(r.e)}</span><span class="hm-sc-num">${esc(r.score)}</span></span>`;
+      lines = '';
+      for (let k = 0; k < all.length; k += 2) lines += `<div class="hm-sc-line">${show(all[k])}${all[k + 1] ? show(all[k + 1]) : '<span class="hm-sc-cell"></span>'}</div>`;
+    }
     $('hm-score').innerHTML = !c ? homeNoData('The scorecard') : `<div class="hm-sc-heads"><span>${c.count === 1 ? 'Entity' : 'Best'}</span><span>${c.count === 1 ? '' : 'Weakest'}</span></div>${lines}`;
     if ($('hm-score-open')) $('hm-score-open').innerHTML = !c ? '' : `<span class="hm-sc-pf" title="${c.atB} of ${c.count} entities at B or better">Portfolio <b>${esc(c.grade)}</b></span>${can ? '<button type="button" class="hm-score-open" onclick="homeOpenEntity(null)">Open full scorecard →</button>' : ''}`;
     if ($('hm-score-title')) $('hm-score-title').title = `Each entity graded 0–100 against the scorecard targets${c && c.at ? ' · as of ' + homeAsOf(c.at) : ''}`;
@@ -5918,6 +5934,10 @@ function homeDrawChart(c) {
         y2: { position: 'right', min: 0, ticks: { callback: v => Number(v).toFixed(1) + 'x', font: { size: 10 } }, grid: { drawOnChartArea: false } },
         x: { ticks: { font: { size: 10 }, maxRotation: 45, minRotation: 0 }, grid: { display: false } } } }
   });
+  // Chart.js can size itself before the page has finished laying out, leaving the chart
+  // shorter than its rectangle. Fit it to the box again once the layout has settled.
+  const fit = () => { if (window._hmc) window._hmc.resize(); };
+  requestAnimationFrame(fit); setTimeout(fit, 250); setTimeout(fit, 1200);
 }
 
 function homeInit() {
