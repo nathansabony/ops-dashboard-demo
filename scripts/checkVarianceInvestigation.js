@@ -389,7 +389,7 @@ console.log('\nBill status');
   check('siblings are the entity\'s other buildings, last month and this', calls.gl.some(a => a.propOwnerIds === '102,103' && a.startDate === '2026-08-01'));
   check('neighbouring lines are asked for by their own accounts', calls.gl.some(a => a.refs.join() === '5401,5404'));
   check('at most three bill lookups, one per bill, biggest first', calls.bills >= 1 && calls.bills <= 3, `${calls.bills}`);
-  check('the answer carries its label, time and report ids', out.label === 'Cedar Ridge analysis of Rent Manager data' && out.generatedAt === '2026-10-22T12:00:00.000Z' && out.reports.some(r => r.id === 51));
+  check('the answer carries its label, time and report ids', out.label === 'Demo Portfolio analysis of Rent Manager data' && out.generatedAt === '2026-10-22T12:00:00.000Z' && out.reports.some(r => r.id === 51));
   check('unapproved, unpaid and unattached bills come back apart from the cause', out.housekeeping.map(h => h.kind).sort().join() === 'no-invoice,unapproved,unpaid', out.housekeeping.map(h => h.kind).join());
   const before = calls.gl.length, bBefore = calls.bills;
   const again = await vi.investigate({ scope: 'prop:101', key: 'waterSewer', month: '2026-09' }, mk());

@@ -21,17 +21,17 @@ function parseCookies(header) {
 function makeGate(pin) {
   if (!pin) return (req, res, next) => next();
   // The cookie is an HMAC of the PIN, so changing the PIN on the host signs everyone out.
-  const token = crypto.createHmac('sha256', 'cedar-ridge-demo-gate').update(pin).digest('hex');
+  const token = crypto.createHmac('sha256', 'portfolio-dashboard-demo-gate').update(pin).digest('hex');
   const tries = new Map();   // ip -> { n, at }: 8 wrong PINs, then a 5 minute pause
   const page = (msg) => `<!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Cedar Ridge Management - Demo</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Portfolio Management Dashboard Demo</title>
 <style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#F6F3EC;font-family:system-ui,sans-serif;color:#14342A}
 form{background:#FFFDFA;border:1px solid #E6E1D6;border-radius:10px;padding:32px;width:300px;text-align:center}
 h1{font:600 20px Georgia,serif;margin:0 0 6px}p{font-size:13px;color:#6b665c;margin:0 0 18px}
 input{width:100%;box-sizing:border-box;padding:12px;font-size:20px;text-align:center;letter-spacing:4px;border:1px solid #E6E1D6;border-radius:6px;margin-bottom:12px}
 button{width:100%;padding:12px;font-size:14px;font-weight:600;color:#FFFDFA;background:#14532D;border:0;border-radius:6px;cursor:pointer}
 .e{color:#A32B2B;font-size:12.5px;min-height:18px;margin-top:10px}</style></head><body>
-<form method="post" action="/__pin"><h1>Cedar Ridge Management</h1><p>Demo - enter the access PIN</p>
+<form method="post" action="/__pin"><h1>Portfolio Management Dashboard</h1><p>Demo - enter the access PIN</p>
 <input name="pin" type="password" autocomplete="off" placeholder="PIN" autofocus><button>Enter</button><div class="e">${msg || ''}</div></form></body></html>`;
 
   return (req, res, next) => {

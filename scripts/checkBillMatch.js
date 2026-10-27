@@ -215,7 +215,7 @@ const CHARGE = {
     !m.row || m.row.ID !== 999, JSON.stringify(m.row && { id: m.row.ID, acct: m.row.AccountID }));
 
   // 12. the worksheet cross-check on a SPLIT invoice — the real shape of
-  //     FY Construction's MAJOR/Cedar Ridge/37Du, found on the tab 2026-08-26.
+  //     FY Construction's MAJOR/Demo Portfolio/37Du, found on the tab 2026-08-26.
   //
   //     One $20,000 bill, ten lines, all on GL 5156, one per property. Filtering
   //     on the GL account alone summed all ten and compared $20,000 against a
@@ -223,7 +223,7 @@ const CHARGE = {
   //     the cent, shown in red, on exactly the charges where the invoice had just
   //     been found. It fired on every split invoice, which here is most of them.
   const SPLIT_BILL = {
-    ID: 1, Reference: 'MAJOR/Cedar Ridge/37Du', Amount: 20000,
+    ID: 1, Reference: 'MAJOR/Demo Portfolio/37Du', Amount: 20000,
     BillDetails: [
       { GLAccountID: 466, PropertyID: 112, Amount: 1900 },
       { GLAccountID: 466, PropertyID: 115, Amount: 2100 },
@@ -611,7 +611,7 @@ const CHARGE = {
   // before, because this map was always empty.
   docs.__resetBankDirectory();
   servePayment({ ...PAID, banks: null, glAccounts: [
-    { GLAccountID: 3, Reference: '1017', Name: 'Cedar Ridge - TD Bank debit card', GLAccountType: 'Bank' },
+    { GLAccountID: 3, Reference: '1017', Name: 'Demo Portfolio - TD Bank debit card', GLAccountType: 'Bank' },
   ] });
   pay = await docs.paymentFor(PAID_BILL, PAID_CHARGE);
   check('a debit-card account is a bank account, not a credit card',
@@ -709,7 +709,7 @@ const CHARGE = {
           Payee: 'Town of West New York', Amount: 125, TransactionType: 'Check',
           BankID: 3, ReconcileID: 4411 };
       }
-      if (/^\/Banks\b/.test(p2)) return [{ BankID: 3, Name: 'Cedar Ridge - First Commerce Distr' }];
+      if (/^\/Banks\b/.test(p2)) return [{ BankID: 3, Name: 'Demo Portfolio - First Commerce Distr' }];
       // No bill exists anywhere for this posting.
       if (/^\/Bills/.test(p2)) return [];
       throw new Error('Rent Manager request failed (404)');
@@ -723,7 +723,7 @@ const CHARGE = {
       pay && String(pay.reference) === '10835' && pay.payee === 'Town of West New York',
       JSON.stringify(pay && { ref: pay.reference, payee: pay.payee }));
     check('...naming the bank account it was drawn on',
-      pay && pay.bank.name === 'Cedar Ridge - First Commerce Distr', JSON.stringify(pay && pay.bank.label));
+      pay && pay.bank.name === 'Demo Portfolio - First Commerce Distr', JSON.stringify(pay && pay.bank.label));
     check('...and whether it cleared', pay && pay.reconciled === true);
     check('the applied figure is the posting\'s own amount, not a match',
       pay && pay.appliedToChargeLine === 125 && pay.direct === true,

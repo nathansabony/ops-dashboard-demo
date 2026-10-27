@@ -103,7 +103,7 @@ check('a credit draws on the same scale as a charge, not backwards',
 console.log('\nThe ranked list');
 const ROWS = [
   { label: 'Willow Creek', value: 200000, note: '11 properties', onclick: "renoPickEntity('Willow Creek')" },
-  { label: 'Cedar Ridge', value: 50000, note: '36 properties', onclick: "renoPickEntity('Cedar Ridge')" },
+  { label: 'Demo Portfolio', value: 50000, note: '36 properties', onclick: "renoPickEntity('Demo Portfolio')" },
 ];
 {
   const out = sandbox.renoRankListHtml('Spend by entity', ROWS, 250000);

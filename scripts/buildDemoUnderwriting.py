@@ -108,7 +108,7 @@ def write_rent_roll(units, path):
     ws["A1"].font = Font(bold=True, size=14)
     ws["A2"] = NAME
     ws["A3"] = f"As Of = {AS_OF.strftime('%m/%d/%Y')}"
-    ws["A4"] = "Cedar Ridge Capital (demo) - fictional sample data"
+    ws["A4"] = "Portfolio Management Dashboard (demo) - fictional sample data"
     hdr = ["Unit", "Unit Type", "Sq Ft", "Resident ID", "Name", "Market Rent", "Actual", "Resident Deposit", "Other Deposit",
            "Move In", "Lease From", "Lease Expiration", "Move Out", "Balance"]
     ws.append([])  # row 5 is the header, rows 3/4 above
@@ -209,7 +209,7 @@ def write_t12(path):
     ws["A1"] = NAME
     ws["A2"] = "12 Month Trailing Income Statement"
     ws["A3"] = "Period = Oct 2025-Sep 2026"
-    ws["A4"] = "Book = Accrual   (fictional sample data - Cedar Ridge Capital demo)"
+    ws["A4"] = "Book = Accrual   (fictional sample data - Demo Portfolio Capital demo)"
     for c, h in enumerate(["Account", "Description"] + MONTHS + ["Total"], start=1):
         ws.cell(row=6, column=c, value=h).font = Font(bold=True)
     row = [7]

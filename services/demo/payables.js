@@ -202,8 +202,8 @@ function model() {
     entries, bills, billsById: byId(bills), checks, checksById: byId(checks), checkLines, checkMeta,
     cards, cardsById: byId(cards), billOfTxn: billEntry, credits, planted, eventBills, noInvoice, unapproved,
     cardsMaster: [
-      { CreditCardID: 1, Name: 'Cedar Ridge Maintenance Visa - 4417', Reference: '4417', Description: 'Maintenance purchasing card (Sam Whitfield)', IsActive: true, BankID: BANK_OPERATING },
-      { CreditCardID: 2, Name: 'Cedar Ridge Office Mastercard - 9082', Reference: '9082', Description: 'Office and supplies card (Priya Natarajan)', IsActive: true, BankID: BANK_OPERATING },
+      { CreditCardID: 1, Name: 'Demo Portfolio Maintenance Visa - 4417', Reference: '4417', Description: 'Maintenance purchasing card (Sam Whitfield)', IsActive: true, BankID: BANK_OPERATING },
+      { CreditCardID: 2, Name: 'Demo Portfolio Office Mastercard - 9082', Reference: '9082', Description: 'Office and supplies card (Priya Natarajan)', IsActive: true, BankID: BANK_OPERATING },
     ],
     recId,
   };

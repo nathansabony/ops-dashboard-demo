@@ -13,7 +13,7 @@
 //     including with no months, no tenant list, a single month, nothing billed
 //   * every interpolated string is escaped (a property named <b>, a tenant with
 //     a quote and a tag in the name)
-//   * the PDF carries the as-of date, the source and the Cedar Ridge-estimate stamp
+//   * the PDF carries the as-of date, the source and the house-estimate stamp
 //   * the page wires it: the top card, the repaint hook, the print button
 //   * the workflow runs this check, and no step name has an unquoted ": " (an
 //     unquoted one made GitHub run no jobs at all on 2026-10-22)
@@ -72,7 +72,7 @@ const EVIL = '<b>Evil & "Co"</b>';
 const PROPS = {
   'Bad Hill':   { entity: 'Willow Creek', rows: [[100000, 60000, 0, 0, 62000], [100000, 70000, 75000, 0, 80000], [100000, 80000, 82000, 84000, 85000], [100000, 85000, 86000, 87000, 90000]] },
   'Ocean View': { entity: 'Birchwood Commons', rows: [[100000, 70000, 0, 0, 75000], [100000, 72000, 90000, 0, 95000], [100000, 70000, 90000, 99000, 99000], [100000, 71000, 92000, 99500, 99500]] },
-  'Few Large':  { entity: 'Cedar Ridge', rows: [[80000, 76000, 0, 0, 77000], [80000, 77000, 78000, 0, 79000], [80000, 77000, 78000, 78000, 78500], [80000, 77000, 78000, 78000, 78500]] },
+  'Few Large':  { entity: 'Demo Portfolio', rows: [[80000, 76000, 0, 0, 77000], [80000, 77000, 78000, 0, 79000], [80000, 77000, 78000, 78000, 78500], [80000, 77000, 78000, 78000, 78500]] },
   'Good':       { entity: 'Maple Court', rows: [[100000, 99000, 0, 0, 99500], [100000, 99000, 99600, 0, 99800], [100000, 99100, 99600, 99900, 99900], [100000, 99000, 99600, 99900, 99900]] },
   'Tiny':       { entity: 'The Alder', rows: [[1000, 400, 0, 0, 400], [1000, 400, 400, 0, 400], [1000, 400, 400, 400, 400], [1000, 400, 400, 400, 400]] },
 };
@@ -97,7 +97,7 @@ for (let i = 0; i < 10; i++) TENANTS.push({ tenant: 'Tenant ' + String.fromCharC
 TENANTS.push({ tenant: 'Big Debtor', unit: '200', property: 'Bad Hill', entity: 'Willow Creek', amount: 1500 });
 TENANTS.push({ tenant: 'Ocean One', unit: '12', property: 'Ocean View', entity: 'Birchwood Commons', amount: 9000 });
 TENANTS.push({ tenant: 'Ocean Two', unit: '14', property: 'Ocean View', entity: 'Birchwood Commons', amount: 6000 });
-[8000, 3000, 500, 400].forEach((a, i) => TENANTS.push({ tenant: 'Large ' + (i + 1), unit: String(i + 1), property: 'Few Large', entity: 'Cedar Ridge', amount: a }));
+[8000, 3000, 500, 400].forEach((a, i) => TENANTS.push({ tenant: 'Large ' + (i + 1), unit: String(i + 1), property: 'Few Large', entity: 'Demo Portfolio', amount: a }));
 TENANTS.push({ tenant: "O'Brien <img src=x onerror=alert(1)>", unit: '4<B>', property: EVIL, entity: 'Summit Lofts', amount: 2500 });
 TENANTS.push({ tenant: 'Credit Only', unit: '1', property: 'Good', entity: 'Maple Court', amount: -50 });   // never a delinquent tenant
 const UNITS = { 'Bad Hill': 110, 'Ocean View': 200, 'Few Large': 60 };   // the others have no unit count on purpose
@@ -266,12 +266,12 @@ check('the PDF carries the as-of date, both sources, the estimate stamp, and no 
   assert.ok(h.startsWith('<!doctype html>') && h.includes('@page') && h.includes('page-break-inside:avoid'));
   assert.ok(h.includes('tenants as of 2026-10-21') && h.includes('Prepared Oct 22, 2026, 9:00 AM'));
   assert.ok(h.includes('Rent Manager report 30 (Charge Detail)') && h.includes('report 85 (Delinquency)'));
-  assert.ok(/Cedar Ridge estimate/.test(h) && !h.includes('onclick'));
+  assert.ok(/house estimate/.test(h) && !h.includes('onclick'));
   ['Struggling most with collecting rent', 'By region', 'Pursue first.', 'What drives it.'].forEach(t => assert.ok(h.includes(t), t));
 });
 check('the card has the PDF button and a fold that hides the detail but keeps the headline', () => {
   const open = card(R), folded = card(R, { folded: true });
-  assert.ok(open.includes('⎙ PDF report') && open.includes('dqrPrint()') && open.includes('Cedar Ridge estimates'));
+  assert.ok(open.includes('⎙ PDF report') && open.includes('dqrPrint()') && open.includes('house estimates'));
   assert.ok(open.includes('Pursue first.') && !folded.includes('Pursue first.') && folded.includes('Sep 2026: we billed'));
 });
 

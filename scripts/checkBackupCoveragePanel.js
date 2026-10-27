@@ -73,7 +73,7 @@ const FIXTURE = {
     { key: '2026-08', charges: 116, documentRate: 34, billRate: 41, amountWithDocument: 9000, amount: 20000 },
   ],
   byEntity: [
-    { key: 'Cedar Ridge', entity: 'Cedar Ridge', charges: 322, withDocument: 106, documentRate: 33, billRate: 50, amountWithDocument: 12727, amount: 32000,
+    { key: 'Demo Portfolio', entity: 'Demo Portfolio', charges: 322, withDocument: 106, documentRate: 33, billRate: 50, amountWithDocument: 12727, amount: 32000,
       properties: [
         { property: '90 Maple Court', charges: 22, documentRate: 45, billRate: 55, amountWithDocument: 9031, amount: 20000 },
         { property: '77 Birchwood Lane', charges: 300, documentRate: 31, billRate: 48, amountWithDocument: 3696, amount: 12000 },
@@ -85,8 +85,8 @@ const FIXTURE = {
       ] },
   ],
   properties: [
-    { property: '90 Maple Court', entity: 'Cedar Ridge', charges: 22, documentRate: 45, billRate: 55, amountWithDocument: 9031, amount: 20000 },
-    { property: '77 Birchwood Lane', entity: 'Cedar Ridge', charges: 300, documentRate: 31, billRate: 48, amountWithDocument: 3696, amount: 12000 },
+    { property: '90 Maple Court', entity: 'Demo Portfolio', charges: 22, documentRate: 45, billRate: 55, amountWithDocument: 9031, amount: 20000 },
+    { property: '77 Birchwood Lane', entity: 'Demo Portfolio', charges: 300, documentRate: 31, billRate: 48, amountWithDocument: 3696, amount: 12000 },
     { property: 'Willow Creek', entity: 'CC', charges: 670, documentRate: 5, billRate: 33, amountWithDocument: 83308, amount: 900000 },
     { property: 'Tiny Place', entity: 'CC', charges: 3, documentRate: 100, billRate: 100, amountWithDocument: 10, amount: 10 },
   ],

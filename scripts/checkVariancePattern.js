@@ -66,7 +66,7 @@ function sandbox() {
 
 const MONTHS = ['Jan 26', 'Feb 26', 'Mar 26', 'Apr 26', 'May 26', 'Jun 26', 'Jul 26', 'Aug 26', 'Sep 26'];
 // One property-level variance flag.
-const flag = (prop, line, month, impact, entity = 'Cedar Ridge') => ({
+const flag = (prop, line, month, impact, entity = 'Demo Portfolio') => ({
   category: 'variance', reason: 'mom', key: line.toLowerCase().replace(/\W+/g, '_'), label: line,
   scope: { key: 'prop:' + prop.toLowerCase().replace(/\W+/g, '-'), label: prop, type: 'Property', entity },
   monthLabel: month, giMonth: MONTHS.indexOf(month), impact,
@@ -89,7 +89,7 @@ console.log('\nThe biggest-dollar grouping is the one featured');
 check('same line wins when its buildings carry the most money', () => {
   const ctx = sandbox();
   const flags = [
-    // Water & Sewer, Aug, four Cedar Ridge buildings: $400K
+    // Water & Sewer, Aug, four Demo Portfolio buildings: $400K
     flag('2301 Willow Creek Rd', 'Water & Sewer', 'Aug 26', 100000),
     flag('15 Summit Avenue', 'Water & Sewer', 'Aug 26', 100000),
     flag('108 60th Street', 'Water & Sewer', 'Aug 26', 100000),
@@ -104,7 +104,7 @@ check('same line wins when its buildings carry the most money', () => {
   assert.strictEqual(p.axis, 'line');
   assert.strictEqual(p.impact, 400000);
   assert.strictEqual(p.n, 4);
-  assert.strictEqual(p.headline, 'Water & Sewer moved at 4 Cedar Ridge buildings in Aug');
+  assert.strictEqual(p.headline, 'Water & Sewer moved at 4 Demo Portfolio buildings in Aug');
   assert.ok(/^\$400,000\/yr at stake · /.test(p.sub), 'sub should lead with the money: ' + p.sub);
   assert.ok(/one billing change, not four problems/.test(p.reading), 'same line + entity + month reads as one change: ' + p.reading);
   assert.strictEqual(p.ids.length, 4, 'four board rows');
@@ -189,7 +189,7 @@ check('a varGroup of three is a qualifying line pattern on its own, with one boa
   assert.strictEqual(p.n, 3, 'three buildings, not one card');
   assert.strictEqual(p.impact, 90000, 'the members, summed once');
   assert.deepStrictEqual(Array.from(p.ids), [ctx.varFlagId(g)], 'the board row is the group card');
-  assert.strictEqual(p.headline, 'Water & Sewer moved at 3 Cedar Ridge buildings in Aug');
+  assert.strictEqual(p.headline, 'Water & Sewer moved at 3 Demo Portfolio buildings in Aug');
 });
 
 check('a varGroup listed beside its own members is not double counted', () => {

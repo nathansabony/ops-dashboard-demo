@@ -73,7 +73,7 @@ console.log('\nFour going well, four going badly');
   check('no headline carries a dollar figure: Home shows ratios and counts only', out.every(i => !i.headline.includes('$') && !i.title.includes('$')), out.filter(i => i.headline.includes('$')).map(i => i.headline).join(' | '));
   check('the explanation carries the dollars (that page is Portfolio only)', out.filter(i => i.why.some(w => w.includes('$')) || i.rows.some(r => r.cells.some(c => c.includes('$')))).length >= 6);
   check('nothing reads undefined, NaN or Infinity', !dirty(out), String(dirty(out)));
-  check('derived figures are labelled Cedar Ridge estimates', out.every(i => i.ours === true) && out.filter(i => i.tone === 'bad').some(i => i.why.concat(i.steps).some(t => /Cedar Ridge estimate/.test(t))));
+  check('derived figures are labelled house estimates', out.every(i => i.ours === true) && out.filter(i => i.tone === 'bad').some(i => i.why.concat(i.steps).some(t => /house estimate/.test(t))));
   check('the same facts always give the same words', JSON.stringify(build(BASE)) === JSON.stringify(build(BASE)));
   check('good items lead, each tone ranked by weight', out.slice(0, 4).every(i => i.tone === 'good') && out.slice(0, 3).every((i, k) => i.weight >= out[k + 1].weight));
 }
@@ -83,8 +83,8 @@ console.log('\nThe debt story is told honestly');
   const out = build(BASE);
   const debt = out.find(i => i.id === 'debt-coverage');
   check('debt coverage is among the bad: Bravo and Echo are under 1.25x', !!debt && debt.rows.map(r => r.label).join() === 'Echo,Bravo');
-  check('a missing-interest entity is called a Cedar Ridge estimate in the headline and the why',
-    !!debt && /Delta coverage is a Cedar Ridge estimate/.test(debt.headline) && debt.why.some(w => /Delta/.test(w) && /Jan 26/.test(w) && /not an improvement/.test(w)));
+  check('a missing-interest entity is called a house estimate in the headline and the why',
+    !!debt && /Delta coverage is a house estimate/.test(debt.headline) && debt.why.some(w => /Delta/.test(w) && /Jan 26/.test(w) && /not an improvement/.test(w)));
   check('...and asks for the missing interest to be entered', !!debt && debt.steps.some(s => /missing mortgage interest for Delta/.test(s)));
   const strong = out.find(i => i.id === 'debt-strength');
   check('an estimated-debt entity is never counted as strong coverage', !!strong && !strong.rows.some(r => r.label === 'Delta'));

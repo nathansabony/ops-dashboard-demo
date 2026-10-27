@@ -26,7 +26,7 @@ const A = require('../services/budgetAssumptions');
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const UNITS = {
   'Willow Creek': 183, 'Willow Creek': 207, 'Willow Creek': 174, 'Summit Lofts': 221, 'Maple Court': 202,
-  'The Alder': 12, 'Birchwood Commons': 871, 'Willow Creek': 35, 'Cedar Ridge': 868, 'Willow Creek': 468,
+  'The Alder': 12, 'Birchwood Commons': 871, 'Willow Creek': 35, 'Demo Portfolio': 868, 'Willow Creek': 468,
   'Maple Court': 26, 'Birchwood Commons': 19, 'Summit Lofts': 12,
 };
 
@@ -68,7 +68,7 @@ function syntheticSnapshot() {
       + s.repairsMaint[i] + s.payroll[i] + s.mgmtFees[i] + s.advertising[i] + 7000 * scale);
     return s;
   };
-  const scales = { 'Willow Creek': 1, 'Willow Creek': 1.15, 'Willow Creek': 0.95, 'Summit Lofts': 1.2, 'Maple Court': 1.1, 'The Alder': 0.07, 'Birchwood Commons': 4.6, 'Willow Creek': 0.2, 'Cedar Ridge': 4.5, 'Willow Creek': 2.4, 'Maple Court': 0.14, 'Birchwood Commons': 0.1, 'Summit Lofts': 0.07 };
+  const scales = { 'Willow Creek': 1, 'Willow Creek': 1.15, 'Willow Creek': 0.95, 'Summit Lofts': 1.2, 'Maple Court': 1.1, 'The Alder': 0.07, 'Birchwood Commons': 4.6, 'Willow Creek': 0.2, 'Demo Portfolio': 4.5, 'Willow Creek': 2.4, 'Maple Court': 0.14, 'Birchwood Commons': 0.1, 'Summit Lofts': 0.07 };
   const entities = {};
   Object.keys(scales).forEach((n, i) => { entities[n] = entity(scales[n], i + 1); });
   const portfolio = {};

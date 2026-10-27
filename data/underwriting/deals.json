@@ -36,10 +36,10 @@
    ],
    "report": {
     "v": 10,
-    "at": "2026-10-27T01:16:22.605Z",
+    "at": "2026-10-27T20:22:12.725Z",
     "pages": 3
    },
-   "mtime": 1793063776697.2434,
+   "mtime": 1793132526820.913,
    "v": 6,
    "card": {
     "computed": true,
@@ -55,7 +55,7 @@
     "year1_noi": 484834.8818373657,
     "capex": 883600,
     "cap_rate": 0.06199999999999999,
-    "cap_note": "T12 NOI / the model's purchase price - a Cedar Ridge estimate, not a quoted cap rate",
+    "cap_note": "T12 NOI / the model's purchase price - a house estimate, not a quoted cap rate",
     "irr": 0.1904325573907768,
     "irr_target": 0.16,
     "irr_failed": false,

@@ -19,7 +19,7 @@
 //
 // Labelling rule (the owner's, kept everywhere): a number WE derived says so. The
 // in-place cap rate, the gap to max price, annualised loss-to-lease and each expense's
-// share of EGI are marked "Cedar Ridge estimate"; everything else is the model's own.
+// share of EGI are marked "house estimate"; everything else is the model's own.
 
 const fs = require('fs');
 const path = require('path');
@@ -121,12 +121,12 @@ function buildReport(facts, ctx = {}) {
   const irr = irrFailed ? null : (isNum(card.irr) ? card.irr : null);
   const meets = irrFailed ? false : (irr == null ? null : irr >= tgt);
   const maxPrice = isNum(card.max_price) && card.max_price > 0 ? card.max_price : null;
-  const gap = maxPrice != null && price ? maxPrice - price : null;                    // Cedar Ridge estimate
-  const cap = price && isNum(card.t12_noi) ? card.t12_noi / price : null;             // Cedar Ridge estimate
+  const gap = maxPrice != null && price ? maxPrice - price : null;                    // house estimate
+  const cap = price && isNum(card.t12_noi) ? card.t12_noi / price : null;             // house estimate
 
   const name = text(card.name) !== NA ? text(card.name) : (text(prop.name) !== NA ? text(prop.name) : '(unnamed deal)');
   const T = (kind, tab) => srcText(idx, kind, tab);
-  const OPT = 'Cedar Ridge estimate';
+  const OPT = 'house estimate';
 
   // headline numbers: the owner's price-test six, then the second row
   // Plausibility gate (services/underwritingDeals.js): a deal built on inputs that cannot support a decision says so on page 1
@@ -237,7 +237,7 @@ function buildReport(facts, ctx = {}) {
   const pfRows = pfYears.length ? [
     ['Effective gross income', pf.egi], ['Total operating expenses', pf.opex], ['Net operating income', pf.noi], ['Debt service', pf.debt_service], ['Net income after debt service', pf.after_debt],
   ].map(([l, m]) => ({ label: l, cells: pfYears.map(y => money(yv(m, y))) })).concat([{ label: 'Cash-on-cash', cells: pfYears.map(y => pct(yv(pf.coc, y), 1)) }]) : [];
-  const noiUpside = isNum(card.year1_noi) && isNum(card.t12_noi) ? card.year1_noi - card.t12_noi : null;     // Cedar Ridge estimate
+  const noiUpside = isNum(card.year1_noi) && isNum(card.t12_noi) ? card.year1_noi - card.t12_noi : null;     // house estimate
 
   // assumptions
   const inputs = Array.isArray(facts.inputs) ? facts.inputs : [];
@@ -309,24 +309,24 @@ function renderHtml(r) {
   if (r.score && r.score.score != null) {
     h.push(`<h2>Deal score: ${r.score.score} / 100 (${esc(r.score.grade)})</h2>`);
     h.push(`<table><tr><th>Factor</th><th class="r">Points</th><th>What drove it</th></tr>${r.score.parts.map(p => `<tr><td>${esc(p.label)}</td><td class="r">${p.points} / ${p.weight}</td><td class="muted">${esc(p.why)}</td></tr>`).join('')}</table>`);
-    h.push('<p class="src">Cedar Ridge estimate: the score weighs the model\'s own results against our targets; the factors and thresholds are set on the Underwriting tab.</p>');
+    h.push('<p class="src">house estimate: the score weighs the model\'s own results against our targets; the factors and thresholds are set on the Underwriting tab.</p>');
   }
   h.push('<h2>Rent roll summary</h2>');
   h.push(`<table><tr><th>Item</th><th class="r">Value</th><th>Source</th></tr>${r.rent.rows.map(f => row2(f[0], f[1], f[2])).join('')}</table>`);
   if (r.rent.mix.length) {
     h.push(`<h3>Unit mix — average rent vs market</h3><table><tr><th>Type</th><th class="r">Units</th><th class="r">Occupied</th><th class="r">Avg sf</th><th class="r">Avg market</th><th class="r">Avg in-place</th><th class="r">Loss-to-lease*</th></tr>${r.rent.mix.map(m => `<tr><td>${esc(m.type)}</td><td class="r">${esc(m.units)}</td><td class="r">${esc(m.occ)}</td><td class="r">${esc(m.sf)}</td><td class="r">${esc(m.market)}</td><td class="r">${esc(m.inplace)}</td><td class="r">${esc(m.ltl)}</td></tr>`).join('')}</table>`);
-    h.push(`<p class="src">* Cedar Ridge estimate: average market rent minus average in-place rent, per unit per month.${r.rent.mixMore ? ` ${r.rent.mixMore} more unit type(s) are in the Excel model.` : ''}</p>`);
+    h.push(`<p class="src">* house estimate: average market rent minus average in-place rent, per unit per month.${r.rent.mixMore ? ` ${r.rent.mixMore} more unit type(s) are in the Excel model.` : ''}</p>`);
   }
 
   h.push('<h2>T12 summary</h2>');
   h.push(`<p>Months covered: <b>${esc(r.t12.span)}</b> · ${esc(r.t12.src)}</p>`);
   h.push(`<table><tr><th>Line</th><th class="r">12-month amount</th><th class="r">% of EGI*</th></tr>${r.t12.rows.map(l => `<tr class="${l.total ? 'tot' : ''}"><td class="${l.memo ? 'muted' : ''}">${esc(l.label)}${l.memo ? ' (memo)' : ''}</td><td class="r">${esc(l.amount)}</td><td class="r muted">${esc(l.share)}</td></tr>`).join('') || '<tr><td colspan="3" class="muted">T12 summary not readable from this model.</td></tr>'}</table>`);
-  h.push(`<p class="src">* Cedar Ridge estimate: the line divided by effective gross income. NOI margin ${esc(r.t12.margin)}.${r.t12.zeroLines.length ? ` Lines at $0 are not shown (${esc(r.t12.zeroLines.join(', '))}).` : ''}</p>`);
+  h.push(`<p class="src">* house estimate: the line divided by effective gross income. NOI margin ${esc(r.t12.margin)}.${r.t12.zeroLines.length ? ` Lines at $0 are not shown (${esc(r.t12.zeroLines.join(', '))}).` : ''}</p>`);
 
   if (r.proForma.rows.length) {
     h.push('<h2>Pro forma (model)</h2>');
     h.push(`<table><tr><th></th>${r.proForma.years.map(y => `<th class="r">Year ${y}</th>`).join('')}</tr>${r.proForma.rows.map(p => `<tr><td>${esc(p.label)}</td>${p.cells.map(c => `<td class="r">${esc(c)}</td>`).join('')}</tr>`).join('')}</table>`);
-    h.push(`<p class="src">${esc(r.proForma.src)}. Year-1 NOI vs the T12 NOI: ${esc(r.proForma.noiUpside)} (Cedar Ridge estimate: the model's Year-1 figure minus the trailing actual).</p>`);
+    h.push(`<p class="src">${esc(r.proForma.src)}. Year-1 NOI vs the T12 NOI: ${esc(r.proForma.noiUpside)} (house estimate: the model's Year-1 figure minus the trailing actual).</p>`);
   }
 
   h.push('<h2>Assumptions the model used</h2>');
@@ -341,17 +341,17 @@ function renderHtml(r) {
   } else {
     h.push('<p class="note">No record of how this deal\'s files were read: it was run before the board began saving that (2026-10-21). Every figure above is exactly what the Excel model holds; the confidence of the original parse is unknown.</p>');
   }
-  if (c.adjusted && c.adjusted.length) h.push(`<h3>Adjusted by us (Cedar Ridge estimate)</h3>${c.adjusted.map(a => `<p>• ${esc(a)}</p>`).join('')}`);
+  if (c.adjusted && c.adjusted.length) h.push(`<h3>Adjusted by us (house estimate)</h3>${c.adjusted.map(a => `<p>• ${esc(a)}</p>`).join('')}`);
   h.push(`<h3>Values a person had to judge</h3><p>${c.confirmed.length ? esc(c.confirmed.join(' · ')) : (c.recorded ? 'None: nothing was edited or low-confidence at review.' : 'Not recorded for this deal.')}</p>`);
   if (c.notOk.length) h.push(`<h3>Model checks that are not OK</h3><table>${c.notOk.map(n => `<tr><td width="14%" class="amber"><b>${esc(n.result)}</b></td><td width="30%">${esc(n.check)}</td><td class="src">${esc(n.note)}</td></tr>`).join('')}</table>`);
   if (r.placeholders.length) h.push(`<h3>Assumptions still placeholders</h3><p>${esc(r.placeholders.join(' · '))} — set from house defaults or a prior model, not from a quote or document.</p>`);
   if (c.missing.length) h.push(`<h3>Not available, and not guessed</h3>${c.missing.map(m => `<p>• ${esc(m)}</p>`).join('')}`);
-  h.push(`<h3>Figures derived here (Cedar Ridge estimates)</h3><p class="src">${esc(c.estimates.join(' · '))}</p>`);
+  h.push(`<h3>Figures derived here (house estimates)</h3><p class="src">${esc(c.estimates.join(' · '))}</p>`);
   return `<html><body>${h.join('\n')}</body></html>`;
 }
 
 function footerText(r) {
-  return `Cedar Ridge Capital (demo) · Underwriting summary · ${clip(r.header.name, 60)} · prepared ${new Date().toISOString().slice(0, 10)}`;
+  return `Portfolio Management Dashboard (demo) · Underwriting summary · ${clip(r.header.name, 60)} · prepared ${new Date().toISOString().slice(0, 10)}`;
 }
 
 // ── the disk side ───────────────────────────────────────────────────────────

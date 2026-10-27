@@ -1,4 +1,4 @@
-// The demo's fake world: one entity ("Cedar Ridge Holdings"), five properties, 56 units,
+// The demo's fake world: one entity ("Demo Portfolio"), five properties, 56 units,
 // 50 current tenants (+ former ones). Everything is generated deterministically from a
 // seed and anchored to TODAY, so the demo always looks current without a data refresh.
 //
@@ -29,7 +29,7 @@ const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); r
 const addMonths = (d, n) => { const x = new Date(d.getFullYear(), d.getMonth() + n, Math.min(d.getDate(), 28)); return x; };
 const firstOfMonth = (d, offset = 0) => new Date(d.getFullYear(), d.getMonth() + offset, 1);
 
-const ENTITY = { name: 'Cedar Ridge', legalName: 'Cedar Ridge Holdings, LLC', billingName: 'Cedar Ridge Holdings, LLC' };
+const ENTITY = { name: 'Demo Portfolio', legalName: 'Demo Portfolio', billingName: 'Demo Portfolio' };
 
 const PROPERTIES = [
   { id: 101, name: 'The Alder',          street: '410 Alder Street',      city: 'Columbus', state: 'OH', zip: '43215', units: 12, built: 1998, rent: 1425, sqft: 780 },

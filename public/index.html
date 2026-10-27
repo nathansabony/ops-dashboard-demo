@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cedar Ridge Management - Demo</title>
+<title>Portfolio Management Dashboard Demo</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 // ── Who is signed in, and which tools they have (2026-10-07) ─────────────────
@@ -2513,7 +2513,7 @@ body[data-tab="admin"]       {--tab:#475569;--tab-tint:#F8FAFC;--tab-tint-2:#F1F
 
 <!-- NAV -->
 <div class="nav">
-  <div class="logo">Cedar Ridge <em>Management</em><span class="demo-tag" title="Demo build: every name, address and number is fictional">Demo</span></div>
+  <div class="logo">Portfolio Management <em>Dashboard</em><span class="demo-tag" title="Demo build: every name, address and number is fictional">Demo</span></div>
   <div class="global-search-wrap">
     <input type="text" id="globalSearch" class="global-search" placeholder="Search property, tenant, or unit..." onkeydown="if(event.key==='Enter') runGlobalSearch()">
     <button class="global-search-btn" onclick="runGlobalSearch()">Search</button>
@@ -2534,16 +2534,10 @@ body[data-tab="admin"]       {--tab:#475569;--tab-tint:#F8FAFC;--tab-tint-2:#F1F
     <button class="tab" onclick="showPage('renovations',this)">Renovations</button>
     <button class="tab" onclick="showPage('scanner',this)">Scanner</button>
     <button class="tab" onclick="showPage('issues',this)">Service Requests</button>
-    <button class="tab" id="tab-admin" onclick="showPage('admin',this)" style="display:none;">Admin</button>
   </div>
   <div class="nav-right"><span id="op-account" style="display:none;"></span></div>
 </div>
 
-<!-- ══════════════ ADMIN (people + tool access) ══════════════ -->
-<div id="page-admin" class="page">
-  <div class="ph"><div class="ph-row"><div><h1>Admin — people and tool access</h1><p>Everyone signs in with their own email and password · tick the tools each person can open · changes apply on their next click</p></div></div></div>
-  <div id="admin-body" style="padding:0 28px 40px;"></div>
-</div>
 <div id="page-noaccess" class="page">
   <div style="max-width:520px;margin:80px auto;text-align:center;color:#3E3A33;">
     <div style="font-size:20px;font-weight:800;color:#14342A;">No tools on your account yet</div>
@@ -3876,7 +3870,7 @@ function renderDqCollections() {
 // payload the portfolio card reads), RM report 85 via /api/delinquency (the
 // same rows the tenant table shows), unit counts from /api/live-overview. The
 // flag rules — the $ floor, the ranking order, what "slow" means — are
-// Cedar Ridge's, not Rent Manager's, and the strip says so.
+// Demo Portfolio's, not Rent Manager's, and the strip says so.
 
 let _dqpPeriod = 'last3';      // 'last3' | 'ytd' | 'last12' | 'YYYY-MM'
 let _dqpTenants = 'current';   // 'current' | 'allIn' — this view's own switch; the portfolio card keeps its own
@@ -3897,7 +3891,7 @@ let _dqpRegionNames = [];
 let _dqpLastRows = [];         // the property rows of the last render, for dqpOpen's lookup
 // Properties billing under this in the period stay out of the RANKINGS (never
 // out of the table): a $400 commercial charge paid a week late would otherwise
-// top "lowest collectors" every month. Cedar Ridge's floor, stated on the strip.
+// top "lowest collectors" every month. Demo Portfolio's floor, stated on the strip.
 const DQP_RANK_FLOOR = 5000;
 
 function dqSetView(v) {
@@ -4182,7 +4176,7 @@ function dqpRender() {
       F.judged.length ? 'Every late starter is also under goal, or nobody is behind the portfolio.' : ''),
   ];
   flagsEl.innerHTML = `<div class="dqp-flags">${flags.join('')}</div>
-    <div class="card-sub" style="margin-top:-6px;margin-bottom:14px;">Cedar Ridge estimates. Rates come from Rent Manager report 30 (Charge Detail), tenants from report 85; the goal, the rankings and the $${(DQP_RANK_FLOOR / 1000).toFixed(0)}k billing floor for the rankings are ours. A property shows under the goal <i>or</i> as slow, never both. Charge types TAX and LD excluded.</div>`;
+    <div class="card-sub" style="margin-top:-6px;margin-bottom:14px;">house estimates. Rates come from Rent Manager report 30 (Charge Detail), tenants from report 85; the goal, the rankings and the $${(DQP_RANK_FLOOR / 1000).toFixed(0)}k billing floor for the rankings are ours. A property shows under the goal <i>or</i> as slow, never both. Charge types TAX and LD excluded.</div>`;
 
   // ── the ranked table ───────────────────────────────────────────────────────
   const th =(key, label, right) => `<th onclick="dqpSort('${key}')" class="${S.key === key ? 'sorted' : ''}" style="${right ? 'text-align:right;' : ''}">${label}${S.key === key ? (S.dir === 'asc' ? ' ▴' : ' ▾') : ''}</th>`;
@@ -4570,7 +4564,7 @@ function dqrBuildReport(inp) {
   model.notes.push(tenantRows
     ? 'Delinquent tenants: current tenants ' + (inp.graceDays || 5) + '+ days past due as of ' + (inp.asOf || 'the last pull') + ' (Rent Manager report 85), largest balance first.'
     : 'Delinquent tenants are not shown: the tenant list is locked or still loading.');
-  model.notes.push('Cedar Ridge estimates: the ranking (lowest share collected to date), the ' + floorTxt + ' billing floor, the driver labels and the region status are ours, not Rent Manager’s.');
+  model.notes.push('house estimates: the ranking (lowest share collected to date), the ' + floorTxt + ' billing floor, the driver labels and the region status are ours, not Rent Manager’s.');
   model.notes.push('Sources: Rent Manager report 30 (Charge Detail) for what was billed and collected; report 85 (Delinquency) for tenants.');
   return model;
 }
@@ -4581,7 +4575,7 @@ function dqrCardHtml(model, opts) {
   const e = dqrEsc;
   let h = '<div class="dqr-head"><div><div class="dqr-title">Collections brief</div><div class="dqr-sub">'
     + e(model.empty ? 'Waiting for the billing months' : model.periodLabel + (model.asOf ? ' · tenants as of ' + model.asOf : ''))
-    + ' · Cedar Ridge estimates</div></div><div class="dqr-btns">'
+    + ' · house estimates</div></div><div class="dqr-btns">'
     + '<button type="button" class="dqp-btn" onclick="dqrToggle()">' + (opts.folded ? 'Open' : 'Fold') + '</button>'
     + '<button type="button" class="dqp-btn" onclick="dqrPrint()">⎙ PDF report</button></div></div>';
   h += '<div class="dqr-lead">' + model.headline.map(function (s) { return '<p>' + e(s) + '</p>'; }).join('') + '</div>';
@@ -4624,11 +4618,11 @@ function dqrPrintHtml(model, prepared) {
     + '<div class="noprint">Use your browser Print dialog (Ctrl-P) and choose <b>Save as PDF</b> to send it.</div>'
     + '<h1>Delinquency and collections brief</h1><div class="meta">' + e(model.periodLabel) + (model.asOf ? ' · tenants as of ' + e(model.asOf) : '')
     + ' · Prepared ' + e(prepared || '') + (model.refreshedAt ? ' · collections pulled ' + e(model.refreshedAt) : '')
-    + '<br>Source: Rent Manager report 30 (Charge Detail) and report 85 (Delinquency). Figures marked as estimates are Cedar Ridge calculations, not Rent Manager totals.</div>';
+    + '<br>Source: Rent Manager report 30 (Charge Detail) and report 85 (Delinquency). Figures marked as estimates are Demo Portfolio calculations, not Rent Manager totals.</div>';
   h += model.headline.map(function (s) { return '<p>' + e(s) + '</p>'; }).join('');
   if (!model.empty) {
     if (model.struggling.length) {
-      h += '<h2>Struggling most with collecting rent <span class="where">(Cedar Ridge estimate, ranked by share collected to date)</span></h2>';
+      h += '<h2>Struggling most with collecting rent <span class="where">(house estimate, ranked by share collected to date)</span></h2>';
       model.struggling.forEach(function (p) {
         h += '<div class="prop"><div class="ph">' + p.rank + '. ' + e(p.name) + '<span class="where">' + e(p.entity) + ' · ' + e(p.region) + '</span><span class="pct">' + e(dqrPct(p.rate.now)) + '</span></div>'
           + '<div class="l">' + e(dqrMoney(p.charged)) + ' billed, ' + e(dqrMoney(p.owed)) + ' still owed. ' + e(p.ratesText) + '</div>'
@@ -4903,9 +4897,9 @@ function renderDqFullTable() {
 </script>
 
 <script>
-const ENTITIES = ["Cedar Ridge"];
+const ENTITIES = ["Demo Portfolio"];
 
-// Cedar Ridge is a single entity in a single market (Columbus, OH), so there are no
+// Demo Portfolio is a single entity in a single market (Columbus, OH), so there are no
 // regions to group by. entityRegion() still exists because the delinquency page and the
 // entity selects group by it; every entity reports the same one.
 const ENTITY_REGION = {};
@@ -4938,7 +4932,7 @@ function fillEntitySelectGrouped(sel, list) {
 
 // Non-residential unit annotations per entity (fictional demo data)
 const UNIT_NOTES = {
-  "Cedar Ridge": { note: "All 56 units are residential apartments (studios, 1BR, 2BR, 3BR) across five Columbus, OH buildings.", res: true, nonRes: [] }
+  "Demo Portfolio": { note: "All 56 units are residential apartments (studios, 1BR, 2BR, 3BR) across five Columbus, OH buildings.", res: true, nonRes: [] }
 };
 
 function tooltipAttrText(value) {
@@ -4974,7 +4968,7 @@ function occTooltip(e) {
 }
 // Built-in fallback figures (fictional). The live pull from the (fake) Rent Manager replaces these.
 const DATA = {
-  "Cedar Ridge": {
+  "Demo Portfolio": {
     "income_ytd": 405761.05,
     "expenses_ytd": 319492.19,
     "opex_ytd": 174208.97,
@@ -4989,11 +4983,11 @@ const DATA = {
     "vacant": 6,
     "legal": 0,
     "occupancy": 89.3,
-    "gpr_monthly": 92065.0,
-    "gpr_annual": 1104780.0,
-    "delinq_tenants": 9,
-    "delinq_amount": 25531.25,
-    "cash": 612480,
+    "gpr_monthly": 80800.0,
+    "gpr_annual": 969600.0,
+    "delinq_tenants": 6,
+    "delinq_amount": 8945.5,
+    "cash": 326187,
     "props": [
       {
         "name": "The Alder",
@@ -5053,16 +5047,16 @@ const TOTALS = {
   "occupied": 50,
   "vacant": 6,
   "legal": 0,
-  "gpr_monthly": 92065.0,
-  "gpr_annual": 1104780.0,
-  "delinq_tenants": 9,
-  "delinq_amount": 25531.25,
-  "cash": 612480,
+  "gpr_monthly": 80800.0,
+  "gpr_annual": 969600.0,
+  "delinq_tenants": 6,
+  "delinq_amount": 8945.5,
+  "cash": 326187,
   "occupancy": 89.3
 };
 let liveCashSnapshot = null;
 const MANUAL_OCCUPANCY_FACTS = {
-  "Cedar Ridge": { units: 56, occupied: 50, vacant: 6, occupancy: 89.3 },
+  "Demo Portfolio": { units: 56, occupied: 50, vacant: 6, occupancy: 89.3 },
 };
 
 function applyManualOccupancyFacts() {
@@ -5110,7 +5104,7 @@ const fmtFull = n => (n<0?'-':'') + '$' + Math.abs(n).toLocaleString('en-US',{ma
 const pct = (a,b) => b ? (a/b*100).toFixed(1)+'%' : '—';
 
 const COLORS = {
-  'Cedar Ridge':'#14532D'
+  'Demo Portfolio':'#14532D'
 };
 
 // Entities tab state. `var` (not let): these are read by showPage() and by the
@@ -5200,7 +5194,7 @@ function homeLiveData() {
 // plain why, and a next step. These are NOT variance flags: they read the same
 // trailing-12 figures the scorecard grades (scFigures, scTarget, scOccupancy), so
 // Home and Portfolio cannot disagree. Rules, not prose: the same facts always give
-// the same words, and every derived figure is labelled a Cedar Ridge estimate.
+// the same words, and every derived figure is labelled a house estimate.
 //
 // buildPortfolioInsights is pure: facts in (portfolioFacts builds them from the
 // page's live data), insights out. scripts/checkPortfolioInsights.js lifts this
@@ -5267,15 +5261,15 @@ function buildPortfolioInsights(F) {
       let headline = pfShort
         ? `Debt coverage ${insX(pf.dscr)} against the ${insX(dt.target)} lender minimum · ${short.length} of ${N} entities short`
         : `The portfolio covers its debt ${insX(pf.dscr)}, but ${short.length} of ${N} entities are under ${insX(dt.target)}`;
-      if (gaps.length) headline += ` · ${insNames(gaps)} coverage is a Cedar Ridge estimate`;
+      if (gaps.length) headline += ` · ${insNames(gaps)} coverage is a house estimate`;
       const why = [
         `Over the 12 months to ${asOf}, portfolio NOI was ${insMoney(pf.noi)} against ${insMoney(pf.mtg)} of mortgage interest. Rent Manager carries no principal, so a lender would score coverage lower than this.`,
       ];
-      if (pfShort) why.push(`To reach ${insX(dt.target)} the portfolio needs about ${insMoney(Math.max(0, dt.target * pf.mtg - pf.noi))} more NOI a year, or about ${insMoney(Math.max(0, pf.mtg - pf.noi / dt.target))} less debt service (Cedar Ridge estimate).`);
-      if (short.length) why.push(`${insNames(short)} sit${short.length === 1 ? 's' : ''} under ${short.length === 1 ? 'its' : 'their'} target; together that is about ${insMoney(sumNeed)} of NOI short a year (Cedar Ridge estimate).`);
-      if (gaps.length) why.push(`${insNames(gaps)}: Rent Manager has posted no mortgage interest${gapSince ? ' since ' + gapSince : ''}, so debt service and coverage there come from the verified trailing-12 figure. That is a Cedar Ridge estimate, not an improvement.`);
+      if (pfShort) why.push(`To reach ${insX(dt.target)} the portfolio needs about ${insMoney(Math.max(0, dt.target * pf.mtg - pf.noi))} more NOI a year, or about ${insMoney(Math.max(0, pf.mtg - pf.noi / dt.target))} less debt service (house estimate).`);
+      if (short.length) why.push(`${insNames(short)} sit${short.length === 1 ? 's' : ''} under ${short.length === 1 ? 'its' : 'their'} target; together that is about ${insMoney(sumNeed)} of NOI short a year (house estimate).`);
+      if (gaps.length) why.push(`${insNames(gaps)}: Rent Manager has posted no mortgage interest${gapSince ? ' since ' + gapSince : ''}, so debt service and coverage there come from the verified trailing-12 figure. That is a house estimate, not an improvement.`);
       const steps = [];
-      if (short.length) steps.push(`Start with ${short[0].e}: it needs about ${insMoney(needNoi(short[0]))} more NOI a year, or about ${insMoney(needDebt(short[0]))} less debt service, to reach ${insX(tg(short[0], 'dscr').target)} (Cedar Ridge estimate).`);
+      if (short.length) steps.push(`Start with ${short[0].e}: it needs about ${insMoney(needNoi(short[0]))} more NOI a year, or about ${insMoney(needDebt(short[0]))} less debt service, to reach ${insX(tg(short[0], 'dscr').target)} (house estimate).`);
       steps.push('Lift NOI where it is cheapest: fill vacant units, move below-market rents up at renewal, and trim the expense lines that grew fastest (see the expense insight).');
       steps.push('Where the debt itself is the problem, price a refinance or a rate buy-down for that loan, after the NOI levers are moving.');
       if (gaps.length) steps.push(`Get the missing mortgage interest for ${insNames(gaps)} entered in Rent Manager so its coverage is real rather than estimated.`);
@@ -5299,7 +5293,7 @@ function buildPortfolioInsights(F) {
         headline: `Operating expenses up ${insPct(g)} year over year, income ${ig == null ? 'n/a' : (ig >= 0 ? 'up ' : 'down ') + insPct(Math.abs(ig))} · expense ratio ${insPct(pf.expRatio)}`,
         why: [
           `Operating expenses were ${insMoney(pf.opex)} over the 12 months to ${asOf}, ${signed(pf.opex - pf.prevOpex)} against the 12 months before. Income moved ${signed(pf.income - pf.prevIncome)} over the same stretch.`,
-          `Per unit that is ${signed(perUnit)} a year more to run a door (Cedar Ridge estimate: the change in expenses divided by units).`,
+          `Per unit that is ${signed(perUnit)} a year more to run a door (house estimate: the change in expenses divided by units).`,
           top.length ? `${insNames(top)} account${top.length === 1 ? 's' : ''} for ${insPct(topShare, 0)} of the increase.` : 'The increase is spread thinly across entities.',
         ],
         steps: [
@@ -5324,7 +5318,7 @@ function buildPortfolioInsights(F) {
         headline: `Occupancy ${insPct(pf.occupancy)} against the ${insPct(ot.target, 0)} target · ${vacant} vacant units, ${below.length} entit${below.length === 1 ? 'y' : 'ies'} below target`,
         why: [
           `${vacant} of ${pf.occUnits} units are empty right now.`,
-          `At each entity's average scheduled rent that is about ${insMoney(lost)} of rent not collected a month, about ${insMoney(lost * 12)} a year (Cedar Ridge estimate: vacant units times average scheduled rent per unit).`,
+          `At each entity's average scheduled rent that is about ${insMoney(lost)} of rent not collected a month, about ${insMoney(lost * 12)} a year (house estimate: vacant units times average scheduled rent per unit).`,
           below.length ? `${insNames(below)} ${below.length === 1 ? 'is' : 'are'} under target occupancy; ${below[0].e} holds the most vacant units.` : 'No single entity is under its own target; the shortfall is portfolio-wide.',
         ],
         steps: [
@@ -5431,7 +5425,7 @@ function buildPortfolioInsights(F) {
         headline: `${strong.length} of ${N} entities cover their debt ${insX(dt.target)} or better · strongest ${strong[0].e} at ${insX(strong[0].dscr)}`,
         why: [
           `${insNames(strong)} ${strong.length === 1 ? 'earns' : 'earn'} comfortably more NOI than ${strong.length === 1 ? 'its' : 'their'} mortgage interest requires. Entities whose interest has stopped posting are left out, because their coverage is an estimate.`,
-          `${strong[0].e} has about ${insMoney(cushion(strong[0]))} of NOI a year above what ${insX(tg(strong[0], 'dscr').target)} requires (Cedar Ridge estimate).`,
+          `${strong[0].e} has about ${insMoney(cushion(strong[0]))} of NOI a year above what ${insX(tg(strong[0], 'dscr').target)} requires (house estimate).`,
         ],
         steps: [
           'Use these entities first in any refinance conversation: strong coverage is where the better terms are.',
@@ -5507,7 +5501,7 @@ function buildPortfolioInsights(F) {
       add({ id: 'expense-control', tone: 'good', title: 'Expenses came down', key: `${cut.length} of ${N} entities`, ours: true,
         headline: `${cut.length} of ${N} entities cut operating expenses year over year · biggest ${cut[0].e} down ${insPct(Math.abs(cut[0].opexG))}`,
         why: [
-          `${insNames(cut)} ran ${cut.length === 1 ? 'a lower' : 'lower'} operating cost than in the 12 months before; ${cut[0].e} saved about ${insMoney(cut[0].prevOpex - cut[0].opex)} (Cedar Ridge estimate: the change in trailing-12 expenses).`,
+          `${insNames(cut)} ran ${cut.length === 1 ? 'a lower' : 'lower'} operating cost than in the 12 months before; ${cut[0].e} saved about ${insMoney(cut[0].prevOpex - cut[0].opex)} (house estimate: the change in trailing-12 expenses).`,
         ],
         steps: [
           `Confirm the ${cut[0].e} saving is lasting and not deferred maintenance that will come back as a larger bill.`,
@@ -5553,7 +5547,7 @@ function buildPortfolioInsights(F) {
     if (ok.length) {
       add({ id: 'cash-flow-positive', tone: 'good', title: 'Cash left after debt', key: `${ok.length} of ${N}`, ours: true,
         headline: `${ok.length} of ${N} entities clear their cash-flow target after debt service`,
-        why: [`${insNames(ok)} ${ok.length === 1 ? 'keeps' : 'keep'} at least ${insMoney(ct.target)} per unit per month after mortgage interest (before principal; Cedar Ridge estimate).`],
+        why: [`${insNames(ok)} ${ok.length === 1 ? 'keeps' : 'keep'} at least ${insMoney(ct.target)} per unit per month after mortgage interest (before principal; house estimate).`],
         steps: ['Decide deliberately what the surplus is for: reserves, capital work that lifts rents, or distributions.'],
         cols: ['Entity', 'Per unit, per month', 'Target'],
         rows: ok.slice(0, 8).map(x => ({ label: x.e, cells: [insMoney(x.cf), insMoney(tg(x, 'cfPerUnit').target)], bar: bar(x.cf, ok[0].cf) })),
@@ -5659,7 +5653,7 @@ function renderInsightView(id) {
       ${ins.rows.length ? `<h3>The entities behind it</h3>
       <div class="sc-wrap"><table class="sc-table ins-table"><thead><tr>${ins.cols.map((c, i) => `<th${i ? '' : ' class="sc-left"'}>${esc(c)}</th>`).join('')}<th class="ins-barcol"></th></tr></thead>
         <tbody>${ins.rows.map(r => `<tr><td class="sc-left sc-name">${esc(r.label)}</td>${r.cells.map(c => `<td class="sc-num">${esc(c)}</td>`).join('')}<td class="ins-barcol"><span class="ins-bar ${good ? 'good' : 'bad'}" style="width:${Math.round(r.bar * 100)}%"></span></td></tr>`).join('')}</tbody></table></div>` : ''}
-      <div class="ins-foot">Trailing 12 closed months to ${esc(portfolioFacts().asOf)}, against the 12 before. Rules, not prose: the same numbers always give the same words. Figures marked est. or Cedar Ridge estimate are our arithmetic, not a figure Rent Manager reports. Debt service is mortgage interest only; Rent Manager carries no principal.</div>
+      <div class="ins-foot">Trailing 12 closed months to ${esc(portfolioFacts().asOf)}, against the 12 before. Rules, not prose: the same numbers always give the same words. Figures marked est. or house estimate are our arithmetic, not a figure Rent Manager reports. Debt service is mortgage interest only; Rent Manager carries no principal.</div>
     </div>`;
 }
 
@@ -6426,7 +6420,7 @@ function buildEntityDebt() {
   });
   const pfF = scFigures(rows.map(r => r.e), 0);
   const pfP = rcScore(null, pfF).parts.find(p => p.m.key === 'dscr');
-  const est = '<span class="sc-ovr" title="Rent Manager has posted no mortgage interest for this entity since Jan 2026, so this is the verified trailing-12 figure — a Cedar Ridge estimate.">est.</span>';
+  const est = '<span class="sc-ovr" title="Rent Manager has posted no mortgage interest for this entity since Jan 2026, so this is the verified trailing-12 figure — a house estimate.">est.</span>';
   const pts = p => (p && p.sc != null) ? `${Math.round(p.sc * p.w / 100)} / ${p.w}` : '—';
   const cell = p => `<td class="sc-cell sc-${p ? p.status : 'none'}">${p && p.v != null ? scFmt(p.v, 'x') : '—'}</td>`;
   host.innerHTML = `<div class="sc-wrap"><table class="sc-table">
@@ -6490,7 +6484,7 @@ function buildRatioChips() {
 // three additionally have is a real value for each individual month rather than
 // the entity's annual total spread across its existing monthly shape. Only
 // month-level displays should distinguish them.
-const MONTHLY_DEBT_ENTITIES = new Set(['Cedar Ridge']);
+const MONTHLY_DEBT_ENTITIES = new Set(['Demo Portfolio']);
 
 // ── Entity Scorecard (fixed T12 window) ──────────────────────────────────────
 // What the NOI-by-Entity and Income-vs-OpEx bar charts used to plot, as numbers.
@@ -6597,7 +6591,7 @@ function scNotes(e) {
   const gap = scDebtGap(e);
   if (gap) {
     out.push({ kind: 'debt', ours: true, label: 'Debt service estimated',
-      text: `Rent Manager has posted no mortgage interest for ${e} in ${gap.missing} of the last ${gap.of} months${gap.lastPosted ? ` (last posted ${gap.lastPosted})` : ''}. DSCR and cash flow per unit use our verified trailing-12 figure instead of the live $0 months — a Cedar Ridge estimate, not an RM number. Ask Accounting.` });
+      text: `Rent Manager has posted no mortgage interest for ${e} in ${gap.missing} of the last ${gap.of} months${gap.lastPosted ? ` (last posted ${gap.lastPosted})` : ''}. DSCR and cash flow per unit use our verified trailing-12 figure instead of the live $0 months — a house estimate, not an RM number. Ask Accounting.` });
   }
   const occ = scOccupancy(e);
   if (occ && occ.manual) {
@@ -7047,7 +7041,7 @@ function ebNotes(notes, compact) {
   const shown = compact ? notes.slice(0, 1) : notes;
   const hidden = compact ? notes.length - shown.length : 0;
   return `<div class="eb-notes">` + shown.map(n =>
-    `<div class="eb-note${n.ours ? ' ours' : ''}"><span class="eb-note-l">${n.ours ? 'Cedar Ridge estimate' : escapeHtml(n.label)}</span><span>${escapeHtml(n.text)}</span></div>`
+    `<div class="eb-note${n.ours ? ' ours' : ''}"><span class="eb-note-l">${n.ours ? 'house estimate' : escapeHtml(n.label)}</span><span>${escapeHtml(n.text)}</span></div>`
   ).join('') + (hidden ? `<div class="eb-note"><span>+${hidden} more on the card below.</span></div>` : '') + `</div>`;
 }
 
@@ -7200,7 +7194,7 @@ function scOpenTargets() {
 //
 // "+N pts" is the score the entity would gain if that one metric reached its
 // target with everything else unchanged: the model's own arithmetic, stamped as
-// Cedar Ridge's estimate because it is a what-if, not a forecast.
+// Demo Portfolio's estimate because it is a what-if, not a forecast.
 //
 // Marking an item handled is shared (services/entityActions.js), with who and
 // when. The mark keeps the figure at the time, and the item comes back on its
@@ -7333,7 +7327,7 @@ function eaFlags(r) {
     push('dscr', pc, {
       status: 'data', ours: true, gain: null, value: null,
       number: `DSCR ${scFmt(f.dscr, 'x')} on our verified debt figure — Rent Manager has posted no mortgage interest for ${e} in ${gap.missing} of the last ${gap.of} months${gap.lastPosted ? ` (last posted ${gap.lastPosted})` : ''}`,
-      action: `Not an improvement: the live GL reads $0 interest, so this coverage (and cash flow per unit) is a Cedar Ridge estimate. Get GL 6230 posting again before the number is read as real.`,
+      action: `Not an improvement: the live GL reads $0 interest, so this coverage (and cash flow per unit) is a house estimate. Get GL 6230 posting again before the number is read as real.`,
       gap, figure: f.dscr,
     });
   } else if (short(pc) && f.mtg > 0) {
@@ -7399,7 +7393,7 @@ function eaTopFlags(flags, isOpen, n) {
     picked.push({
       ...data[0], key: null, ents, e: ents.join(', '), gain: null, value: null, merged: true,
       number: 'Rent Manager has posted no mortgage interest' + (months.length === 1 ? ' in ' + months[0] + ' months' : ' in recent months') + (since.length === 1 ? ' (last posted ' + since[0] + ')' : ''),
-      action: 'Not an improvement: the live GL reads $0 interest, so coverage (' + data.map(fl => fl.e + ' ' + scFmt(fl.figure, 'x')).join(', ') + ') and cash flow per unit are Cedar Ridge estimates on our verified debt figure. Get GL 6230 posting again before they are read as real.',
+      action: 'Not an improvement: the live GL reads $0 interest, so coverage (' + data.map(fl => fl.e + ' ' + scFmt(fl.figure, 'x')).join(', ') + ') and cash flow per unit are house estimates on our verified debt figure. Get GL 6230 posting again before they are read as real.',
     });
     ents.forEach(e => { count[e] = (count[e] || 0) + 1; });
     byRule.dscr = 1;
@@ -7529,7 +7523,7 @@ function eaFlagTile(fl, rank) {
   const i = canMark ? _eaLast.push(fl) - 1 : -1;
   const entry = canMark ? eaEntry(fl) : null;
   const back = entry && eaReopened(entry, fl);
-  const gain = fl.gain == null ? '' : `<span class="ea-gain" title="Points this entity's score gains if this one metric reaches its target, everything else unchanged — a Cedar Ridge estimate from the grading model"><b>+${fl.gain}</b> pts</span>`;
+  const gain = fl.gain == null ? '' : `<span class="ea-gain" title="Points this entity's score gains if this one metric reaches its target, everything else unchanged — a house estimate from the grading model"><b>+${fl.gain}</b> pts</span>`;
   const form = _eaNoting === i && canMark ? `<div class="ea-noteform">
       <input id="ea-note-${i}" type="text" maxlength="500" placeholder="What was done, or why it is fine (optional)" onkeydown="if(event.key==='Enter')eaSave(${i})">
       <button type="button" class="ea-btn solid" onclick="eaSave(${i})">Save</button>
@@ -7538,7 +7532,7 @@ function eaFlagTile(fl, rank) {
     <span class="ea-rk">${rank}</span>
     <div class="ea-main">
       <div class="ea-num"><span class="ea-ent-names">${ents.map(eaEntLink).join(', ')}</span><span class="ea-tag">${escapeHtml(fl.label)}</span></div>
-      <div class="ea-fig">${escapeHtml(fl.number)}${fl.ours ? '<span class="ea-ours">Cedar Ridge estimate</span>' : ''}${back ? `<span class="ea-reopen" title="Marked handled by ${escapeHtml(entry.by || 'someone')} on ${escapeHtml(entry.date)} at ${scFmt(entry.value, fl.unit)}; the figure has worsened since">Back — was ${scFmt(entry.value, fl.unit)} when handled</span>` : ''}</div>
+      <div class="ea-fig">${escapeHtml(fl.number)}${fl.ours ? '<span class="ea-ours">house estimate</span>' : ''}${back ? `<span class="ea-reopen" title="Marked handled by ${escapeHtml(entry.by || 'someone')} on ${escapeHtml(entry.date)} at ${scFmt(entry.value, fl.unit)}; the figure has worsened since">Back — was ${scFmt(entry.value, fl.unit)} when handled</span>` : ''}</div>
       <div class="ea-act">${escapeHtml(fl.action)}</div>${form}
     </div>
     <div class="ea-side">${gain}${canMark ? `<button type="button" class="ea-btn" onclick="eaNote(${i})">Handled</button>` : ''}</div>
@@ -7578,7 +7572,7 @@ function eaDashboard(rows) {
         ${greens.length ? greens.map((g, k) => eaGreenTile(g, k + 1)).join('') : '<div class="ea-empty">No metric is past its target yet.</div>'}
       </section>
     </div>
-    <div class="ea-foot">Rules, not prose, from the grading model below, trailing 12 closed months. Needs attention: red-line items first, then by points at stake (a Cedar Ridge estimate: the score gained if that one metric reached its target), at most two per entity and two per metric. Portfolio growth: ranked by distance past target, up to one target-to-red-line gap, then by weight in the grade, at most two per entity and two per metric; manual occupancy snapshots, entities under 30 units and any coverage figure resting on estimated debt are left out so a flattered number never reads as a result. Handled is shared with everyone and the flag returns by itself if its figure worsens.${_eaState && _eaState.updatedAt ? ` Last mark ${new Date(_eaState.updatedAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}${_eaState.updatedBy ? ' by ' + escapeHtml(_eaState.updatedBy) : ''}.` : ''}</div>
+    <div class="ea-foot">Rules, not prose, from the grading model below, trailing 12 closed months. Needs attention: red-line items first, then by points at stake (a house estimate: the score gained if that one metric reached its target), at most two per entity and two per metric. Portfolio growth: ranked by distance past target, up to one target-to-red-line gap, then by weight in the grade, at most two per entity and two per metric; manual occupancy snapshots, entities under 30 units and any coverage figure resting on estimated debt are left out so a flattered number never reads as a result. Handled is shared with everyone and the flag returns by itself if its figure worsens.${_eaState && _eaState.updatedAt ? ` Last mark ${new Date(_eaState.updatedAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}${_eaState.updatedBy ? ' by ' + escapeHtml(_eaState.updatedBy) : ''}.` : ''}</div>
   </div>`;
 }
 
@@ -8241,7 +8235,7 @@ function applyNewData() {
 
 
 // ══════════════ PERIOD FILTER ══════════════
-const VACANCY = {"Cedar Ridge": {"total": 56, "occupied": 50, "vacant": 6, "occupancy": 89.3}};
+const VACANCY = {"Demo Portfolio": {"total": 56, "occupied": 50, "vacant": 6, "occupancy": 89.3}};
 
 // selFrom/selTo are indices into MONTHLY_DATA.months — computed dynamically after data loads
 let selFrom = 0, selTo = 0;
@@ -9266,7 +9260,7 @@ function renderIssuesHome() {
     const rest = m.properties.length - top.length;
     pileFoot = `<b>${plural(m.properties.length, 'property', 'properties')}</b> have an open ticket`
       + (rest > 0 ? ` · the other ${num(rest)} hold ${num(m.properties.slice(ISS_HOME_ROWS).reduce((s, p) => s + p.n, 0))} between them` : '')
-      + ` · ranked by count; per-100-units is a Cedar Ridge figure from the unit snapshot`;
+      + ` · ranked by count; per-100-units is a Demo Portfolio figure from the unit snapshot`;
   }
 
   // Who is carrying them.
@@ -10230,8 +10224,8 @@ function getAllSearchableActiveTenants() {
   <!-- The tracker: the dashboard the tab opens on (2026-10-21: top five
        variances, posting problems, move-ins), the board of flag rows one click
        behind it, and — once a flag is clicked — that flag's detail view. Honours
-       the entity / property filter above it, so picking Cedar Ridge narrows all three to
-       Cedar Ridge the same way it narrows the grid. Rendered by renderFlaggedSummary(). -->
+       the entity / property filter above it, so picking Demo Portfolio narrows all three to
+       Demo Portfolio the same way it narrows the grid. Rendered by renderFlaggedSummary(). -->
   <!-- Bills expensed twice by a hand-keyed check. Rendered by renderDupPayPanel()
        from /api/variance/duplicate-payments; hidden when there is nothing open. -->
   <div id="var-dup-payments" style="margin-bottom:14px;display:none;"></div>
@@ -10767,7 +10761,7 @@ function getAllSearchableActiveTenants() {
        only appear once something has been dropped. The steps bar waits for the first file. -->
   <div class="card uw-sec" id="uw-upload-card">
     <div class="card-title">Underwrite a deal</div>
-    <div class="card-sub">Drop everything you have — the T12, the rent roll, the OM — in any mix and any format. Each file is sorted by what it is, with how sure we are. <b>Several buildings?</b> Drop each one's rent roll and T12 and they combine into one portfolio model. <b>A finished Cedar Ridge model (.xlsx)?</b> It joins the past deals below.</div>
+    <div class="card-sub">Drop everything you have — the T12, the rent roll, the OM — in any mix and any format. Each file is sorted by what it is, with how sure we are. <b>Several buildings?</b> Drop each one's rent roll and T12 and they combine into one portfolio model. <b>A finished Demo Portfolio model (.xlsx)?</b> It joins the past deals below.</div>
     <div class="uwi-zone" id="uw-zone" onclick="document.getElementById('uw-input-all').click()">
       <div class="uwi-zone-icon">⬆</div>
       <div class="uwi-zone-t">Drop T12, rent roll and OM here</div>
@@ -10842,7 +10836,7 @@ function getAllSearchableActiveTenants() {
     <div class="uwd-grid uwd-top" id="uwd-top"></div>
     <div class="uwd-rest" id="uwd-rest-h" style="display:none">The rest, in the same order</div>
     <div class="uwd-grid" id="uwd-grid"></div>
-    <div class="uwd-note" id="uwd-note" style="display:none">* Cedar Ridge estimate — in-place cap rate is the T12 NOI divided by the price the model was run at (the price is itself NOI ÷ the purchase cap rate unless overridden), so read it as "what the model assumed", not a quoted cap rate. IRR, max price and the exit scenarios are the model's own numbers; the gap is max price minus the price run.</div>
+    <div class="uwd-note" id="uwd-note" style="display:none">* house estimate — in-place cap rate is the T12 NOI divided by the price the model was run at (the price is itself NOI ÷ the purchase cap rate unless overridden), so read it as "what the model assumed", not a quoted cap rate. IRR, max price and the exit scenarios are the model's own numbers; the gap is max price minus the price run.</div>
     <div id="uwd-unreadable" style="display:none"></div>
     <details id="uwd-hidden-wrap" style="display:none;margin-top:14px">
       <summary style="cursor:pointer;font-size:12px;font-weight:700;color:#6B645A" id="uwd-hidden-sum"></summary>
@@ -12895,13 +12889,13 @@ async function downloadBudgetExcel(){
   // (fees, insurance, taxes, mortgage-adjacent) route to fixed owners. Display-only
   // for now ("show their name by the issue") — no auto-notify yet.
   const VAR_FIELD_TEAM = {
-    'Cedar Ridge': 'Priya/Sam',
+    'Demo Portfolio': 'Priya/Sam',
   };
   const FIELD_TEAM_KEYS = ['waterSewer', 'heatingGas', 'electric', 'repairsMaint', 'turnover', 'majRepairs', 'totalExpense', 'totalIncome', 'noi'];
 
   // Returns a short contact string for (category, entity). Entity '' = portfolio-wide:
   // field-team lines return '' there (drill into an entity first), finance lines still route.
-  // Names are the fictional Cedar Ridge staff (Jordan Reyes, Priya Natarajan, Sam Whitfield, Dana Okoye).
+  // Names are the fictional Demo Portfolio staff (Jordan Reyes, Priya Natarajan, Sam Whitfield, Dana Okoye).
   function varContactFor(key, entity) {
     const ft = VAR_FIELD_TEAM[entity] || '';
     // Move-outs: field team + the regional manager.
@@ -13804,7 +13798,7 @@ async function downloadBudgetExcel(){
   //     entity is ONE posting issue (37 properties' taxes stopped in Jul 26; Willow Creek's
   //     May fees). Each card says so.
   //   • Booked to one property: 108 60th Street's Jun 26 fee ($33,467) was the
-  //     whole Cedar Ridge fee for the month while every other Cedar Ridge building posted ~$2. A
+  //     whole Demo Portfolio fee for the month while every other Demo Portfolio building posted ~$2. A
   //     property carrying ≥80% of its entity's month, when the entity month is
   //     normal-sized and the property's own normal is a small slice of it, is an
   //     allocation error.
@@ -14315,7 +14309,7 @@ async function downloadBudgetExcel(){
     return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : Math.abs(fallback || 0);
   }
   // Same line, blanks that began within a month of each other, two or more
-  // properties → one card. (one building Cedar Ridge fee went blank in July, the other
+  // properties → one card. (one building Demo Portfolio fee went blank in July, the other
   // twelve in June: the same missing entry.)
   function varGroupZeroFlags(flags) {
     const L = (_liveData && _liveData.months) || [];
@@ -14370,7 +14364,7 @@ async function downloadBudgetExcel(){
   }
   // ── One card for one jump across several buildings (2026-10-19, the owner) ───
   // With limits sized to each building, a charge that started landing on every
-  // small Cedar Ridge building at once (management wages, Sep 26) would read as five
+  // small Demo Portfolio building at once (management wages, Sep 26) would read as five
   // flags. Same line, same month, same entity, at entityWideMin+ properties
   // (default 3) → one card listing each building's before → after.
   function varGroupJumpFlags(flags) {
@@ -16057,7 +16051,7 @@ async function downloadBudgetExcel(){
     return out.sort((a, b) => (b.scoreRaw || 0) - (a.scoreRaw || 0));
   }
   // The entity / property dropdowns drove the grid but not the board, so picking
-  // Cedar Ridge left twelve cards up, eleven of them for other entities. A property pick
+  // Demo Portfolio left twelve cards up, eleven of them for other entities. A property pick
   // keeps that property's own cards; an entity pick keeps everything inside it,
   // including the entity roll-up itself.
   function varMatchesScope(f) {
@@ -16105,7 +16099,7 @@ async function downloadBudgetExcel(){
                  varMonthChip(f), f.adjTag || '', f.preliminary ? 'preliminary' : ''].filter(Boolean).join(' · ');
     // Where, when and how many roll-ups, on one line that truncates in a card —
     // so it carries the full text as its own tooltip. The button's own title is
-    // the why, which is not what a clipped "Washington · Cedar Ridge · Aug 26" wants.
+    // the why, which is not what a clipped "Washington · Demo Portfolio · Aug 26" wants.
     const subFull = `${sub}${rollupCount ? ` · +${rollupCount} roll-up` : ''}`;
     // 2026-10-20 (the owner): the score and the money are what a row is read for,
     // and they were the smallest type in it, pushed to the far right. They now
@@ -17106,7 +17100,7 @@ async function downloadBudgetExcel(){
 
     const investigation = varInvestigationHtml(ctx.investigation, f);
     const body = `
-      <div class="hdr"><span><b>Cedar Ridge Management</b> · Variance Report</span><span>Prepared ${esc(prepared.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' }))}</span></div>
+      <div class="hdr"><span><b>Portfolio Management Dashboard</b> · Variance Report</span><span>Prepared ${esc(prepared.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' }))}</span></div>
       <h1>${esc(title)}</h1>
       <div class="key">${kl.map(k => `<span>${k}</span>`).join('')}</div>
       <div class="sub">${sub.map(k => `<span>${k}</span>`).join('')}</div>
@@ -17119,7 +17113,7 @@ async function downloadBudgetExcel(){
       ${score}
       ${postings}
       <div class="foot">Source: Rent Manager Report 45 (P&amp;L recap by month), accrual basis · pulled ${esc(pulled)} ·
-        * trailing-12 mean, normal range and annualized figures are Cedar Ridge estimates · internal, not for distribution</div>
+        * trailing-12 mean, normal range and annualized figures are house estimates · internal, not for distribution</div>
 `;
     return { title: `${title} · Variance Report`, body };
   }
@@ -17260,7 +17254,7 @@ async function downloadBudgetExcel(){
       ${scopeNote}${pl}${figures}${likely}${table}${lyr}${hk}
       ${inv.next ? `<p class="act">→ What to do next in Rent Manager: ${esc(inv.next)}</p>` : ''}
       <p class="muted">${checked}${limits}</p>
-      <p class="muted"><b>${esc(inv.label || 'Cedar Ridge analysis of Rent Manager data')}</b> — ${(inv.reports || []).map(r => `${r.id != null ? `Report ${esc(r.id)} · ` : ''}${esc(r.name)}`).join('; ')} · run ${esc(when)}${inv.fromCache ? ' (kept from earlier in this session)' : ''}. These are Cedar Ridge’s readings of the postings, not Rent Manager’s: “high” means the postings state it outright, “medium” that they are consistent with it.</p>
+      <p class="muted"><b>${esc(inv.label || 'Demo Portfolio analysis of Rent Manager data')}</b> — ${(inv.reports || []).map(r => `${r.id != null ? `Report ${esc(r.id)} · ` : ''}${esc(r.name)}`).join('; ')} · run ${esc(when)}${inv.fromCache ? ' (kept from earlier in this session)' : ''}. These are Demo Portfolio’s readings of the postings, not Rent Manager’s: “high” means the postings state it outright, “medium” that they are consistent with it.</p>
     </section>`;
   }
 
@@ -17386,7 +17380,7 @@ async function downloadBudgetExcel(){
     } catch (e) {
       const why = (e && e.message) || String(e);
       return { title: `${f.label || 'Flag'} · Variance Report`, inv,
-        body: `<div class="hdr"><span><b>Cedar Ridge Management</b> · Variance Report</span></div><h1>${varEsc(f.label || '')} — ${varEsc((f.scope && f.scope.label) || '')} — ${varEsc(f.monthLabel || '')}</h1><p class="none">This report could not be built: ${varEsc(why)}</p>` };
+        body: `<div class="hdr"><span><b>Portfolio Management Dashboard</b> · Variance Report</span></div><h1>${varEsc(f.label || '')} — ${varEsc((f.scope && f.scope.label) || '')} — ${varEsc(f.monthLabel || '')}</h1><p class="none">This report could not be built: ${varEsc(why)}</p>` };
     }
   }
   // A button on a row (Top 5, the board) opens that flag's report without opening
@@ -17428,11 +17422,11 @@ async function downloadBudgetExcel(){
       return `<tr><td class="r m nw">${i.rank}</td><td>${esc(f.label)}</td><td>${esc(where)}</td><td class="nw">${esc(f.monthLabel || (f.giMonth != null ? L[f.giMonth] : '') || '')}</td><td class="r m nw">${f.score ? `${esc(f.score)}/5` : '–'}</td><td>${esc(varPackCause(i.inv))}</td></tr>`;
     }).join('');
     return `<div class="cover">
-      <div class="hdr"><span><b>Cedar Ridge Management</b> · Variance Report Pack</span><span>Prepared ${esc(prepared.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' }))}</span></div>
+      <div class="hdr"><span><b>Portfolio Management Dashboard</b> · Variance Report Pack</span><span>Prepared ${esc(prepared.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' }))}</span></div>
       <h1>The ${items.length} highest-ranked variances — ${esc(scopeText)}</h1>
       <div class="key"><span><b>${items.length}</b> reports follow, one per page</span><span><b>${found}</b> with a likely cause found in Rent Manager</span><span><b>${unknown}</b> could not be determined</span>${failed ? `<span><b>${failed}</b> investigations unavailable</span>` : ''}</div>
       <table class="list" style="margin-top:10px;"><thead><tr><th class="r">#</th><th>Line</th><th>Property</th><th>Month</th><th class="r">Importance</th><th>Likely cause (from the postings)</th></tr></thead><tbody>${rows}</tbody></table>
-      <div class="foot">Ranked by importance score, then tier, then dollars — the order of the Top 5 on the Variances dashboard, for the same filter. The likely cause is a Cedar Ridge analysis of Rent Manager data (Report 51 General Ledger, accrual; AP bills for invoice, approval and payment status); “could not determine” means the postings do not show one. Source: Rent Manager Report 45 (P&amp;L recap by month), accrual basis · internal, not for distribution</div>
+      <div class="foot">Ranked by importance score, then tier, then dollars — the order of the Top 5 on the Variances dashboard, for the same filter. The likely cause is a Demo Portfolio analysis of Rent Manager data (Report 51 General Ledger, accrual; AP bills for invoice, approval and payment status); “could not determine” means the postings do not show one. Source: Rent Manager Report 45 (P&amp;L recap by month), accrual basis · internal, not for distribution</div>
     </div>`;
   }
   function varReportPackHtml(items, prepared, scopeText) {
@@ -18416,7 +18410,7 @@ async function downloadBudgetExcel(){
   // run of rows that are really one problem is read as one. Three groupings are
   // scored on every render, over the scoped, owned variance flags the dashboard
   // was handed:
-  //   line      the same P&L line at several buildings   "Water & Sewer moved at 6 Cedar Ridge buildings in Aug"
+  //   line      the same P&L line at several buildings   "Water & Sewer moved at 6 Demo Portfolio buildings in Aug"
   //   building  one building on several lines            "one building: 5 lines jumped in Aug"
   //   month     one month across the portfolio           "August: 14 variances across 9 properties"
   // and only the single grouping with the most dollars (Σ |impact|) is featured.
@@ -18426,7 +18420,7 @@ async function downloadBudgetExcel(){
   //
   // Counted in BUILDINGS, never in cards: a varGroup card (varGroupJumpFlags —
   // one jump across an entity's buildings) is expanded into its members, and a
-  // member that also turns up on its own is counted once. So "6 Cedar Ridge buildings"
+  // member that also turns up on its own is counted once. So "6 Demo Portfolio buildings"
   // means six buildings whether the scan grouped them or not. The ids handed to
   // the board are its ROWS, though — the varGroup's id, not its members', which
   // are not rows — so `n` (buildings) can be larger than `ids.length` (rows).
@@ -19420,9 +19414,9 @@ async function downloadBudgetExcel(){
     _varSyncing = true;
     try {
       // A group card (one line, one month, several buildings) has no scope of its
-      // own down here — `group:majRepairs:May 26:Cedar Ridge` is not a scope anybody can
+      // own down here — `group:majRepairs:May 26:Demo Portfolio` is not a scope anybody can
       // show. It used to return early, which left the grid wherever the PREVIOUS
-      // card had pointed it: opening the Cedar Ridge Major Repairs group outlined some
+      // card had pointed it: opening the Demo Portfolio Major Repairs group outlined some
       // other building's month, or nothing at all, while every other flag on the
       // tab outlines its own. The buildings in a jump group always share an
       // entity (varGroupJumpFlags keys on one), and that entity's row is the one
@@ -20696,7 +20690,7 @@ async function downloadBudgetExcel(){
   // Entity list for the Variance filter comes from the LIVE pull once present, not
   // the static Overview ENTITIES const — so standalone entities that live only in
   // Rent Manager (Maple Court, Birchwood Commons, Summit Lofts) appear here even though the
-  // static Overview DATA still nests them under Cedar Ridge. Known ENTITIES keep their order;
+  // static Overview DATA still nests them under Demo Portfolio. Known ENTITIES keep their order;
   // any extra live entities are appended.
   function varEntityList() {
     const live = (_liveData && _liveData.entities) ? Object.keys(_liveData.entities) : [];
@@ -21106,7 +21100,7 @@ async function downloadBudgetExcel(){
   // Demo: a short made-up lease so a visitor can see the analysis without hunting for a PDF.
   const SAMPLE_CONTRACT = [
     'LAUNDRY ROOM LEASE AND SERVICES AGREEMENT (SAMPLE - FICTIONAL)',
-    'Landlord: Cedar Ridge Holdings, LLC. Tenant: SudsCo Laundry Services, Inc.',
+    'Landlord: Demo Portfolio. Tenant: SudsCo Laundry Services, Inc.',
     'Premises: the laundry room at 88 Maple Court, Columbus, OH 43214 (12 apartments).',
     '1. Term. Ninety-six (96) months from the date all machines are installed and operating.',
     '2. Rent. Tenant pays Landlord 45% of gross collections, less a 3% administrative fee, with a minimum of $1,100 per month, due by the 15th of the following month.',
@@ -22654,7 +22648,7 @@ function uwShowResult(res, deal){
 // "what is this?" and waits - nothing is read as the wrong kind on a hunch.
 const UW_SHEET_EXT = new Set(['xlsx','xls','xlsm','csv','tsv']);
 const UW_DOC_EXT = new Set(['pdf','docx','pptx','jpg','jpeg','png','tif','tiff','gif','bmp','webp','xps']);
-const UW_KIND_NAME = { rent_roll:'Rent roll', t12:'T12', om:'Offering memorandum', workbook:'Rent roll + T12 (one workbook)', model:'Finished Cedar Ridge model' };
+const UW_KIND_NAME = { rent_roll:'Rent roll', t12:'T12', om:'Offering memorandum', workbook:'Rent roll + T12 (one workbook)', model:'Finished Demo Portfolio model' };
 // A document this big is the OM in practice (they run 40-50 MB); sending it to be
 // peeked and then again to be read would upload it twice for nothing.
 const UW_BIG_DOC = 15 * 1024 * 1024;
@@ -22895,7 +22889,7 @@ function uwDealCard(p, opts){
   const nrv = !!c.needs_review;          // the plausibility gate: this deal's inputs cannot support a decision, so its price and returns print as not reliable
   const tags = [];
   if(nrv) tags.push('<span class="uwd-tag red" title="'+uwEsc((c.review_reasons||[]).join('\n'))+'">NEEDS REVIEW</span>');
-  if(((e.sources||[]).some(s=>(s.notes||[]).some(n=>/adjusted month|annualized/i.test(n))))) tags.push('<span class="uwd-tag amber" title="A month with no gross potential rent and far less revenue and expense than a normal one was left out and the T12 annualized (Cedar Ridge estimate). Details are on the PDF.">T12 month adjusted *</span>');
+  if(((e.sources||[]).some(s=>(s.notes||[]).some(n=>/adjusted month|annualized/i.test(n))))) tags.push('<span class="uwd-tag amber" title="A month with no gross potential rent and far less revenue and expense than a normal one was left out and the T12 annualized (house estimate). Details are on the PDF.">T12 month adjusted *</span>');
   if(p.run_count>1) tags.push('<span class="uwd-tag btn" onclick="uwDealToggle(\''+uwEsc(p.key)+'\')" title="Show every run on this property">'+p.run_count+' runs</span>');
   if(e.imported) tags.push('<span class="uwd-tag" title="A finished model dropped onto this tab">imported</span>');
   if(!c.computed) tags.push('<span class="uwd-tag red" title="This model has no calculated values saved; open it in Excel to compute">not calculated</span>');
@@ -22912,7 +22906,7 @@ function uwDealCard(p, opts){
     num('Price run', nrv?NR:uwMoneyK(c.price), nrv?'not reliable':(c.price_per_door!=null?uwMoneyK(c.price_per_door)+'/door':''), nrv?'nr':''),
     num('Units', c.units!=null?Number(c.units).toLocaleString('en-US'):'—', c.occupancy!=null?uwFmtPct(c.occupancy,0)+' occ. (all units)':'', '', '', revSub),
     num('T12 NOI', uwMoneyK(c.t12_noi), c.year1_noi!=null?'Yr 1 '+uwMoneyK(c.year1_noi):''),
-    num('In-place cap *', nrv?NR:(c.cap_rate!=null?uwFmtPct(c.cap_rate,2):'—'), nrv?'not reliable':'Cedar Ridge est.', nrv?'nr':''),
+    num('In-place cap *', nrv?NR:(c.cap_rate!=null?uwFmtPct(c.cap_rate,2):'—'), nrv?'not reliable':'House est.', nrv?'nr':''),
     // the best-deal cards lead with IRR and cash-on-cash in the hero row, so this slot shows equity multiple there
     top ? num('Equity multiple', nrv?NR:(c.equity_multiple!=null?Number(c.equity_multiple).toFixed(2)+'x':'—'), c.hold_years!=null?c.hold_years+'-yr hold':'', nrv?'nr':'')
         : num('Levered IRR', irrTxt, verdictTxt, nrv?'nr':vcls, vcls, 'Yr-2 cash-on-cash '+cocTxt),
@@ -23009,7 +23003,7 @@ function uwRenderDealView(){
   const priced = '<div class="card"><div class="card-title">Is it priced right?</div><table class="uw-table"><tbody>'+
     kv('Price run', nrv?NR:M(c.price), nrv?'':(c.price_per_door!=null?M(c.price_per_door)+' per unit':''))+
     kv('Max price at '+tgtTxt+' IRR', nrv?NR:(c.max_price!=null?M(c.max_price):(c.meets_target?'above range':'none in range')), nrv||gap==null?'':(gap>=0?'+':'−')+M(Math.abs(gap))+' vs the price run')+
-    kv('In-place cap rate', nrv?NR:(c.cap_rate!=null?P(c.cap_rate,2):'—'), 'T12 NOI ÷ price (Cedar Ridge estimate)')+
+    kv('In-place cap rate', nrv?NR:(c.cap_rate!=null?P(c.cap_rate,2):'—'), 'T12 NOI ÷ price (house estimate)')+
     kv('T12 NOI', M(c.t12_noi), '')+kv('Year-1 NOI', M(c.year1_noi), '')+kv('Capex', M(c.capex), '')+
     '</tbody></table></div>';
   const returns = '<div class="card"><div class="card-title">Returns</div><table class="uw-table"><tbody>'+
@@ -23180,7 +23174,7 @@ function uwRenderDeals(){
   topEl.innerHTML = feature.map(p=>uwDealCard(p,{top:true})).join('');
   restH.style.display = feature.length && rest.length ? '' : 'none';
   grid.innerHTML = rest.length ? rest.map(p=>uwDealCard(p)).join('')
-    : (feature.length ? '' : '<div class="uwd-empty" style="grid-column:1/-1">'+(live.length ? 'No deal matches that search or filter.' : 'No deals yet. Drop a T12, a rent roll and the OM above — the model you generate lands here, with its numbers. A finished Cedar Ridge model (.xlsx) dropped above is added too.')+'</div>');
+    : (feature.length ? '' : '<div class="uwd-empty" style="grid-column:1/-1">'+(live.length ? 'No deal matches that search or filter.' : 'No deals yet. Drop a T12, a rent roll and the OM above — the model you generate lands here, with its numbers. A finished Demo Portfolio model (.xlsx) dropped above is added too.')+'</div>');
   uwRenderUnreadable();
   hw.style.display = hidden.length ? '' : 'none';
   document.getElementById('uwd-hidden-sum').textContent = 'Hidden deals ('+hidden.length+') — still on the disk, restorable';
@@ -23267,7 +23261,7 @@ async function exportPropertyRoster(btn) {
     }
 
     const stamp = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(wb, `Cedar Ridge-property-roster_${stamp}.xlsx`);
+    XLSX.writeFile(wb, `Demo Portfolio-property-roster_${stamp}.xlsx`);
   } catch (err) {
     alert('Could not build the property list: ' + err.message);
   } finally {

@@ -125,7 +125,7 @@ const textOf = async (bytes) => {
     check('it is titled a payment record, not an invoice or a receipt',
       /Payment record/.test(d.getTitle() || '') === false || true);
     check('...and names this site as its creator, so it cannot pass as the vendor\'s',
-      /Cedar Ridge Management/.test(d.getCreator() || ''), d.getCreator());
+      /Portfolio Management Dashboard/.test(d.getCreator() || ''), d.getCreator());
   }
 
   console.log('\nText out of Rent Manager cannot break the encoder');

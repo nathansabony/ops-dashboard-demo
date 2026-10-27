@@ -83,11 +83,11 @@ console.log('\nUser store');
   store.updateUser(v.id, { disabled: true });
   check('a turned-off account cannot sign in', !store.authenticate('var@example.com', 'variance-new-pass-7'));
   store.updateUser(v.id, { disabled: false });
-  const su = store.signUp({ name: 'Self', email: 'self@cedarridge.example', password: 'self-signup-pw-7' }, ['cedarridge.example']);
+  const su = store.signUp({ name: 'Self', email: 'self@example.com', password: 'self-signup-pw-7' }, ['example.com']);
   check('a self sign-up is never an admin, has no tools, and keeps the password they chose (no forced change)',
-    !su.admin && su.tools.length === 0 && !su.tools.includes('overview') && !!store.authenticate('self@cedarridge.example', 'self-signup-pw-7'));
-  check('SIGNUP_ALLOWED_DOMAINS limits sign-ups to work addresses', throws(() => store.signUp({ name: 'X', email: 'x@gmail.com', password: 'whatever-12345' }, ['cedarridge.example'])));
-  check('a sign-up needs a name', throws(() => store.signUp({ name: ' ', email: 'y@cedarridge.example', password: 'whatever-12345' })));
+    !su.admin && su.tools.length === 0 && !su.tools.includes('overview') && !!store.authenticate('self@example.com', 'self-signup-pw-7'));
+  check('SIGNUP_ALLOWED_DOMAINS limits sign-ups to work addresses', throws(() => store.signUp({ name: 'X', email: 'x@gmail.com', password: 'whatever-12345' }, ['example.com'])));
+  check('a sign-up needs a name', throws(() => store.signUp({ name: ' ', email: 'y@example.com', password: 'whatever-12345' })));
 }
 
 console.log('\nMailer');

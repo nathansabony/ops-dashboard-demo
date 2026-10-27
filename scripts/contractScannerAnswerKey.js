@@ -18,7 +18,7 @@ module.exports = {
     ['90-day non-renewal notice', j => /90/.test(j.renewal?.notice_to_stop || '')],
     ['not fully executed (vendor never signed)', j => j.signature_status?.fully_executed === false],
     ['flags 410 Alder Street vs 2301 Willow Creek Rd mismatch', j => has(issues(j), '53', '6119')],
-    ['never reports the 1 Cedar Ridge Plaza head office as the property', j => !/600 central/i.test(j.property?.address || '')],
+    ['never reports the 1 Demo Portfolio Plaza head office as the property', j => !/600 central/i.test(j.property?.address || '')],
     ['flags §10 sale clause wording', j => /§\s*10|section 10/i.test(JSON.stringify(j.document_issues || []))],
     ['no PSA deal terms', j => j.deal_terms == null],
   ],
@@ -74,7 +74,7 @@ module.exports = {
     ['15-year warranty captured', (j, all) => /15.year|fifteen/.test(all)],
     ['payment schedule NOT treated as earnest money', j => j.deal_terms == null],
     ['flags "12/2/224" date typo', j => /224/.test(issues(j))],
-    ['flags signed as individual / Cedar Ridge entity not named', j => /individual|entity|personal/.test(issues(j))],
+    ['flags signed as individual / Demo Portfolio entity not named', j => /individual|entity|personal/.test(issues(j))],
     // The invoice carries 9-digit account/routing/ACH numbers — none may appear.
     ['no bank account numbers leaked', (j, all) => !/\b\d{9}\b/.test(all)],
   ],

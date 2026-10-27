@@ -1003,7 +1003,7 @@ async function build({ now = new Date() } = {}) {
     }
     // Only properties this site actually manages. The property map deliberately
     // turns some away (sold buildings still billed under a live LLC — see
-    // entityMap's Cedar Ridge whitelist), and reporting those as a renovation "mismatch"
+    // entityMap's Demo Portfolio whitelist), and reporting those as a renovation "mismatch"
     // would fill the panel with rows nobody can act on and bury the real ones.
     const pids = new Set(
       [...shortlist.expected.keys(), ...actualByProperty.keys()].filter(pid => propMap.has(pid)));

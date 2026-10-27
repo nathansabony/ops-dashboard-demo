@@ -590,7 +590,7 @@ async function run({ scope, key, month }, deps) {
   const refs = deps.refsFor(key);
   const lineLabel = deps.lineLabel ? deps.lineLabel(key) : key;
   const stamp = deps.now().toISOString();
-  const head = { ok: true, scope, key, month, line: lineLabel, label: 'Cedar Ridge analysis of Rent Manager data', generatedAt: stamp,
+  const head = { ok: true, scope, key, month, line: lineLabel, label: 'Demo Portfolio analysis of Rent Manager data', generatedAt: stamp,
     reports: [{ id: 51, name: 'General Ledger (accrual)' }] };
   if (!refs) {
     return { ...head, supported: false, reason: `${lineLabel} has no GL accounts behind it, so there are no postings to look at.` };

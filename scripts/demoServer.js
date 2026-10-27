@@ -1,4 +1,4 @@
-// Official boot for the Cedar Ridge demo: `npm start` / `npm run dev`.
+// Official boot for the Demo Portfolio demo: `npm start` / `npm run dev`.
 //
 // Forces DEMO_MODE=1 (every Rent Manager call is answered by the fake world in
 // services/demo), blanks any RENTMANAGER_* credentials that happen to be in the

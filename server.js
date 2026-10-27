@@ -1,4 +1,4 @@
-// Backend for the Cedar Ridge Management site (demo build).
+// Backend for the Portfolio Management Dashboard site (demo build).
 //
 // Rent Manager (WAPI12) is the source of truth in a live install: when
 // RENTMANAGER_COMPANY / RENTMANAGER_USERNAME / RENTMANAGER_PASSWORD are set, each
@@ -7,7 +7,7 @@
 // propertyFinancials, moveActivity, chargedCollections).
 //
 // DEMO_MODE=1 (what `npm start` sets, via scripts/demoServer.js): rentManagerClient
-// answers every call from the fictional "Cedar Ridge" world in services/demo, the
+// answers every call from the fictional "Demo Portfolio" world in services/demo, the
 // visitor is signed in automatically as an admin, and nothing leaves the machine.
 //
 // When neither is set (local dev without creds), routes fall back to mockData
@@ -146,7 +146,7 @@ const LOGIN_PAGE_HTML = `<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cedar Ridge Management — Sign In</title>
+<title>Portfolio Management Dashboard — Sign In</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
@@ -454,7 +454,7 @@ function tenantAccessEnabled() {
   return Boolean(TENANT_ACCESS_PIN) || userStore.count() > 0 || process.env.IS_PULL_REQUEST === 'true';
 }
 const LOCAL_OPEN_USER = DEMO_MODE
-  ? { id: 'demo-admin', email: 'demo@cedarridge.example', name: 'Demo Admin', admin: true, tools: userStore.TOOL_KEYS }
+  ? { id: 'demo', email: '', name: 'Demo', admin: true, tools: userStore.TOOL_KEYS }
   : { email: '', name: 'local', admin: true, tools: userStore.TOOL_KEYS };
 
 // The PIN only opens the site while no admin account exists — it is how the first
@@ -501,14 +501,14 @@ app.get('/brand/logo', (req, res) => {
 });
 
 function brandHtml() {
-  if (brandLogoFile()) return '<div class="brand"><img src="/brand/logo" alt="Cedar Ridge Management"></div>';
+  if (brandLogoFile()) return '<div class="brand"><img src="/brand/logo" alt="Portfolio Management Dashboard"></div>';
   // No logo file yet: a quiet wordmark — a square-in-square mark, tracked caps, a gold hairline.
-  return `<div class="brand" aria-label="Cedar Ridge Management">
+  return `<div class="brand" aria-label="Portfolio Management Dashboard">
   <svg class="mark" viewBox="0 0 34 34" fill="none" aria-hidden="true">
     <rect x="0.75" y="0.75" width="32.5" height="32.5" stroke="#FFFDFA" stroke-opacity=".9" stroke-width="1.5"/>
     <rect x="9.75" y="9.75" width="14.5" height="14.5" stroke="#B98A2E" stroke-width="1.5"/>
   </svg>
-  <div class="wm">CEDAR RIDGE</div>
+  <div class="wm">DEMO PORTFOLIO</div>
   <div class="rule"></div>
   <div class="sub">MANAGEMENT</div>
 </div>`;
@@ -518,7 +518,7 @@ function brandHtml() {
 const SKYLINE_SVG = '<svg class="skyline" viewBox="0 0 1440 320" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><path fill="rgba(255,253,250,.022)" d="M-10 320V85H38V320ZM41 320V200L69 182L97 200V320ZM106 320V133H176V320ZM179 320V223H250V320ZM258 320V75H325V320ZM327 320V116H366V90H372V116H411V320ZM416 320V204H493V320ZM495 320V224H536V320ZM538 320V175H602V320ZM604 320V174H677V320ZM686 320V171H720V145H726V171H761V320ZM766 320V113H854V320ZM856 320V88H922V320ZM925 320V185H935V155H966V185H976V320ZM983 320V102H1069V320ZM1077 320V182H1110V156H1116V182H1149V320ZM1158 320V130H1230V320ZM1232 320V168H1302V320ZM1310 320V186H1340V160H1346V186H1376V320ZM1383 320V118H1428V320ZM1431 320V189H1520V320Z"/><path fill="#0D2219" stroke="rgba(255,253,250,.07)" stroke-width="1" d="M-10 320V289H1V259H36V289H47V320ZM54 320V151L113 129L173 151V320ZM179 320V166H245V320ZM247 320V215H260V185H301V215H314V320ZM322 320V235H342V205H406V235H426V320ZM435 320V225H522V320ZM529 320V248H635V320ZM643 320V224H753V320ZM755 320V202H867V320ZM877 320V261H889V231H926V261H938V320ZM942 320V187H954V157H992V187H1004V320ZM1011 320V255H1025V225H1068V255H1082V320ZM1084 320V248H1152V320ZM1155 320V202H1270V320ZM1280 320V164H1343V320ZM1353 320V173H1426V320ZM1430 320V193H1527V320Z"/><g fill="rgba(185,138,46,.32)"><rect x="74" y="165" width="4" height="6"/><rect x="86" y="165" width="4" height="6"/><rect x="74" y="181" width="4" height="6"/><rect x="122" y="277" width="4" height="6"/><rect x="62" y="309" width="4" height="6"/><rect x="134" y="309" width="4" height="6"/><rect x="158" y="309" width="4" height="6"/><rect x="211" y="180" width="4" height="6"/><rect x="223" y="196" width="4" height="6"/><rect x="187" y="244" width="4" height="6"/><rect x="199" y="276" width="4" height="6"/><rect x="255" y="199" width="4" height="6"/><rect x="291" y="247" width="4" height="6"/><rect x="303" y="247" width="4" height="6"/><rect x="414" y="219" width="4" height="6"/><rect x="390" y="251" width="4" height="6"/><rect x="354" y="267" width="4" height="6"/><rect x="366" y="267" width="4" height="6"/><rect x="414" y="299" width="4" height="6"/><rect x="479" y="303" width="4" height="6"/><rect x="549" y="294" width="4" height="6"/><rect x="687" y="254" width="4" height="6"/><rect x="663" y="270" width="4" height="6"/><rect x="847" y="216" width="4" height="6"/><rect x="835" y="248" width="4" height="6"/><rect x="986" y="299" width="4" height="6"/><rect x="1055" y="239" width="4" height="6"/><rect x="1043" y="303" width="4" height="6"/><rect x="1175" y="248" width="4" height="6"/><rect x="1187" y="264" width="4" height="6"/><rect x="1223" y="264" width="4" height="6"/><rect x="1247" y="264" width="4" height="6"/><rect x="1211" y="280" width="4" height="6"/><rect x="1312" y="242" width="4" height="6"/><rect x="1288" y="290" width="4" height="6"/><rect x="1300" y="306" width="4" height="6"/><rect x="1486" y="223" width="4" height="6"/><rect x="1510" y="223" width="4" height="6"/></g></svg>';
 
 function footHtml() {
-  return SKYLINE_SVG + `<div class="foot">&copy; ${new Date().getFullYear()} Cedar Ridge Management</div>`;
+  return SKYLINE_SVG + `<div class="foot">&copy; ${new Date().getFullYear()} Portfolio Management Dashboard</div>`;
 }
 
 function loginPageHtml() {
@@ -653,21 +653,21 @@ function embeddedText(value, keys = ['Name', 'PropertyName', 'Status', 'Descript
 }
 
 // ── one entity source for the whole site ────────────────────────────────────
-// The owner, 2026-09-11, after six Cedar Ridge buildings turned out to be missing
-// from the Cedar Ridge whitelist: *"go over the entire website and not just this tool and
+// The owner, 2026-09-11, after six Demo Portfolio buildings turned out to be missing
+// from the Demo Portfolio whitelist: *"go over the entire website and not just this tool and
 // see if it's like that everywhere else. If it is, make the entire portfolio the
-// updated Cedar Ridge one."*
+// updated Demo Portfolio one."*
 //
 // It was like that everywhere else, and worse. There were TWO property→entity
 // maps and they disagreed:
 //
-//   services/entityMap.js        built from Rent Manager, now with Cedar Ridge read off
-//                                the "Cedar Ridge" group. 42 Cedar Ridge
+//   services/entityMap.js        built from Rent Manager, now with Demo Portfolio read off
+//                                the "Demo Portfolio" group. 42 Demo Portfolio
 //                                properties. Gates delinquency, collections,
 //                                cohorts, moves, unit counts, financials.
 //   getStaticPropertyEntityMap   THE SERVER PARSING ITS OWN FRONTEND HTML —
 //                                reading `const DATA` out of public/index.html
-//                                and keying entity by property NAME. 37 Cedar Ridge
+//                                and keying entity by property NAME. 37 Demo Portfolio
 //                                properties, missing all six.
 //
 // The second one is not cosmetic. It filters which units count toward portfolio
@@ -706,7 +706,7 @@ async function refreshPropertyEntityNames(reason = 'refresh') {
     const { byId, gah: group } = await buildPropertyEntityMap(rentManager);
     livePropertyEntityByName = buildNameIndex(byId);
     console.log(`Property→entity map (${reason}): ${livePropertyEntityByName.size} name(s) from Rent Manager`
-      + (group ? ` · Cedar Ridge from ${group.source}${group.via ? ` (${group.via})` : ''}, ${group.properties || (group.ids && group.ids.size) || '?'} propert${(group.properties || 0) === 1 ? 'y' : 'ies'}` : ''));
+      + (group ? ` · Demo Portfolio from ${group.source}${group.via ? ` (${group.via})` : ''}, ${group.properties || (group.ids && group.ids.size) || '?'} propert${(group.properties || 0) === 1 ? 'y' : 'ies'}` : ''));
     return livePropertyEntityByName;
   } catch (err) {
     console.warn(`Property→entity map (${reason}) failed, using the static fallback:`, publicErrorMessage(err));
@@ -1488,7 +1488,7 @@ app.post('/api/auth/reset', (req, res) => {
 // ── Self sign-up (2026-10-07) ────────────────────────────────────────────────
 // Anyone can create an account; it has no tools until an admin ticks some, and
 // until then the person only sees a "waiting for access" page (GET /). Optional
-// SIGNUP_ALLOWED_DOMAINS=cedarridge.example limits it to work addresses.
+// SIGNUP_ALLOWED_DOMAINS=example.com limits it to work addresses.
 const SIGNUP_DOMAINS = (process.env.SIGNUP_ALLOWED_DOMAINS || '').split(',').map(d => d.trim().toLowerCase().replace(/^@/, '')).filter(Boolean);
 async function sendVerifyEmail(u) {
   const raw = userStore.createVerifyToken(u.id);
@@ -3241,7 +3241,7 @@ app.post('/api/underwriting/deals/hide', async (req, res) => {
   res.json({ file, hidden: state });
 });
 
-// A finished Cedar Ridge model dropped on the tab becomes a past deal (so models run
+// A finished Demo Portfolio model dropped on the tab becomes a past deal (so models run
 // before the host disk existed, or on another machine, can be brought in).
 // Anything that is not one of our models is refused, not shown with zeros.
 app.post('/api/underwriting/deals/import', async (req, res) => {
@@ -3305,9 +3305,9 @@ app.post('/api/underwriting/peek', async (req, res) => {
         if (s.kind === 'rent_roll' || s.kind === 'retail_rent_roll') has.rent_roll = true;
         if (s.kind === 't12') has.t12 = true;
       }
-      // a finished Cedar Ridge model carries these tabs; it becomes a past deal, not an input
+      // a finished Demo Portfolio model carries these tabs; it becomes a past deal, not an input
       if (['Dashboard', 'Inputs', 'Pro Forma', 'Max Price Solver'].every(n => names.includes(n))) {
-        return res.json({ kind: 'model', confidence: 1, reason: 'Has the Cedar Ridge model\'s own tabs (Dashboard, Inputs, Pro Forma, Max Price Solver).', has, sheets: names });
+        return res.json({ kind: 'model', confidence: 1, reason: 'Has the Demo Portfolio model\'s own tabs (Dashboard, Inputs, Pro Forma, Max Price Solver).', has, sheets: names });
       }
       if (has.rent_roll || has.t12) {
         const kind = has.rent_roll && has.t12 ? 'workbook' : has.rent_roll ? 'rent_roll' : 't12';
@@ -3684,7 +3684,7 @@ async function buildLiveOverview(from, to) {
         .filter(([id]) => id)
     );
     // The filter that decided which units count toward portfolio occupancy. Read
-    // off the static list it excluded six real Cedar Ridge buildings outright.
+    // off the static list it excluded six real Demo Portfolio buildings outright.
     const propertyEntityMap = propertyEntityLookup();
     const portfolioUnits = propertyEntityMap.size
       ? units.filter(u => propertyEntityMap.has(normalizeKey(rowPropertyName(u))))
@@ -4740,7 +4740,7 @@ app.get('/api/properties/breakdown', async (req, res) => {
 
     res.json({
       generatedAt: new Date().toISOString(),
-      // Where Cedar Ridge's membership came from, and what changed against the list that
+      // Where Demo Portfolio's membership came from, and what changed against the list that
       // used to be typed into the code. A total that moved should be explainable
       // without reading a diff.
       group: group ? {
@@ -5684,7 +5684,7 @@ app.get('/api/renovations/charge-sheet', async (req, res) => {
 <div class="noprint" style="margin-bottom:14px;"><button onclick="window.print()">Print / Save as PDF</button></div>
 
 <h1>Charge summary</h1>
-<div class="sub">Generated by the Cedar Ridge Management management site · ${esc(new Date().toISOString().slice(0, 16).replace('T', ' '))} UTC</div>
+<div class="sub">Generated by the Portfolio Management Dashboard site · ${esc(new Date().toISOString().slice(0, 16).replace('T', ' '))} UTC</div>
 
 <div class="banner"><b>This is not an invoice.</b> It is a summary of what Rent Manager holds
 about this charge, produced by this site${atts.length ? '' : ' because no vendor document is attached to it in Rent Manager'}.
@@ -5729,7 +5729,7 @@ ${why.length ? `<h2>Why there is no document</h2>${why.map(w => `<div class="not
  ${row('Amount', ml.amount != null ? usd(ml.amount) : null)}
 </table>
 
-<footer>Charge summary generated by the Cedar Ridge Management management site from Rent Manager data.
+<footer>Charge summary generated by the Portfolio Management Dashboard site from Rent Manager data.
 Not a vendor invoice. Charge id ${esc(chargeId)}.</footer>
 </div></body></html>`);
 });
@@ -6387,7 +6387,7 @@ function weeklyScheduleTick(reason) {
 // Manager that morning, so any drift between the snapshot and RM reads as a bug
 // in the tab. And the books genuinely move after month-end: a sweep on 2026-08-15
 // against a 69-hour-old snapshot found mortgage interest for June AND July posted
-// on ~31 Cedar Ridge properties in the days after it was taken
+// on ~31 Demo Portfolio properties in the days after it was taken
 // (scripts/compareDashboardToRM.js). At a weekly cadence that window is up to
 // seven days wide, which is far too much for a tab whose whole job is spotting a
 // number that looks off.
@@ -6474,7 +6474,7 @@ process.on('uncaughtException', (err) => {
 
 // Startup chores shared by `node server.js` and scripts/demoServer.js.
 function onListening() {
-  console.log(`Cedar Ridge management backend running on http://localhost:${PORT}`);
+  console.log(`Demo Portfolio management backend running on http://localhost:${PORT}`);
   console.log(`Rent Manager mode: ${DEMO_MODE ? 'DEMO (fictional data, no network)' : rentManager.isConfigured() ? 'LIVE (credentials found)' : 'MOCK (no .env credentials yet)'}`);
   console.log(`Weekly refresh: ${SCHEDULE_DOW} ${SCHEDULE_HOUR}:00 ${SCHEDULE_TZ} · next ${nextWeeklyRefreshISO()}`);
   console.log(DAILY_REFRESH_KEYS.length

@@ -27,7 +27,7 @@ console.log('\nWhat a card says');
 {
   const c = deals.shapeCard(raw());
   check('cap rate is T12 NOI over the price run, labelled as our estimate',
-    Math.abs(c.cap_rate - 616456 / 11208290) < 1e-9 && /Cedar Ridge estimate/.test(c.cap_note));
+    Math.abs(c.cap_rate - 616456 / 11208290) < 1e-9 && /house estimate/.test(c.cap_note));
   check('gap to max price is max minus price, in dollars and as a share of the price',
     Math.round(c.gap_to_max) === 8129433 - 11208290 && Math.abs(c.gap_pct - (8129433 - 11208290) / 11208290) < 1e-9);
   check('an IRR under its target is "below", at or over is "meets"',
@@ -39,7 +39,7 @@ console.log('\nWhat a card says');
   const blank = deals.shapeCard(raw({ address: '[ADDRESS]', year_built: '[YEAR]' }));
   check('an unfilled template ([ADDRESS] / [YEAR]) is blank, not a fact', blank.address === null && blank.year_built === null);
   check('a portfolio\'s year-built text is kept as the model wrote it', deals.shapeCard(raw({ year_built: '1924 (A) / 1962 (B)' })).year_built === '1924 (A) / 1962 (B)');
-  check('a model that is not ours reads as an error, never as zeros', deals.shapeCard({ error: 'Not a Cedar Ridge underwriting model' }).error != null);
+  check('a model that is not ours reads as an error, never as zeros', deals.shapeCard({ error: 'Not a house underwriting model' }).error != null);
   check('no price means no cap rate rather than a divide by zero', deals.shapeCard(raw({ price: 0 })).cap_rate === null);
 }
 
@@ -211,7 +211,7 @@ async function store() {
     const out = {};
     for (const f of files) {
       const b = path.basename(f);
-      out[f] = /stray/.test(b) ? { error: 'Not a Cedar Ridge underwriting model' } : raw({ name: /Harbor/.test(b) ? 'Harbor Row Portfolio' : 'Willow Bay' });
+      out[f] = /stray/.test(b) ? { error: 'Not a house underwriting model' } : raw({ name: /Harbor/.test(b) ? 'Harbor Row Portfolio' : 'Willow Bay' });
     }
     return out;
   };

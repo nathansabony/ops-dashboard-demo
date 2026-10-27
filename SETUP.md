@@ -62,7 +62,7 @@ a person without a tool is refused that tool's data even if they type the addres
 name, email and a password they choose — that is their real password. A new account
 has **no tools** and only sees a "waiting for access" page (not the site) until an
 admin ticks tools for it on the **Admin** tab, where new sign-ups are listed first.
-Optional: `SIGNUP_ALLOWED_DOMAINS=cedarridge.example` limits sign-ups to work addresses.
+Optional: `SIGNUP_ALLOWED_DOMAINS=example.com` limits sign-ups to work addresses.
 Anyone can type any address, so until email is set up (which sends a "confirm your
 email" link and shows ✓ in Admin), check with the person before giving them access.
 
@@ -84,7 +84,7 @@ hash of each link is stored; links always use `DASHBOARD_PUBLIC_URL`. Until emai
 set up, admins set temporary passwords as above.
 
 To turn email on, set in the host **one** of:
-- *Microsoft 365* (send as e.g. `noreply@cedarridge.example`): register an app in
+- *Microsoft 365* (send as e.g. `noreply@example.com`): register an app in
   Microsoft Entra with the **Mail.Send** application permission (admin consent), then
   `MS_GRAPH_TENANT_ID`, `MS_GRAPH_CLIENT_ID`, `MS_GRAPH_CLIENT_SECRET`, `MAIL_FROM`.
 - *Any SMTP provider* (Resend, Postmark, SendGrid, M365 SMTP): `SMTP_HOST`,

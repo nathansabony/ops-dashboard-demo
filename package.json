@@ -1,8 +1,8 @@
 {
-  "name": "cedar-ridge-management-demo",
+  "name": "portfolio-dashboard-demo",
   "version": "0.1.0",
   "private": true,
-  "description": "Cedar Ridge Management - Demo. A showcase property-management site running entirely on fictional data (a fake Rent Manager layer). Swap services/rentManagerClient.js to a live Rent Manager to use it for real.",
+  "description": "Portfolio Management Dashboard Demo. A showcase property-management site running entirely on fictional data (a fake Rent Manager layer). Swap services/rentManagerClient.js to a live Rent Manager to use it for real.",
   "main": "server.js",
   "scripts": {
     "start": "node scripts/demoServer.js",

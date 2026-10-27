@@ -76,22 +76,10 @@ const DUMMY_HASH = hashPassword(crypto.randomBytes(12).toString('hex'));
 
 // ── store ───────────────────────────────────────────────────────────────────
 const DEMO = process.env.DEMO_MODE === '1';
-const DEMO_ADMIN_ID = 'demo-admin';
 let demoStore = null;
+// The demo has one built-in visitor (server.js LOCAL_OPEN_USER) and no accounts at all.
 function seedDemo() {
-  const now = new Date().toISOString();
-  const mk = (id, email, name, admin, tools) => ({
-    id, email, name, passwordHash: hashPassword(crypto.randomBytes(12).toString('hex')), admin, tools,
-    disabled: false, sv: 1, createdAt: now, createdBy: 'demo seed', selfSignup: false, emailVerified: true,
-    scannerSplit: true, lastLoginAt: now,
-  });
-  return { users: [
-    mk(DEMO_ADMIN_ID, 'demo@cedarridge.example', 'Demo Admin', true, []),
-    mk('demo-jordan', 'jordan.reyes@cedarridge.example', 'Jordan Reyes', false, TOOL_KEYS.filter(k => k !== 'underwriting' && k !== 'scanner')),
-    mk('demo-priya', 'priya.natarajan@cedarridge.example', 'Priya Natarajan', false, ['entities', 'delinquency', 'issues']),
-    mk('demo-sam', 'sam.whitfield@cedarridge.example', 'Sam Whitfield', false, ['issues', 'renovations']),
-    mk('demo-dana', 'dana.okoye@cedarridge.example', 'Dana Okoye', false, ['variances', 'budget', 'delinquency']),
-  ] };
+  return { users: [] };
 }
 
 function load() {

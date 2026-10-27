@@ -135,7 +135,7 @@ def extract_t12(book_path, m):
     # the ledger, it did not earn and spend that little. The statement's 12-month Total includes it, so every bucket
     # was off. A month is flagged when it has no gross potential rent, or when BOTH its revenue and its expenses sit
     # far below the median month; at most two months. Those months are left out and every bucket is recomputed from
-    # the clean months and annualized (x12/11), said so in the warnings, and marked as a Cedar Ridge estimate.
+    # the clean months and annualized (x12/11), said so in the warnings, and marked as a house estimate.
     def month_values(field):
         spec = (tm.get("fields") or {}).get(field) or {}
         rows = [int(spec["row"])] if spec.get("row") else [int(x) for x in (spec.get("sum_rows") or [])]
@@ -188,7 +188,7 @@ def extract_t12(book_path, m):
             data[field] = round(-v if spec.get("flip_sign") else v, 2)
         warnings.insert(0, f"ADJUSTED MONTH: {', '.join(hdrs)} has no gross potential rent and far less revenue and expense than a normal month (a "
                            f"transition month in the ledger). It is left out and every T12 figure is recomputed from the other {n - len(odd)} months and "
-                           f"annualized (x{n}/{n - len(odd)}). This is a Cedar Ridge estimate; the statement's own 12-month total is different.")
+                           f"annualized (x{n}/{n - len(odd)}). This is a house estimate; the statement's own 12-month total is different.")
         stub_info = {"adjusted_months": hdrs, "annualized_from_months": n - len(odd)}
 
     # The mapped columns must reproduce the statement's own total for the NOI line. A mapping that took two of twelve month columns

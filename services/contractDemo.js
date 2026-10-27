@@ -10,9 +10,9 @@ function sampleAnalysis(today = new Date()) {
   return {
     contract_type: 'Laundry Lease',
     title: 'Laundry Room Lease and Services Agreement (sample)',
-    one_line_summary: 'Demo sample: SudsCo runs the laundry room at Maple Court for 8 years and pays Cedar Ridge 45% of collections, with a $1,100/month minimum.',
+    one_line_summary: 'Demo sample: SudsCo runs the laundry room at Maple Court for 8 years and pays Demo Portfolio 45% of collections, with a $1,100/month minimum.',
     property: { address: '88 Maple Court, Columbus, OH 43214', units: 12, units_note: 'All 12 apartments may use the shared laundry room.' },
-    our_entity: { name: 'Cedar Ridge Holdings, LLC', role: 'Landlord / Lessor' },
+    our_entity: { name: 'Demo Portfolio', role: 'Landlord / Lessor' },
     counterparty: { name: 'SudsCo Laundry Services, Inc. (fictional)', role: 'Tenant / Lessee (vendor)' },
     signature_status: { fully_executed: true, detail: `Signed for both parties on ${iso(signed)}.` },
     money: {

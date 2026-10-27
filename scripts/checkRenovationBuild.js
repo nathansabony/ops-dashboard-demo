@@ -39,11 +39,11 @@ const GL_ACCOUNTS = [
   { GLAccountID: 507, Reference: '5075',   Name: 'Licenses & Permits',           GLAccountTypeName: 'Expense' },
 ];
 
-// 107 and 109 are billed to Cedar Ridge (services/entityMap.js); 999 is billed to a former owner, so it
+// 107 and 109 are billed to Demo Portfolio (services/entityMap.js); 999 is billed to a former owner, so it
 // must be filtered out before a single report run is spent on it.
 const PROPERTIES = [
-  { PropertyID: 107, Name: 'Grand Ave', ShortName: 'GRAND', BillingName1: 'Cedar Ridge Holdings, LLC', IsActive: true },
-  { PropertyID: 109, Name: 'Maple Court Ave', ShortName: 'MAPLE', BillingName1: 'Cedar Ridge Holdings, LLC', IsActive: true },
+  { PropertyID: 107, Name: 'Grand Ave', ShortName: 'GRAND', BillingName1: 'Demo Portfolio', IsActive: true },
+  { PropertyID: 109, Name: 'Maple Court Ave', ShortName: 'MAPLE', BillingName1: 'Demo Portfolio', IsActive: true },
   { PropertyID: 999, Name: 'Sold Street', ShortName: 'SOLD', BillingName1: 'Former Owner, LLC', IsActive: true },
 ];
 
@@ -88,9 +88,9 @@ const PL_SNAPSHOT = {
   refreshedAt: '2026-08-24T09:00:00.000Z',
   months: ['Jan 26', 'Feb 26', 'Mar 26', 'Apr 26', 'May 26', 'Jun 26', 'Jul 26', 'Aug 26'],
   properties: {
-    107: { name: 'Grand Ave', entity: 'Cedar Ridge', renCapital: [0, 0, 0, 0, 4500, 1700, 0, 0] },
-    109: { name: 'Maple Court Ave', entity: 'Cedar Ridge', renCapital: [0, 0, 0, 0, 0, 0, 1500, 0] },
-    999: { name: 'Sold Street', entity: 'Cedar Ridge', renCapital: [0, 0, 0, 0, 0, 0, 9999, 0] },
+    107: { name: 'Grand Ave', entity: 'Demo Portfolio', renCapital: [0, 0, 0, 0, 4500, 1700, 0, 0] },
+    109: { name: 'Maple Court Ave', entity: 'Demo Portfolio', renCapital: [0, 0, 0, 0, 0, 0, 1500, 0] },
+    999: { name: 'Sold Street', entity: 'Demo Portfolio', renCapital: [0, 0, 0, 0, 0, 0, 9999, 0] },
   },
 };
 
@@ -279,8 +279,8 @@ check('a property with ONLY major spend is shortlisted, and the cross-check coun
     refreshedAt: '2026-08-24T09:00:00.000Z',
     months: ['Jan 26', 'Feb 26', 'Mar 26', 'Apr 26', 'May 26', 'Jun 26', 'Jul 26', 'Aug 26'],
     properties: {
-      107: { name: 'Grand Ave', entity: 'Cedar Ridge', renCapital: [0, 0, 0, 0, 0, 0, 0, 0], majRepairs: [0, 0, 0, 0, 8200, 0, 0, 0] },
-      109: { name: 'Maple Court Ave', entity: 'Cedar Ridge', renCapital: [0, 0, 0, 0, 0, 0, 1500, 0] },
+      107: { name: 'Grand Ave', entity: 'Demo Portfolio', renCapital: [0, 0, 0, 0, 0, 0, 0, 0], majRepairs: [0, 0, 0, 0, 8200, 0, 0, 0] },
+      109: { name: 'Maple Court Ave', entity: 'Demo Portfolio', renCapital: [0, 0, 0, 0, 0, 0, 1500, 0] },
     },
   };
   const prev = propertyFinancials.loadSnapshot;
@@ -564,7 +564,7 @@ check('with no P&L snapshot it falls back to one portfolio-wide run and says so'
   assert.strictEqual(out.charges.length, 4);
   // Attribution by name still has to land, or the rollup is meaningless.
   assert.strictEqual(out.coverage.unattributed, 0, 'every posting must resolve to a property by short name');
-  assert.ok(out.charges.every(c => c.entity === 'Cedar Ridge'));
+  assert.ok(out.charges.every(c => c.entity === 'Demo Portfolio'));
   assert.strictEqual(out.reconciliation.checked, false, 'no P&L snapshot means no cross-check to claim');
 });
 

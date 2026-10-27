@@ -30,7 +30,7 @@ const USERS = [
 const PROPERTY_SUPER = { 101: 3, 102: 5, 103: 3, 104: 6, 105: null };
 
 // ── property groups / unit status types ──────────────────────────────────────
-const GROUP = { id: 1, name: 'Cedar Ridge Portfolio' };
+const GROUP = { id: 1, name: 'Demo Portfolio Portfolio' };
 const UNIT_STATUS_TYPES = [
   { id: 1, name: 'Occupied', isVacant: false },
   { id: 2, name: 'Notice - Occupied', isVacant: false },

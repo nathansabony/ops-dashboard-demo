@@ -142,10 +142,10 @@ console.log('\nOccupancy: live roster first, and the manual snapshot says so');
 
 check('the live per-property roster is preferred and is not marked manual', () => {
   const ctx = sandbox({
-    DATA: { 'Cedar Ridge': { units: 100, occupied: 80, occupancy: 80 } },
-    entPropLive: e => (e === 'Cedar Ridge' ? [{ total: 60, occupied: 57 }, { total: 40, occupied: 38 }] : null),
+    DATA: { 'Demo Portfolio': { units: 100, occupied: 80, occupancy: 80 } },
+    entPropLive: e => (e === 'Demo Portfolio' ? [{ total: 60, occupied: 57 }, { total: 40, occupied: 38 }] : null),
   });
-  const o = ctx.scOccupancy('Cedar Ridge');
+  const o = ctx.scOccupancy('Demo Portfolio');
   assert.strictEqual(o.units, 100);
   assert.strictEqual(o.occupied, 95);
   assert.strictEqual(o.manual, false);
@@ -181,7 +181,7 @@ check('an imputed debt figure is stamped as ours and names the gap', () => {
   assert.ok(n, 'no debt note was raised for an entity with a posting gap');
   assert.strictEqual(n.ours, true, 'a figure we derived must be stamped as ours');
   assert.ok(/Jan 26/.test(n.text), 'the note should say when interest was last posted');
-  assert.ok(/Cedar Ridge estimate/.test(n.text), 'it must not read as a Rent Manager number');
+  assert.ok(/house estimate/.test(n.text), 'it must not read as a Rent Manager number');
 });
 
 check('a manual occupancy note carries the date it was entered', () => {
@@ -206,15 +206,15 @@ check('a small entity says how much one vacancy is worth', () => {
 
 check('a large entity on a live roster raises no notes at all', () => {
   const ctx = sandbox({
-    DATA: { 'Cedar Ridge': { units: 941, occupied: 844, occupancy: 89.7 } },
-    LIVE_MONTHLY: { 'Cedar Ridge': POSTED },
+    DATA: { 'Demo Portfolio': { units: 941, occupied: 844, occupancy: 89.7 } },
+    LIVE_MONTHLY: { 'Demo Portfolio': POSTED },
     LIVE_DEBT_GAPS: [],
     entPropLive: () => [{ total: 941, occupied: 844 }],
   });
   // Length, not deepStrictEqual: the array comes back from the vm sandbox, so
   // its prototype is that realm's Array and a strict compare fails on an
   // equally empty list.
-  const notes = ctx.scNotes('Cedar Ridge');
+  const notes = ctx.scNotes('Demo Portfolio');
   assert.strictEqual(notes.length, 0,
     `a clean entity should carry no caveats, got: ${notes.map(n => n.kind).join(', ')}`);
 });
@@ -326,22 +326,22 @@ const CR_F = { income: 5000000, opex: 2200000, noi: 2800000, mtg: 2600000, net: 
   occupancy: 89.7, delinquency: 24.0, margin: 56, expRatio: 44, dscr: 1.08, cfPerUnit: 17.7 };
 
 check('an entity on target raises no items at all', () => {
-  const ctx = eaSandbox({ DATA: { 'Cedar Ridge': { units: 941, occupied: 941, occupancy: 100 } }, entPropLive: () => null });
-  assert.strictEqual(ctx.eaFlags(row('Cedar Ridge', CR_F, {}, 941)).length, 0);
+  const ctx = eaSandbox({ DATA: { 'Demo Portfolio': { units: 941, occupied: 941, occupancy: 100 } }, entPropLive: () => null });
+  assert.strictEqual(ctx.eaFlags(row('Demo Portfolio', CR_F, {}, 941)).length, 0);
 });
 
 check('occupancy says how many doors to the target and where the vacancies sit', () => {
   const ctx = eaSandbox({
-    DATA: { 'Cedar Ridge': { units: 941, occupied: 844, occupancy: 89.7 } },
+    DATA: { 'Demo Portfolio': { units: 941, occupied: 844, occupancy: 89.7 } },
     entPropLive: () => [{ name: 'Garden Court', total: 500, occupied: 440, vacant: 60 }, { name: 'Oak', total: 441, occupied: 404, vacant: 37 }],
   });
-  const fl = ctx.eaFlags(row('Cedar Ridge', CR_F, { occupancy: 'bad' }, 941)).find(x => x.rule === 'occupancy');
+  const fl = ctx.eaFlags(row('Demo Portfolio', CR_F, { occupancy: 'bad' }, 941)).find(x => x.rule === 'occupancy');
   assert.ok(fl, 'no occupancy item');
   assert.ok(/89\.7% occupied — 97 of 941 units vacant/.test(fl.number), fl.number);
   // ceil(.95 * 941) = 894 occupied needed, minus 844 = 50 doors.
   assert.ok(/Lease 50 more units to reach the 95\.0% target/.test(fl.action), fl.action);
   assert.ok(/60 at Garden Court, 37 at Oak/.test(fl.action), 'should name the buildings with the most vacancies');
-  assert.strictEqual(fl.key, 'EA:Cedar Ridge:occupancy');
+  assert.strictEqual(fl.key, 'EA:Demo Portfolio:occupancy');
   assert.strictEqual(fl.value, 89.7);
   assert.strictEqual(fl.status, 'bad');
   // 20 of 100 weight at a 25 score: (100-25) * 20 / 100 = 15 points.
@@ -357,13 +357,13 @@ check('a manual-snapshot occupancy says so in the item', () => {
 
 check('delinquency names the dollars to collect and the tenants over $5K', () => {
   const ctx = eaSandbox({
-    DATA: { 'Cedar Ridge': { units: 941, occupied: 844, occupancy: 89.7, delinq_amount: 319313, delinq_tenants: 183, gpr_monthly: 1331022 } },
+    DATA: { 'Demo Portfolio': { units: 941, occupied: 844, occupancy: 89.7, delinq_amount: 319313, delinq_tenants: 183, gpr_monthly: 1331022 } },
     entPropLive: () => null,
     FULL_DELINQUENCY: [
-      ['A', '1', 'P', 'Cedar Ridge', 12000], ['B', '2', 'P', 'Cedar Ridge', 6500], ['C', '3', 'P', 'Cedar Ridge', 900], ['D', '4', 'Q', 'Maple Court', 20000],
+      ['A', '1', 'P', 'Demo Portfolio', 12000], ['B', '2', 'P', 'Demo Portfolio', 6500], ['C', '3', 'P', 'Demo Portfolio', 900], ['D', '4', 'Q', 'Maple Court', 20000],
     ],
   });
-  const fl = ctx.eaFlags(row('Cedar Ridge', CR_F, { delinquency: 'bad' }, 941)).find(x => x.rule === 'delinquency');
+  const fl = ctx.eaFlags(row('Demo Portfolio', CR_F, { delinquency: 'bad' }, 941)).find(x => x.rule === 'delinquency');
   assert.ok(fl, 'no delinquency item');
   assert.ok(/24\.0% of a month's GPR — \$319,313 owed by 183 tenants/.test(fl.number), fl.number);
   // 319,313 − 5% × 1,331,022 = 252,762 to collect.
@@ -373,11 +373,11 @@ check('delinquency names the dollars to collect and the tenants over $5K', () =>
 
 check('without the ledger, delinquency falls back to the property holding most of it', () => {
   const ctx = eaSandbox({
-    DATA: { 'Cedar Ridge': { delinq_amount: 100000, delinq_tenants: 40, gpr_monthly: 1000000 } },
+    DATA: { 'Demo Portfolio': { delinq_amount: 100000, delinq_tenants: 40, gpr_monthly: 1000000 } },
     entPropLive: () => null,
     entPropDelinq: () => ({ total: 100000, tenants: 40, rows: [{ name: 'Garden Court', amount: 70000, tenants: 25 }] }),
   });
-  const fl = ctx.eaFlags(row('Cedar Ridge', { ...CR_F, delinquency: 10 }, { delinquency: 'watch' }, 941)).find(x => x.rule === 'delinquency');
+  const fl = ctx.eaFlags(row('Demo Portfolio', { ...CR_F, delinquency: 10 }, { delinquency: 'watch' }, 941)).find(x => x.rule === 'delinquency');
   assert.ok(/\$70,000 of it sits at Garden Court \(25 tenants\)/.test(fl.action), fl.action);
 });
 
@@ -414,13 +414,13 @@ check('a stopped interest posting reads as missing data, stamped as ours — nev
   assert.strictEqual(fl.gain, null, 'a data item has no points to win');
   assert.strictEqual(fl.value, null, 'a data item carries no figure, so a mark on it never reopens on a number');
   assert.ok(/no mortgage interest for Willow Creek in 6 of the last 6 months \(last posted Jan 26\)/.test(fl.number), fl.number);
-  assert.ok(/Not an improvement/.test(fl.action) && /Cedar Ridge estimate/.test(fl.action) && /GL 6230/.test(fl.action), fl.action);
+  assert.ok(/Not an improvement/.test(fl.action) && /house estimate/.test(fl.action) && /GL 6230/.test(fl.action), fl.action);
   assert.ok(!items.find(x => x.rule === 'cfPerUnit'), 'cash flow per unit must not speak separately on estimated debt');
 });
 
 check('a real DSCR shortfall says what NOI has to do, and absorbs cash flow per unit', () => {
   const ctx = eaSandbox({ DATA: {}, entPropLive: () => null, LIVE_DEBT_GAPS: [] });
-  const items = ctx.eaFlags(row('Cedar Ridge', CR_F, { dscr: 'watch', cfPerUnit: 'bad' }, 941));
+  const items = ctx.eaFlags(row('Demo Portfolio', CR_F, { dscr: 'watch', cfPerUnit: 'bad' }, 941));
   const fl = items.find(x => x.rule === 'dscr');
   assert.ok(/1\.08x — NOI \$2,800,000 against \$2,600,000 of debt service \(interest only\)/.test(fl.number), fl.number);
   // 1.25 × 2.6M − 2.8M = 450,000, +16%; or debt 2.6M − 2.8M/1.25 = 360,000 lower.
@@ -433,7 +433,7 @@ check('a real DSCR shortfall says what NOI has to do, and absorbs cash flow per 
 
 check('cash flow per unit speaks on its own only when DSCR did not', () => {
   const ctx = eaSandbox({ DATA: {}, entPropLive: () => null, LIVE_DEBT_GAPS: [] });
-  const fl = ctx.eaFlags(row('Cedar Ridge', CR_F, { cfPerUnit: 'bad' }, 941)).find(x => x.rule === 'cfPerUnit');
+  const fl = ctx.eaFlags(row('Demo Portfolio', CR_F, { cfPerUnit: 'bad' }, 941)).find(x => x.rule === 'cfPerUnit');
   assert.ok(fl, 'no cash flow item');
   assert.ok(/\$18 per unit per month — net \$200,000 a year across 941 units/.test(fl.number), fl.number);
   // 50 × 12 × 941 = 564,600 − 200,000 = 364,600.
@@ -442,10 +442,10 @@ check('cash flow per unit speaks on its own only when DSCR did not', () => {
 
 check('red items come before amber, and a data item sits between', () => {
   const ctx = eaSandbox({
-    DATA: { 'Cedar Ridge': { units: 941, occupied: 844, occupancy: 89.7, delinq_amount: 1, delinq_tenants: 1, gpr_monthly: 100 } },
-    entPropLive: () => null, LIVE_DEBT_GAPS: [{ entity: 'Cedar Ridge', missing: 4, of: 6 }],
+    DATA: { 'Demo Portfolio': { units: 941, occupied: 844, occupancy: 89.7, delinq_amount: 1, delinq_tenants: 1, gpr_monthly: 100 } },
+    entPropLive: () => null, LIVE_DEBT_GAPS: [{ entity: 'Demo Portfolio', missing: 4, of: 6 }],
   });
-  const order = ctx.eaFlags(row('Cedar Ridge', CR_F, { occupancy: 'watch', delinquency: 'bad' }, 941)).map(x => x.status);
+  const order = ctx.eaFlags(row('Demo Portfolio', CR_F, { occupancy: 'watch', delinquency: 'bad' }, 941)).map(x => x.status);
   assert.deepStrictEqual([...order], ['bad', 'data', 'watch']);
 });
 
@@ -453,10 +453,10 @@ check('no owner names anywhere: the items carry none and the code that routed th
   // The owner, 2026-10-22: "remove those people's names." Removed, not hidden.
   assert.ok(!/function eaOwner\(|function eaPeople\(|_eaOwnerFilter|function eaEntityBlock\(/.test(PAGE), 'owner routing or the per-entity list is still in the page');
   const ctx = eaSandbox({
-    DATA: { 'Cedar Ridge': { units: 941, occupied: 844, occupancy: 89.7, delinq_amount: 300000, delinq_tenants: 100, gpr_monthly: 1000000 } },
+    DATA: { 'Demo Portfolio': { units: 941, occupied: 844, occupancy: 89.7, delinq_amount: 300000, delinq_tenants: 100, gpr_monthly: 1000000 } },
     entPropLive: () => null, LIVE_DEBT_GAPS: [],
   });
-  const items = ctx.eaFlags(row('Cedar Ridge', CR_F, { occupancy: 'bad', delinquency: 'bad', expRatio: 'bad', dscr: 'bad' }, 941));
+  const items = ctx.eaFlags(row('Demo Portfolio', CR_F, { occupancy: 'bad', delinquency: 'bad', expRatio: 'bad', dscr: 'bad' }, 941));
   assert.ok(items.length >= 4);
   items.forEach(x => {
     assert.ok(!('owner' in x), `${x.rule} still carries an owner`);
@@ -522,14 +522,14 @@ check('Willow Creek/2/3 collapse into ONE flag that leads, says the interest is 
   const ctx = eaSandbox({ DATA: {}, entPropLive: () => null, LIVE_DEBT_GAPS: gaps });
   const dataFlags = gaps.map(g => ctx.eaFlags(row(g.entity, { ...CR_F, dscr: 1.4 }, {}, 200)).find(x => x.rule === 'dscr'));
   assert.ok(dataFlags.every(x => x && x.status === 'data'), 'each Willow Creekentity must raise a data item');
-  const rest = [F('Cedar Ridge', 'dscr', 'bad', 40, 50), F('Maple Court', 'pl', 'bad', 30, 60)];
+  const rest = [F('Demo Portfolio', 'dscr', 'bad', 40, 50), F('Maple Court', 'pl', 'bad', 30, 60)];
   const top = ctx.eaTopFlags([...rest, ...dataFlags], open, 5);
   assert.strictEqual(top.length, 3, 'three Willow Creekitems must collapse to one slot');
   const lead = top[0];
   assert.strictEqual(lead.merged, true, 'the data flag must take the first slot');
   assert.deepStrictEqual([...lead.ents], ['Willow Creek', 'Willow Creek', 'Willow Creek']);
   assert.ok(/^Rent Manager has posted no mortgage interest in 6 of the last 6 months \(last posted Jan 26\)/.test(lead.number), lead.number);
-  assert.ok(/Not an improvement/.test(lead.action) && /Cedar Ridge estimate/.test(lead.action) && /Willow Creek 1\.40x/.test(lead.action), lead.action);
+  assert.ok(/Not an improvement/.test(lead.action) && /house estimate/.test(lead.action) && /Willow Creek 1\.40x/.test(lead.action), lead.action);
   assert.strictEqual(lead.ours, true);
   assert.strictEqual(lead.key, null, 'nothing to mark handled: it clears when interest posts again');
   assert.strictEqual(lead.gain, null);
@@ -546,10 +546,10 @@ const GOOD_F = { occupancy: 98, delinquency: 1, margin: 60, expRatio: 40, dscr: 
 
 check('a green names the metric, the figure and how far past target it is', () => {
   const ctx = eaSandbox({ DATA: {}, entPropLive: () => [{ total: 400, occupied: 392 }], LIVE_DEBT_GAPS: [] });
-  const g = ctx.eaGreens([greenRow('Cedar Ridge', { ...GOOD_F, occupancy: 98 }, 400)], 9).find(x => x.rule === 'occupancy');
+  const g = ctx.eaGreens([greenRow('Demo Portfolio', { ...GOOD_F, occupancy: 98 }, 400)], 9).find(x => x.rule === 'occupancy');
   assert.ok(g, 'no occupancy green');
   assert.ok(/98\.0% occupied \(392 of 400 units\) — 3\.0 pts above the 95\.0% target/.test(g.number), g.number);
-  const dq = ctx.eaGreens([greenRow('Cedar Ridge', { ...GOOD_F, delinquency: 1 }, 400)], 9).find(x => x.rule === 'delinquency');
+  const dq = ctx.eaGreens([greenRow('Demo Portfolio', { ...GOOD_F, delinquency: 1 }, 400)], 9).find(x => x.rule === 'delinquency');
   assert.ok(/1\.0% — 4\.0 pts below the 5\.0% target/.test(dq.number), dq.number);
 });
 
@@ -559,7 +559,7 @@ check('ranked by distance past target (capped at one target-to-red-line gap), th
   // one full gap (0.25) as well, and weighs more (25 against 20). Delinquency 4
   // is a tenth of its 10-point gap, so it ranks last of the three.
   const only = { occupancy: 100, delinquency: 4, dscr: 1.5, margin: 45, expRatio: 55, cfPerUnit: 50 };
-  const order = ctx.eaGreens([greenRow('Cedar Ridge', only, 400)], 9).map(x => x.rule);
+  const order = ctx.eaGreens([greenRow('Demo Portfolio', only, 400)], 9).map(x => x.rule);
   assert.strictEqual(order[0], 'dscr');
   assert.strictEqual(order[1], 'occupancy');
   assert.ok(order.indexOf('delinquency') > order.indexOf('occupancy'));
@@ -605,7 +605,7 @@ check('a flattered number never reads as a result: manual occupancy, tiny entiti
 
 check('only metrics on target are greens, and a metric with no figure is not one', () => {
   const ctx = eaSandbox({ DATA: {}, entPropLive: () => [{ total: 400, occupied: 392 }], LIVE_DEBT_GAPS: [] });
-  const r = row('Cedar Ridge', { ...GOOD_F, delinquency: null }, { dscr: 'watch' }, 400);
+  const r = row('Demo Portfolio', { ...GOOD_F, delinquency: null }, { dscr: 'watch' }, 400);
   r.score = 90; r.grade = 'A';
   r.parts.find(p => p.m.key === 'delinquency').sc = null;
   const g = ctx.eaGreens([r], 9).map(x => x.rule);

@@ -44,7 +44,7 @@ data/variance-resolutions.json
 # Handled entity action items (services/entityActions.js) — the team's marks, same
 # reasoning as the resolutions above (2026-10-21).
 data/entity-actions.json
-data/home-snapshot.json
+# data/home-snapshot.json ships as a seed so Home has content before the first browser fills it
 # When each variance flag was first seen (services/varianceFirstSeen.js) — the
 # dates behind "still open since", same persistent-disk reasoning (2026-10-21).
 data/variance-first-seen.json

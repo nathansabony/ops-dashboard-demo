@@ -111,7 +111,7 @@ def main(src, out, footer, title):
         page.insert_text((36, r.height - 28), footer, fontsize=7, fontname="helv", color=(0.42, 0.39, 0.35))
         label = f"Page {i} of {n}"
         page.insert_text((r.width - 36 - fitz.get_text_length(label, "helv", 7), r.height - 28), label, fontsize=7, fontname="helv", color=(0.42, 0.39, 0.35))
-    doc.set_metadata({"title": title, "author": "Cedar Ridge Capital (demo)", "subject": "Underwriting summary", "producer": "Cedar Ridge demo site"})
+    doc.set_metadata({"title": title, "author": "Portfolio Management Dashboard (demo)", "subject": "Underwriting summary", "producer": "Demo Portfolio demo site"})
     doc.save(out, garbage=3, deflate=True)
     doc.close()
     del doc, first
