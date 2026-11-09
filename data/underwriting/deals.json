@@ -36,12 +36,12 @@
    ],
    "report": {
     "v": 16,
-    "at": "2026-11-09T14:19:50.490Z",
+    "at": "2026-11-09T18:47:15.664Z",
     "pages": 3,
     "name": "Riverbend Apartments",
     "review": ""
    },
-   "mtime": 1794233984517.4302,
+   "mtime": 1794250031278.786,
    "v": 9,
    "card": {
     "computed": true,
@@ -51,24 +51,24 @@
     "units": 96,
     "occupancy": 0.9375,
     "avg_rent": 1089.5833333333333,
-    "price": 8500000,
-    "price_per_door": 88541.66666666667,
+    "price": 9150000,
+    "price_per_door": 95312.5,
     "t12_noi": 523415,
-    "year1_noi": 492063.48846666666,
+    "year1_noi": 484273.23846666666,
     "capex": 883600,
-    "cap_rate": 0.06157823529411765,
+    "cap_rate": 0.05720382513661202,
     "cap_note": "T12 NOI / the model's purchase price - a house estimate, not a quoted cap rate",
-    "irr": 0.16622951507423012,
+    "irr": 0.12440686149369107,
     "irr_target": 0.16,
     "irr_failed": false,
-    "meets_target": true,
-    "equity_multiple": 2.024493063956899,
-    "coc": 0.08560623017766456,
-    "dscr": 1.503631744741533,
+    "meets_target": false,
+    "equity_multiple": 1.7184376605403677,
+    "coc": 0.07243426587413429,
+    "dscr": 1.3747022595037022,
     "hold_years": 5,
     "max_price": 8596765.566797301,
-    "gap_to_max": 96765.56679730117,
-    "gap_pct": 0.011384184329094256,
+    "gap_to_max": -553234.4332026988,
+    "gap_pct": -0.06046277958499441,
     "checks": {
      "ok": 11,
      "needs_input": 0,
@@ -77,37 +77,37 @@
     "scenarios": [
      {
       "scenario": "Sale Year 3",
-      "irr": 0.1854270984121491,
-      "equity_multiple": 1.6346252488622763
+      "irr": 0.11446022636777453,
+      "equity_multiple": 1.3692878572585618
      },
      {
       "scenario": "Sale Year 5",
-      "irr": 0.16622951507423012,
-      "equity_multiple": 2.024493063956899
+      "irr": 0.12440686149369107,
+      "equity_multiple": 1.7184376605403677
      },
      {
       "scenario": "Sale Year 8",
-      "irr": 0.15393807434580342,
-      "equity_multiple": 2.6747266786802477
+      "irr": 0.1276014270586583,
+      "equity_multiple": 2.3032522214377376
      },
      {
       "scenario": "Refi Yr3 + Sale Yr5",
-      "irr": 0.18368550602249067,
-      "equity_multiple": 1.934018328967772
+      "irr": 0.131219266818134,
+      "equity_multiple": 1.648722674819814
      },
      {
       "scenario": "Refi Yr3 + Sale Yr8",
-      "irr": 0.18121303639900188,
-      "equity_multiple": 2.482310428969345
+      "irr": 0.14183004008622913,
+      "equity_multiple": 2.1605057675495116
      },
      {
       "scenario": "Refi Yr5 + Sale Yr8",
-      "irr": 0.16873195615188963,
-      "equity_multiple": 2.526483100366071
+      "irr": 0.13603285484856165,
+      "equity_multiple": 2.1869756110852125
      },
      {
       "scenario": "Year 2 Cash-on-Cash",
-      "irr": 0.08560623017766456,
+      "irr": 0.07243426587413429,
       "equity_multiple": null
      }
     ],
