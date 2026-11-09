@@ -194,7 +194,7 @@ function unsolvedReason(c) {
 // The owner: "just show the most recent deal and the IRR, COC return and buy price at
 // the target IRR, and give each deal a score"). So: the deal, its levered IRR and
 // Year-2 cash-on-cash, the price to pay that still clears the target IRR, and the
-// deal score. A deal flagged NEEDS REVIEW is not scored and withholds its numbers;
+// deal score. A deal flagged NEEDS REVIEW withholds its numbers and is scored no better than an F;
 // an IRR the model could not solve reads unsolved with its reason.
 const { scoreDeal } = require('./underwritingDeals');
 
@@ -217,6 +217,7 @@ function latestDeal(props) {
   const newerNotScored = live.slice(0, noneSolved ? 0 : firstScored)
     .map(o => ({ key: str(o.key || '', 120), name: o.latest.card.name || o.name, ranOn: String(o.latest.created || '').slice(0, 10),
       needsReview: !!o.latest.card.needs_review, reason: str(unsolvedReason(o.latest.card) || 'Not scored', 260),
+      score: scoreDeal(o.latest.card).score, grade: scoreDeal(o.latest.card).grade,     // flagged deals are scored too, held to an F (2026-10-30)
       fix: str(Array.isArray(o.latest.card.review_fix) && o.latest.card.review_fix[0] || '', 420) }))
     .slice(0, 6);
   const review = !!c.needs_review;

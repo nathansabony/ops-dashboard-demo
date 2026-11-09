@@ -228,6 +228,36 @@ def write_scalars(wb, deal, warnings):
     # instead of quietly vanishing from total opex.
     has_sub_breakdown = any(
         deal.get("t12", {}).get(f) is not None for f in T12_SUB_LABEL_MAP)
+    # 2026-10-31 (review of every live deal): the price is the broker's ask whenever the OM gives one and no override
+    # was typed; T12 NOI / cap rate is only the fallback. A portfolio's ask is the deal's own, else the sum of every
+    # building's when each one has one. And the one-time misc expense is per unit, not a flat $100,000.
+    a = deal.setdefault("assumptions", {})
+    isnum = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool) and v > 0
+    if not isnum(a.get("purchase_price_override")):
+        asks = [p.get("asking_price") for p in deal.get("properties") or [] if isinstance(p, dict)]
+        ask = deal.get("asking_price") if isnum(deal.get("asking_price")) else (
+            sum(asks) if len(asks) >= 2 and all(isnum(x) for x in asks) else None)
+        if ask:
+            a["purchase_price_override"] = ask
+            warnings.append(f"Priced at the broker's ask (${ask:,.0f}), not T12 NOI / cap rate.")
+    units = (deal.get("property") or {}).get("units")
+    # Pinecrest Village (found 2026-10-31): its T12's "Total Controllable" already included utilities, and the template
+    # also carries utilities on their own line, so Year 1 charged them twice ($886K). When the T12's own lines add up to
+    # more than its total by the utilities, the controllable total is taken net of them.
+    t = deal.get("t12") or {}
+    num = lambda v: v if isinstance(v, (int, float)) and not isinstance(v, bool) else None
+    parts = [num(t.get(k)) for k in ("controllable_expenses", "utilities", "insurance", "property_taxes_actual",
+                                       "other_property_expenses", "management_fee_actual")]
+    tot, util, ctrl = num(t.get("total_operating_expenses")), num(t.get("utilities")), num(t.get("controllable_expenses"))
+    if tot and util and ctrl and ctrl >= util > 0:
+        excess = sum(p or 0 for p in parts) - tot
+        if abs(excess - util) <= max(1.0, 0.01 * util):
+            t["controllable_expenses"] = ctrl - util
+            warnings.append(f"The T12's controllable total (${ctrl:,.0f}) already included utilities (${util:,.0f}); "
+                            f"they are counted once, on the Utilities line.")
+    per = a.get("misc_expense_per_unit")
+    if isinstance(per, (int, float)) and per >= 0 and "misc_expense_annual" not in a and isnum(units):
+        a["misc_expense_annual"] = a["misc_expense_per_unit"] * units
     for (section, field), range_name in SCALAR_MAP.items():
         if section not in deal or field not in deal[section]:
             continue
@@ -333,6 +363,18 @@ def write_rent_roll(wb, deal):
         row = first_row + i
         for j, col in enumerate(RENT_ROLL_COLUMNS, start=1):
             rr.cell(row=row, column=j).value = to_excel_value(u.get(col))
+    # Loss to Lease / Status Section (N, O): the template still carried the 404 per-unit values of the
+    # deal it was built from (2026-10-29, Lakeview: unit 01-01A at $1,099 market and $1,099 rent showed
+    # "117"), so every model printed someone else's numbers there. No formula reads them; they are now
+    # this unit's own: market less rent for an occupied unit, and whether it is occupied.
+    last = first_row + len(units) - 1
+    for row in range(first_row, max(rr.max_row, last) + 1):
+        if row <= last:
+            rr.cell(row=row, column=14).value = f"=IF(M{row}=1,F{row}-G{row},0)"
+            rr.cell(row=row, column=15).value = "Occupied" if int(units[row - first_row].get("occupied_flag") or 0) else "Vacant"
+        else:
+            rr.cell(row=row, column=14).value = None
+            rr.cell(row=row, column=15).value = None
     return first_row, len(units)
 
 
@@ -375,7 +417,7 @@ def write_unit_mix(wb, deal):
             "Calculated by grouping unit-level rent roll rows by unit type."
         )
     # The template's summary row sums B6:B25 - the first 20 unit types. A property with more types
-    # (Overlook Sandy Run 39, Estates at Fairway Green 64, 2026-10-22) got a TOTAL UNITS of 351 / 102
+    # (Ridgeview Heights 39, Estates at Fairway Green 64, 2026-10-22) got a TOTAL UNITS of 351 / 102
     # and a blended size and rent computed on part of the building, which also fed the Dashboard's average
     # unit size and the subject row on Rent Comps. The summary now spans every type row written.
     last_row = max(first_row + len(groups) - 1, first_row + 19)
@@ -471,6 +513,20 @@ def fill_display_gaps(wb, deal, warnings):
     """
     prop = deal.get("property", {}) or {}
     tax = deal.get("tax", {}) or {}
+    # Notes the template wrote for the deal it was built on (2026-10-29, Lakeview): a "$255"
+    # premium beside a $248 one, Florida's reassessment rule on a South Carolina deal, and the
+    # subject comp row citing "OM p.13/p.68" of an OM that was never uploaded.
+    stale = (("Inputs", "C31", "$255", "OM value-add plan. Monthly premium = online renovated units x the premium per unit above."),
+             ("Dashboard", "C28", "FL reassessment", "Reassessment basis x millage + non-ad valorem: the Tax tab's Reassessment on Sale % sets how much of the price is reassessed."),
+             ("Rent Comps", "J6", "p.13/p.68", "Rent roll / Unit Mix"))
+    for sheet, coord, marker, text in stale:
+        if sheet in wb.sheetnames and marker in str(wb[sheet][coord].value or ""):
+            wb[sheet][coord] = text
+    # No acreage on file (a portfolio whose buildings do not all state one): the banner said "0.00 Acres".
+    if not isinstance(prop.get("site_acres"), (int, float)) or prop.get("site_acres") <= 0:
+        a2 = str(wb["Dashboard"]["A2"].value or "")
+        if a2.endswith('&"     |     "&TEXT(Inputs!$B$12,"0.00")&" Acres"'):
+            wb["Dashboard"]["A2"] = a2[: -len('&"     |     "&TEXT(Inputs!$B$12,"0.00")&" Acres"')]
     # Year built: display-only (Dashboard B4, comp subject rows), so a portfolio
     # can carry a label such as "1924 (210-216 Elm St) / 1962 (Ridge)".
     if prop.get("year_built") in (None, ""):
@@ -677,10 +733,58 @@ def write_portfolio_breakdown(wb, deal, warnings):
         for c in range(2, tot_col + 1):
             ws.cell(row=r, column=c, value=fn(c)).number_format = fmt
 
+    # ── Pricing split ─────────────────────────────────────────────────
+    # 2026-10-29 (Lakeview, 3 buildings): the breakdown showed each building's
+    # rent roll and T12 but not what each one costs. The broker's ask is per
+    # building where an OM states it; the model prices the portfolio as one deal,
+    # so its price (and the max price at the IRR target) is split by T12 NOI share.
+    r += 2
+    header(r, "Pricing split")
+    asks = [p.get("asking_price") if isinstance(p.get("asking_price"), (int, float)) and p.get("asking_price") > 0 else None
+            for p in props]
+    ask_row = None
+    if any(a is not None for a in asks):
+        r += 1
+        ask_row = r
+        ws.cell(row=r, column=1, value="Asking price (broker)")
+        for i, a in enumerate(asks):
+            ws.cell(row=r, column=2 + i, value=a if a is not None else "—").number_format = money
+        ws.cell(row=r, column=tot_col, value=(f"=SUM({span(r)})" if all(a is not None for a in asks) else "—")).number_format = money
+        for label, fn, fmt in (
+            ("Asking price / unit", lambda c: f"=IFERROR({L(c)}{ask_row}/{L(c)}{u},\"—\")", money),
+            ("Going-in cap at ask (T12 NOI)", lambda c: f"=IFERROR({L(c)}{noi}/{L(c)}{ask_row},\"—\")", "0.00%"),
+        ):
+            r += 1
+            ws.cell(row=r, column=1, value=label)
+            for c in range(2, tot_col + 1):
+                ws.cell(row=r, column=c, value=fn(c)).number_format = fmt
+    share = lambda c: f"IFERROR({L(c)}{noi}/{L(tot_col)}{noi},0)"
+    for label, ref in (("Model purchase price, split by NOI share", "'Debt & Exit'!$B$6"),
+                       ("Max price at the IRR target, split by NOI share", "'Max Price Solver'!$B$42")):
+        r += 1
+        ws.cell(row=r, column=1, value=label)
+        for c in range(2, tot_col):
+            ws.cell(row=r, column=c, value=f"={ref}*{share(c)}").number_format = money
+        ws.cell(row=r, column=tot_col, value=f"=SUM({span(r)})").number_format = money
+        ws.cell(row=r, column=tot_col).font = Font(bold=True)
+        ws.cell(row=r, column=chk_col, value=f'=IF(ABS({L(tot_col)}{r}-{ref})<1,"OK - ties to the model","CHECK")')
+        pr = r
+        r += 1
+        ws.cell(row=r, column=1, value="   per unit")
+        for c in range(2, tot_col + 1):
+            ws.cell(row=r, column=c, value=f"=IFERROR({L(c)}{pr}/{L(c)}{u},0)").number_format = money
+        if ask_row and label.startswith("Model"):
+            r += 1
+            ws.cell(row=r, column=1, value="   vs asking price")
+            for c in range(2, tot_col + 1):
+                ws.cell(row=r, column=c, value=f"=IFERROR({L(c)}{pr}-{L(c)}{ask_row},\"—\")").number_format = money
+
     r += 2
     ws.cell(row=r, column=1, value=("Returns, pricing and the pro forma are underwritten on the portfolio as one deal "
                                      "(Dashboard, Pro Forma, Exit Scenarios). Per-property T12 lines are the owners' "
-                                     "figures; the model's Year 1 expenses use house benchmarks on the combined units."))
+                                     "figures; the model's Year 1 expenses use house benchmarks on the combined units. "
+                                     "The model's price is split by each building's share of T12 NOI — an allocation, "
+                                     "not a separate underwriting of each building."))
     ws.cell(row=r, column=1).alignment = Alignment(wrap_text=True, vertical="top")
     ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=chk_col)
     ws.row_dimensions[r].height = 32
@@ -1055,7 +1159,7 @@ def extend_reno_pace(wb, warnings):
         ws.cell(row=r, column=4, value="=SUM($B${f}:B{r})".format(f=RENO_FIRST_ROW, r=r))
         ws.cell(row=r, column=5, value="=D{r}*Inputs!$B$31".format(r=r))
         ws.cell(row=r, column=6, value=(
-            "=IFERROR(B{r}*('Rent Roll'!$B$16/Inputs!$B$13)*Inputs!$B$32,0)").format(r=r))
+            "=IFERROR(B{r}*('Rent Roll'!$B$19/Inputs!$B$13)*Inputs!$B$32,0)").format(r=r))
         ws.cell(row=r, column=7, value="=E{r}-F{r}".format(r=r))
         for c in range(2, 8):
             ws.cell(row=r, column=c).number_format = (
@@ -1131,6 +1235,12 @@ def extend_reno_pace(wb, warnings):
     if "Checks" in wb.sheetnames:
         wb["Checks"]["B17"] = '=IF(\'Reno Pace\'!$B${r}>0,"OK","WARN")'.format(r=extra + 2)
 
+    # 6. ...and this tab's own headline tiles. They still read B33 / B38, where the 24-month summary
+    #    sat before step 1 cleared it, so "Year 1 net impact" and "Stabilized premium/yr" printed 0
+    #    on every model (found on the Lakeview portfolio, 2026-10-29).
+    ws["C2"] = "=IFERROR(B{r},0)".format(r=s + 1)
+    ws["D2"] = "=B{r}".format(r=extra + 1)
+
 
 def generate(deal_path, output_path, template_path=TEMPLATE_PATH):
     with open(deal_path, encoding="utf-8") as f:
@@ -1152,7 +1262,8 @@ def generate(deal_path, output_path, template_path=TEMPLATE_PATH):
             warnings.append(f"{name} tab: {e} — comps skipped, model generated without them.")
     patch_template_guardrails(wb, warnings)
     import model_fixes
-    model_fixes.apply_all(wb)          # wider max-price solver, 'n/a' IRR on the Dashboard (2026-10-22 audit)
+    # wider max-price solver, 'n/a' IRR on the Dashboard (2026-10-22 audit); a typed occupancy target it resets is said out loud
+    warnings += [n for n in model_fixes.apply_all(wb) if "occupancy target" in n]
     import model_style
     model_style.apply_all(wb)          # presentation: palette, tab colours, Price Tool (never moves a formula)
     write_tax_sources(wb, deal)

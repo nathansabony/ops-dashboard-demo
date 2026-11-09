@@ -2371,7 +2371,7 @@ Rules:
 T12 row-mapping rules (kind "t12", mappable true when the statement has one GL line per row and month columns):
 - month_columns / total_column / label_columns are 1-based column indices from the head rows of the sample; label_columns = the account-code and description columns (in that order).
 - fields: map EACH of gross_potential_rent, vacancy_concessions_bad_debt, net_rental_income, other_income, effective_gross_income, controllable_expenses, utilities, management_fee_actual, insurance, property_taxes_actual, other_property_expenses, total_operating_expenses, net_operating_income, actual_vacancy_loss, actual_bad_debt, actual_concessions to statement rows. Prefer the statement's own total/subtotal row ({"row":N}); use {"sum_rows":[...]} only when no subtotal line exists for that bucket. null when the statement genuinely has no such amount (then add a warning).
-- ALSO map, when the statement breaks controllable expenses into sub-sections, each of: repairs_maintenance, turnover_costs, labor_costs (payroll), advertising_promotions, general_admin. These five must sum to controllable_expenses; put a sub-section under exactly one of them. If the statement has no such breakdown, set them null WITHOUT a warning — they are optional.
+- ALSO map, when the statement breaks controllable expenses into sub-sections, each of: repairs_maintenance, turnover_costs, labor_costs (payroll), advertising_promotions, general_admin. Put a sub-section under at most one of them; together they must never exceed controllable_expenses. repairs_maintenance = repair and maintenance supplies and repairs; turnover_costs = make-ready / turnover; labor_costs = payroll and benefits. CONTRACT SERVICES (landscaping, trash removal, pest, pool, HVAC/plumbing/electrical service contracts) are none of those three: the model replaces those three lines with house benchmarks, while contract services stay at the statement's figure, so leave contract services (and any other section that fits none of the five) out of all five — the model carries the remainder as "other controllable" at the T12 amount. If the statement has no such breakdown, set them null WITHOUT a warning — they are optional.
 - Bucket meanings (labels vary by vendor): gross_potential_rent = gross potential/scheduled/market rent incl. gain/loss-to-lease if the statement folds it there; vacancy_concessions_bad_debt = ALL rent deductions (vacancy + concessions + bad debt + non-revenue units); net_rental_income = GPR + those deductions; other_income = ancillary income; effective_gross_income = total income; utilities; management_fee_actual; insurance; property_taxes_actual = real-estate taxes; controllable_expenses = payroll + R&M/turnover + contract services + admin + marketing (everything EXCEPT utilities/mgmt/insurance/taxes); other_property_expenses = remaining operating expense outside those buckets (null/0 if none — NEVER dump utilities or taxes here). actual_vacancy_loss / actual_bad_debt / actual_concessions = the individual line items when identifiable.
 - Sign convention: income and expenses positive; vacancy_concessions_bad_debt and the three actual_* deduction fields negative. Set flip_sign true on any field whose statement rows carry the opposite sign (e.g. deductions shown positive, or an expense section shown negative).
 - Never map the same dollars into two buckets. The result must tie: EGI - total OpEx = NOI, and the six expense buckets must sum to total OpEx. If the statement's own subtotals do not tie, map the statement faithfully and add a warning naming the discrepancy.
@@ -2412,7 +2412,7 @@ T12 rules:
   net_rental_income = GPR + those (negative) deductions; other_income = all ancillary/other income; effective_gross_income = total income;
   utilities; management_fee_actual; insurance; property_taxes_actual = real-estate property taxes;
   controllable_expenses = payroll + repairs/maintenance/turnover + contract services + admin + marketing (everything EXCEPT utilities, management fees, insurance, taxes);
-  repairs_maintenance / turnover_costs / labor_costs / advertising_promotions / general_admin = the controllable sub-sections when the statement breaks them out (they must sum to controllable_expenses; each section under exactly one). If the statement has no such breakdown, use null for all five WITHOUT a warning — they are optional;
+  repairs_maintenance / turnover_costs / labor_costs / advertising_promotions / general_admin = the controllable sub-sections when the statement breaks them out (each section under at most one; together never more than controllable_expenses). Contract services (landscaping, trash, pest, pool, service contracts) go in none of them — the model benchmarks R&M, turnover and payroll but keeps contract services at the statement's figure as "other controllable". If the statement has no such breakdown, use null for all five WITHOUT a warning — they are optional;
   other_property_expenses = whatever operating expense remains outside those buckets (0 if none — this field grows 3%/yr in the model, so never dump utilities or taxes here).
 - actual_vacancy_loss / actual_bad_debt / actual_concessions: the individual line-item totals when identifiable, else null.
 - Tie-out check before answering: EGI - total OpEx must equal NOI within rounding, and the expense buckets must sum to total OpEx within rounding. If the statement itself does not tie, report the statement's numbers and add a warning naming the discrepancy — NEVER invent or plug numbers.
@@ -2786,7 +2786,7 @@ Respond with ONLY a JSON object (no markdown fences, no commentary):
   "property": { "name": "", "address": "full street address with city/state/zip", "city": "", "year_built": 0, "site_acres": 0.0, "units": 0, "avg_unit_size_sf": 0 },
   "value_add": { "value_add_units": 0, "value_add_premium_per_unit_month": 0, "plan_note": "one sentence on the OM's renovation plan" },
   "tax": { "county_pin": "", "current_taxable_value": 0, "current_millage_rate": 0, "non_ad_valorem_tax": 0 },
-  "properties": [ { "name": "", "address": "", "units": 0, "year_built": 0, "source_page": 0 } ],
+  "properties": [ { "name": "", "address": "", "units": 0, "year_built": 0, "site_acres": null, "asking_price": null, "source_page": 0 } ],
   "asking_price": null,
   "rent_comps": [ { "property_name": "", "address_market": "", "units": 0, "year_built": 0, "avg_unit_size_sf": 0, "market_rent": 0, "achieved_rent": 0, "rent_psf": 0, "occupancy": 0.0, "source_status": "OM p.<page>", "notes": "" } ],
   "sale_comps": [ { "property_name": "", "location": "", "units": 0, "year_built": 0, "sale_date": "", "sale_price": 0, "price_per_unit": 0, "source": "OM p.<page>", "notes": "" } ],
@@ -2796,7 +2796,7 @@ Respond with ONLY a JSON object (no markdown fences, no commentary):
 
 Rules:
 - Only report what the OM actually states. Use null for anything not found; never guess or infer numbers.
-- Portfolio OMs (several buildings sold together): "property" describes the WHOLE deal — name = the portfolio/offering name, units = total units, address = the first property's address, year_built/avg_unit_size_sf as the OM states them for the portfolio (else null). List every building in "properties". For a single-property OM, "properties" has one entry.
+- Portfolio OMs (several buildings sold together): "property" describes the WHOLE deal — name = the portfolio/offering name, units = total units, address = the first property's address, year_built/avg_unit_size_sf as the OM states them for the portfolio (else null). List every building in "properties". For a single-property OM, "properties" has one entry. A building's "asking_price" only where the OM states a price for that building (else null); "asking_price" at the top is the price for everything the OM offers.
 - occupancy as a decimal (0.92 not 92).
 - Include EVERY rent comp in the OM's comp set. OMs rarely have sale comps; empty array is normal.
 - confidence reflects how explicit the OM is (1.0 = stated verbatim in a table; below 0.7 = you had to interpret).
@@ -3075,6 +3075,16 @@ app.post('/api/underwriting/generate', async (req, res) => {
     let genWarnings = [];
     try { genWarnings = (JSON.parse(genOut).warnings) || []; } catch { /* older stdout format */ }
     if (reconciled.note) genWarnings = [reconciled.note, ...genWarnings];
+    // A deal of several buildings also gets every mix of them underwritten (Deal Combinations tab), written
+    // before the finish step so the tab is in the model that gets computed. Non-fatal: the model stands without it.
+    if ((deal.properties || []).filter(p => p && p.name).length >= 2) {
+      try {
+        const combos = await runPythonJson('deal_combos.py', [dealTmp, outPath], 900000);
+        genWarnings = [...genWarnings, ...(combos.warnings || []).map(w => `Deal Combinations: ${w}`)];
+      } catch (err) {
+        genWarnings = [...genWarnings, `Deal Combinations tab skipped: ${publicErrorMessage(err)}`];
+      }
+    }
     let finish = { recalc: false, facts: null };
     try {
       // generous timeout: the pure-python formulas engine takes ~20s locally
@@ -3212,9 +3222,13 @@ app.post('/api/underwriting/deals/retry', async (req, res) => {
   }
   const src = path.basename(file);
   const out = `${src.replace(/\.xlsx$/i, '').replace(/(-repaired-[a-z0-9]+)+$/i, '')}-repaired-${Date.now().toString(36)}.xlsx`;     // one suffix, however many times it is repaired
+  // built under a name the deal list skips, then renamed: a server that dies mid-repair (Render restart,
+  // 2026-11-01) left a half-written copy that the board showed as the deal's latest run, with no scores
+  const part = path.join(UW_OUT, `.partial-${out}`);
   try {
-    const r = await runPythonJson('repair_model.py', [path.join(UW_OUT, src), path.join(UW_OUT, out), '--note', `repaired copy of ${src}`], 420000);
-    if (r.error) return res.status(422).json({ error: r.error });
+    const r = await runPythonJson('repair_model.py', [path.join(UW_OUT, src), part, '--note', `repaired copy of ${src}`], 420000);
+    if (r.error) { fs.unlink(part, () => {}); return res.status(422).json({ error: r.error }); }
+    fs.renameSync(part, path.join(UW_OUT, out));
     const entry = (await uwDeals.list()).find(e => e.file === out);
     if (!entry) { fs.unlink(path.join(UW_OUT, out), () => {}); return res.status(422).json({ error: 'The repaired copy still could not be read' }); }
     uwDeals.setProvenance(out, { imported: true, sources: [{ kind: 'model', filename: src, method: 'repaired copy of a damaged model', notes: r.changes || [] }] });
@@ -3223,6 +3237,7 @@ app.post('/api/underwriting/deals/retry', async (req, res) => {
     uwReports.ensure(out).catch(e => console.error('repair report:', e.message));
     res.json({ file: out, original: src, name: entry.card.name, changes: r.changes || [] });
   } catch (err) {
+    fs.unlink(part, () => {});
     fs.unlink(path.join(UW_OUT, out), () => {});
     res.status(500).json({ error: publicErrorMessage(err) });
   }
@@ -3263,7 +3278,10 @@ app.post('/api/underwriting/deals/import', async (req, res) => {
       name = `${stem}-${Date.now().toString(36)}.xlsx`;
     }
     fs.copyFileSync(tmp, path.join(UW_OUT, name));
-    uwDeals.setProvenance(name, { imported: true, sources: [{ kind: 'model', filename: filename || name, method: 'imported finished model' }] });
+    // a model the no-API intake built carries how each file was read (hidden Provenance tab); keep that record
+    const prov = raw.provenance && Array.isArray(raw.provenance.sources) ? raw.provenance : null;
+    uwDeals.setProvenance(name, prov ? { imported: true, sources: prov.sources, confirmed_by_hand: prov.confirmed_by_hand, confirmed_fields: prov.confirmed_fields }
+      : { imported: true, sources: [{ kind: 'model', filename: filename || name, method: 'imported finished model' }] });
     uwReports.ensure(name).catch(e => console.error('import report:', e.message));   // background; the card's button builds it if this fails
     res.json({ file: name, duplicate: false, name: underwritingDeals.shapeCard(raw).name });
   } catch (err) {
@@ -3431,7 +3449,8 @@ app.get('/api/underwriting/report/:name', async (req, res) => {
   const name = path.basename(req.params.name);
   if (!UW_MODEL_FILE_RE.test(name) || !fs.existsSync(path.join(UW_OUT, name))) return res.status(404).json({ error: 'No such model' });
   try {
-    const r = await uwReports.ensure(name);       // builds it now if this deal has none yet (an older run), then serves it
+    // builds it now if this deal has none yet (an older run), then serves it; ?rebuild=1 builds it again regardless
+    const r = await uwReports.ensure(name, { force: req.query.rebuild === '1' });
     // The site-wide CSP says object-src 'none', which stops the browser's own PDF viewer from drawing a PDF
     // opened in a tab. This response is our own generated file, so it may use the viewer.
     res.setHeader('Content-Security-Policy', "default-src 'self'; object-src 'self'; frame-ancestors 'none'; base-uri 'none'; style-src 'unsafe-inline'; img-src 'self' data:");
@@ -4466,6 +4485,29 @@ function varianceInvestigationDeps() {
     },
     resolveScope: varianceScopeInfo,
     getGLDetail: args => glTransactions.getGLDetail(args),
+    // Where a payee's money has gone before: its checks' own GL lines, with the type of
+    // each account (Expense, Liability…). A payment keyed to expense with no bill, to a
+    // payee whose history sits on a liability account, is not an expense (Optbridge LLC's
+    // wires, 2026-11-01). Read-only; the first 500 checks.
+    payeeHistory: async (vendorId) => {
+      const checks = await rentManager.get('/Checks', { filters: `AccountID,eq,${Number(vendorId)}`, embeds: 'CheckDetails', pagesize: 500 });
+      const lines = (Array.isArray(checks) ? checks : []).flatMap(c => c.CheckDetails || []);
+      const ids = [...new Set(lines.map(l => l.GLAccountID).filter(v => v != null))];
+      if (!ids.length) return null;
+      const accts = await rentManager.get('/GLAccounts', { filters: `GLAccountID,in,(${ids.join(',')})` });
+      const byId = new Map((Array.isArray(accts) ? accts : []).map(a => [a.GLAccountID, a]));
+      const items = new Map();
+      for (const l of lines) {
+        const a = byId.get(l.GLAccountID) || {};
+        const k = l.GLAccountID;
+        if (!items.has(k)) items.set(k, { name: `${a.Reference || ''} ${a.Name || ''}`.trim() || `account ${k}`, type: a.GLAccountType || '', amount: 0 });
+        items.get(k).amount += Number(l.Amount) || 0;
+      }
+      const list = [...items.values()].map(i => ({ ...i, amount: Math.round(i.amount * 100) / 100 }));
+      const total = list.reduce((s, i) => s + Math.abs(i.amount), 0);
+      const offExpense = list.filter(i => i.type && !/expense/i.test(i.type)).reduce((s, i) => s + Math.abs(i.amount), 0);
+      return { total, offExpense, items: list.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount)) };
+    },
     // The bill behind one posting, through the same lookup the invoice button uses.
     billBackup: async (p) => {
       const { byId } = await require('./services/entityMap').buildPropertyEntityMap(rentManager);
@@ -4486,10 +4528,63 @@ app.get('/api/variance/investigate', async (req, res) => {
   try {
     res.json(await varianceInvestigation.investigate({
       scope: String(req.query.scope || 'portfolio'), key: String(req.query.key || ''), month: String(req.query.month || ''),
+      trend: req.query.trend === '1',
     }, varianceInvestigationDeps()));
   } catch (err) {
     if (err.code === 'BAD_REQUEST') return res.status(400).json({ error: err.message });
     res.status(502).json({ error: `Rent Manager: ${publicErrorMessage(err)}` });
+  }
+});
+
+// A review takes a minute or more the first time (the bills behind it are looked up in
+// Rent Manager one by one), which is too long to wait at a card. The Variances tab sends
+// the flags it is about to show here as soon as it opens; they are read one at a time in
+// the background and kept (varianceInvestigation caches per snapshot), so the card finds
+// its answer waiting. Flags are computed in the browser — the server has no list of its
+// own — so the page names them. At most 15 queued; a flag already queued or done is skipped.
+const _warmQueue = [];
+let _warming = false;
+async function warmNextInvestigation() {
+  if (_warming) return;
+  _warming = true;
+  try {
+    while (_warmQueue.length) {
+      const q = _warmQueue.shift();
+      try { await varianceInvestigation.investigate(q, varianceInvestigationDeps()); }
+      catch (e) { /* the flag's own card asks again and shows the error */ }
+    }
+  } finally { _warming = false; }
+}
+app.post('/api/variance/investigate/warm', (req, res) => {
+  noStore(res);
+  if (!rentManager.isConfigured()) return res.json({ queued: 0 });
+  const list = Array.isArray(req.body && req.body.requests) ? req.body.requests.slice(0, 15) : [];
+  let queued = 0;
+  for (const r of list) {
+    const q = { scope: String((r && r.scope) || 'portfolio'), key: String((r && r.key) || ''), month: String((r && r.month) || ''), trend: Boolean(r && (r.trend === '1' || r.trend === true)) };
+    if (!q.key || !/^\d{4}-\d{2}$/.test(q.month)) continue;
+    if (_warmQueue.length >= 15 || _warmQueue.some(x => x.scope === q.scope && x.key === q.key && x.month === q.month && x.trend === q.trend)) continue;
+    _warmQueue.push(q); queued++;
+  }
+  res.json({ queued });
+  warmNextInvestigation();
+});
+
+// ── Hand reviews of the top flags (2026-11-01) ──────────────────────────────
+// The owner: "on each one, there's a clear English description explaining … why
+// these actually got flagged rather than just the number jump itself", for
+// going through them with the owner. config/variance-reviews.json holds one
+// analyst write-up per flag (bills, invoices, conclusion, actions), keyed
+// '<scope>|<line>|<month label>'. Read fresh per request so a corrected review
+// shows without a restart. Access: the /api/variance/ prefix — Variances.
+const VARIANCE_REVIEWS_FILE = path.join(__dirname, 'config', 'variance-reviews.json');
+app.get('/api/variance/reviews', (req, res) => {
+  noStore(res);
+  try {
+    const { reviews } = JSON.parse(fs.readFileSync(VARIANCE_REVIEWS_FILE, 'utf8'));
+    res.json({ reviews: reviews || {} });
+  } catch (err) {
+    res.json({ reviews: {}, error: err.code === 'ENOENT' ? null : err.message });
   }
 });
 

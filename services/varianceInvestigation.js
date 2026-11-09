@@ -43,7 +43,12 @@ const MONTH_RE = /^\d{4}-\d{2}$/;
 const HISTORY_MONTHS = 5;        // months before the flagged one that are read
 const MAX_FINDINGS = 5;
 const BILL_LOOKUPS = 3;
-const BILL_LOOKUP_MS = 25000;
+const REVIEW_LOOKUPS = 4;        // the biggest transactions of the month, for the review (bills AND checks)
+const REVIEW_PARALLEL = 2;
+const PAYEE_LOOKUPS = 2;
+const PAYEE_LOOKUP_MS = 25000;
+const TREND_MONTHS = 24;
+const BILL_LOOKUP_MS = 90000;       // a cold start (bank directory, capabilities) takes over a minute; warm, a lookup is 2–10 seconds
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const POSTINGS_SHOWN_CUR = 200;
 
@@ -401,7 +406,8 @@ function analyze(input) {
         add('cycle', 'medium', `${x.label}: posted in ${base.monthName} and ${monthName(m3)} with nothing between — consistent with a quarterly bill`,
           [`${monthName(m3)}: ${usd(sumOf(then))} (${postingText(then[0])}).`, `${base.monthName}: ${usd(curTotal)} — ${curTotal >= sumOf(then) ? pctTxt(curTotal / (sumOf(then) || 1) - 1) + ' more' : pctTxt(1 - curTotal / (sumOf(then) || 1)) + ' less'} than that quarter's.`,
             `Nothing from ${x.label} in ${base.prevMonthName} or ${monthName(addMonths(month, -2))}.`], [...curP, ...then], { vendor: x.label });
-      } else if (lyP.length && !priorPresent.length) {
+      } else if (lyP.length && !priorPresent.length && sumOf(lyP) >= 0.4 * curTotal) {
+        // last year's bill has to be the same order of size: a $73 charge a year ago does not make $1,535 an annual bill
         add('cycle', 'medium', `${x.label}: posted ${base.monthName} and the same time last year, nothing in the five months between — consistent with an annual bill`,
           [`Last year: ${postingText(lyP[0])} (${usd(sumOf(lyP))} in total around ${monthName(lyM)}).`, `This year: ${usd(curTotal)} in ${base.monthName}.`],
           [...curP, ...lyP], { vendor: x.label });
@@ -409,8 +415,9 @@ function analyze(input) {
     }
 
     // 6. a new vendor ------------------------------------------------------
-    if (s > 0 && curTotal > 0 && !priorPresent.length && !(lyCtx && lyP.length)) {
-      add('new-vendor', 'medium', `${x.label} is new on this line: no postings in the 5 months before ${base.monthName}${lyCtx ? ` or around ${monthName(lyM)} last year` : ''}`,
+    const lyTiny = lyCtx && lyP.length && sumOf(lyP) < 0.4 * curTotal;
+    if (s > 0 && curTotal > 0 && !priorPresent.length && (!(lyCtx && lyP.length) || lyTiny)) {
+      add('new-vendor', 'medium', `${x.label} is new on this line: no postings in the 5 months before ${base.monthName}${!lyCtx ? '' : lyTiny ? ` and only ${usd(sumOf(lyP))} around ${monthName(lyM)} last year` : ` or around ${monthName(lyM)} last year`}`,
         [`${base.monthName}: ${curP.map(postingText).join('; ')}.`, `Searched ${A.length} postings${lyCtx ? ` and ${lyCtx.length} from last year` : ''} on ${input.line.label} for this vendor.`], curP, { vendor: x.label });
     }
 
@@ -630,34 +637,97 @@ async function run({ scope, key, month }, deps) {
   const { result, billTargets } = analyze(input);
   const out = { ...head, ...result, scopeLabel: sc.label, scopeKind: sc.kind };
 
-  // Bill status for the biggest bills behind the findings. Sequential and capped:
-  // each lookup is several Rent Manager requests.
-  if (deps.billBackup && billTargets.length) {
-    const lookups = [];
-    for (const p of billTargets) {
+  // The biggest transactions of the flagged month — bills and checks — are looked
+  // up for the review as well as the bills behind the findings (the housekeeping
+  // list below keeps to those). The lookups are cached per posting by rmDocuments,
+  // so a bill in both lists is asked about once.
+  const monthTxns = new Map();
+  for (const p of (window.postings || []).filter(q => monthOf(q) === month)) {   // the full postings — the trimmed list has no vendor id
+    if (!p.txnId || !(p.txnType === 'BILLITM' || p.txnType === 'CHKITM') || p.amount <= 0) continue;
+    const k = p.txnType + '|' + p.txnId;
+    if (!monthTxns.has(k)) monthTxns.set(k, { posting: p, total: 0 });
+    const e = monthTxns.get(k); e.total += p.amount; if (p.amount > e.posting.amount) e.posting = p;
+  }
+  const reviewTargets = [...monthTxns.values()].sort((x, y) => y.total - x.total).slice(0, REVIEW_LOOKUPS).map(e => e.posting);
+  const targetList = [];
+  for (const p of [...reviewTargets, ...billTargets]) if (!targetList.some(q => q.txnId === p.txnId && q.txnType === p.txnType)) targetList.push(p);
+  const lookups = [];
+  if (deps.billBackup && targetList.length) {
+    const todo = targetList.slice(0, REVIEW_LOOKUPS + 1);
+    const one = async p => {
       try { lookups.push({ posting: p, backup: await withTimeout(deps.billBackup(p, sc), BILL_LOOKUP_MS, 'The bill lookup') }); }
       catch (e) { lookups.push({ posting: p, error: reason(e) }); }
+    };
+    await one(todo.shift());          // the first one warms Rent Manager's shared lookups (banks, capabilities)
+    for (let i = 0; i < todo.length; i += REVIEW_PARALLEL) {
+      await Promise.all(todo.slice(i, i + REVIEW_PARALLEL).map(async p => {
+        try { lookups.push({ posting: p, backup: await withTimeout(deps.billBackup(p, sc), BILL_LOOKUP_MS, 'The bill lookup') }); }
+        catch (e) { lookups.push({ posting: p, error: reason(e) }); }
+      }));
     }
-    const b = billFindings(lookups);
+  }
+  const billSet = new Set(billTargets.map(p => p.txnId));
+  if (deps.billBackup && billTargets.length) {
+    const b = billFindings(lookups.filter(l => billSet.has(l.posting.txnId) && l.posting.txnType === 'BILLITM'));
     out.housekeeping = b.items;
     out.limits = [...out.limits, ...b.limits];
     out.checked = [...out.checked, `bill status in Rent Manager for the ${billTargets.length} biggest bill${billTargets.length === 1 ? '' : 's'} behind the findings (invoice attached, approved, paid)`];
     out.reports = [...out.reports, { id: null, name: 'AP bills (/Bills)' }];
   }
+
+  // Payment history for a check keyed with no bill — what account does this payee's
+  // money normally go to? Two payees at most, each with its own time limit.
+  let payee = null;
+  if (deps.payeeHistory) {
+    const checks = [...monthTxns.values()].filter(e => e.posting.txnType === 'CHKITM' && e.posting.vendorId != null && e.total >= 0.25 * Math.max(Math.abs(result.target || 0), 1))
+      .sort((x, y) => y.total - x.total).slice(0, PAYEE_LOOKUPS);
+    for (const e of checks) {
+      try {
+        const h = await withTimeout(deps.payeeHistory(e.posting.vendorId, e.posting.txnId), PAYEE_LOOKUP_MS, 'The payee history lookup');
+        if (h) { payee = payee || new Map(); payee.set(vendorKey(e.posting), h); }
+      } catch (err) { out.limits = [...(out.limits || []), `Payment history for ${vendorLabel(e.posting)} could not be read (${reason(err)}).`]; }
+    }
+  }
+  try {
+    out.review = require('./varianceReview').build({
+      inv: out, A: window.postings || [], lookups, payee,
+      flag: { scopeLabel: sc.label, scopeToken: scope, line: { key, label: lineLabel }, month }, today: stamp.slice(0, 10),
+    });
+  } catch (e) { out.review = null; out.reviewError = reason(e); }
   return out;
 }
 
+// A run-rate flag ("12 mo to Oct 26"): the question is why the last 12 months cost more
+// than the 12 before, not why one month moved — so this pulls 24 months and splits the
+// difference by payee.
+async function runTrend({ scope, key, month }, deps) {
+  const refs = deps.refsFor(key);
+  const lineLabel = deps.lineLabel ? deps.lineLabel(key) : key;
+  const stamp = deps.now().toISOString();
+  const head = { ok: true, scope, key, month, line: lineLabel, label: 'House analysis of Rent Manager data', generatedAt: stamp, trend: true,
+    reports: [{ id: 51, name: 'General Ledger (accrual)' }] };
+  if (!refs) return { ...head, supported: false, reason: `${lineLabel} has no GL accounts behind it, so there are no postings to look at.` };
+  const sc = await deps.resolveScope(scope);
+  const got = await deps.getGLDetail({ propOwnerIds: sc.propOwnerIds, refs, startDate: monthStart(addMonths(month, -(TREND_MONTHS - 1))), endDate: monthEnd(month) });
+  const review = require('./varianceReview').buildTrend({
+    A: got.postings || [], flag: { scopeLabel: sc.label, scopeToken: scope, line: { key, label: lineLabel }, month }, today: stamp.slice(0, 10),
+  });
+  return { ...head, supported: true, mode: 'trend', summary: review.headline, next: (review.actions[0] || {}).do || '', findings: [], housekeeping: [],
+    likely: null, couldNotDetermine: review.verdict === 'unexplained', checked: review.checked, limits: review.limits,
+    monthName: monthName(month), prevMonthName: monthName(addMonths(month, -12)), totals: {}, scopeLabel: sc.label, scopeKind: sc.kind, review };
+}
+
 async function investigate(args, deps) {
-  const { scope, key, month } = args || {};
+  const { scope, key, month, trend } = args || {};
   if (!scope || !key || !MONTH_RE.test(month || '')) {
     const e = new Error('Need scope, key and month=YYYY-MM.'); e.code = 'BAD_REQUEST'; throw e;
   }
   const snap = deps.snapshotStamp ? deps.snapshotStamp() : '';
-  const ck = `${snap}|${scope}|${key}|${month}`;
+  const ck = `${snap}|${scope}|${key}|${month}|${trend ? 'trend' : ''}`;
   const hit = _cache.get(ck);
   if (hit && Date.now() - hit.at < CACHE_TTL_MS) return { ...hit.payload, fromCache: true };
   if (_inflight.has(ck)) return _inflight.get(ck);
-  const p = run({ scope, key, month }, deps).then(payload => {
+  const p = (trend ? runTrend : run)({ scope, key, month }, deps).then(payload => {
     if (_cache.size >= 400) _cache.delete(_cache.keys().next().value);
     _cache.set(ck, { at: Date.now(), payload });
     return payload;
@@ -668,6 +738,6 @@ async function investigate(args, deps) {
 
 module.exports = {
   investigate, analyze, billFindings, lastYearReading, NEIGHBOURS,
-  addMonths, monthName, vendorKey, periodOf,
+  addMonths, monthName, vendorKey, periodOf, usd, round2, vendorLabel, monthOf, slimPosting,
   __resetCache: () => { _cache.clear(); _inflight.clear(); },
 };

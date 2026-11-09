@@ -52,6 +52,13 @@ def detect_file(path):
         # report title + the As Of stamp instead of a single joined cell
         if "Rent Roll" in flat and ("As Of =" in flat or "Charge" in flat):
             return "rent_roll"
+        # ResMan: title "Rent Roll", the column headers a few rows further down (row 9)
+        if any(c.strip() == "Rent Roll" for r in head for c in r):
+            labels = set()
+            for row in ws.iter_rows(min_row=1, max_row=15, max_col=45, values_only=True):
+                labels |= {str(v).strip().lower() for v in row if v is not None}
+            if {"description", "amount", "market rent", "status"} <= labels:
+                return "rent_roll"
         month_hits = sum(1 for r in head for c in r if MONTH_RE.match(c.strip()))
         if "12 Month Trailing" in flat or "Trailing Income Statement" in flat or month_hits >= 10:
             return "t12"
@@ -317,6 +324,154 @@ def _parse_rr_headed(ws, hdr, warnings):
     return data, meta, warnings
 
 
+# ── ResMan 'Rent Roll' (charge blocks) ────────────────────────────────────────
+# Lakeview portfolio (a broker, 2026-10-29): three ResMan exports of 945-1,253 rows. Each unit is a
+# block - the unit row (unit, type, sq ft, residents, status, market rent and its first charge in
+# Description/Amount), then one row per further charge, then a "Total" row - so the column-mapping
+# path calls it unmappable and the full AI read cannot retype 1,200 rows inside its 5-minute limit.
+# The "Unit" header sits one merged cell to the right of the unit numbers. A vacant unit reads
+# "Vacant Unit" with no status; every resident status (C current, NTV notice, R renewal, MTM, F moving
+# out) is occupied, which is exactly how the report's own Property Occupancy block counts them.
+
+_RR_RESMAN_LABELS = {
+    "unit": "unit", "type": "type", "sq. feet": "sqft", "residents": "name", "status": "status",
+    "market rent": "mkt", "description": "desc", "amount": "amt", "move in": "move_in",
+    "lease end": "lease", "move out": "move_out", "balance": "bal",
+}
+
+
+def _rr_find_resman(ws):
+    """(header_row, {field: col}) for a ResMan rent roll: a header row with Description, Amount and Market Rent."""
+    for r in range(1, 16):
+        cells = {c: str(ws.cell(r, c).value or "").strip().lower() for c in range(1, min(ws.max_column, 45) + 1)}
+        labels = set(cells.values())
+        if {"unit", "description", "amount", "market rent", "status"} <= labels:
+            cols = {}
+            for c, label in cells.items():
+                if label in _RR_RESMAN_LABELS and _RR_RESMAN_LABELS[label] not in cols:
+                    cols[_RR_RESMAN_LABELS[label]] = c
+            # the unit numbers sit under the left half of a merged "Unit" header: take whichever
+            # of the two columns actually carries values below it
+            h = cols["unit"]
+            filled = lambda c: sum(1 for rr in range(r + 1, min(r + 80, ws.max_row) + 1)
+                                   if ws.cell(rr, c).value not in (None, ""))
+            if h > 1 and filled(h - 1) > filled(h):
+                cols["unit"] = h - 1
+            if all(k in cols for k in ("unit", "sqft", "mkt", "desc", "amt", "status")):
+                return r, cols
+    return None
+
+
+def _parse_rr_resman(ws, hdr, warnings):
+    hdr_row, col = hdr
+    property_name = str(ws.cell(2, 1).value or "").strip()
+    as_of = None
+    for r in range(1, hdr_row):
+        v = ws.cell(r, 1).value
+        if isinstance(v, (datetime, date)):
+            as_of = v.strftime("%Y-%m-%d")
+            break
+        m = re.fullmatch(r"\s*(\d{1,2})/(\d{1,2})/(\d{4})\s*", str(v or ""))
+        if m:
+            as_of = f"{m.group(3)}-{int(m.group(1)):02d}-{int(m.group(2)):02d}"
+            break
+    if not as_of:
+        warnings.append("No as-of date in the report header - the rent roll's as-of date is blank.")
+
+    stop_row = ws.max_row + 1
+    for r in range(hdr_row + 1, ws.max_row + 1):
+        a = str(ws.cell(r, 1).value or "").strip().lower()
+        if a.startswith(("total charges", "property occupancy", "future", "applicant", "pending")):
+            stop_row = r
+            break
+
+    get = lambda r, k: ws.cell(r, col[k]).value if k in col else None
+    is_unit_row = lambda r: get(r, "unit") not in (None, "") and get(r, "sqft") not in (None, "")
+    units, starred = [], 0
+    r = hdr_row + 1
+    while r < stop_row:
+        if not is_unit_row(r):
+            r += 1
+            continue
+        unit_no = str(get(r, "unit")).strip()
+        if "*" in unit_no:                     # "* denotes unit is excluded from occupancy calculations"
+            starred += 1
+            unit_no = unit_no.replace("*", "").strip()
+        u = {"unit_number": unit_no, "unit_type": str(get(r, "type") or "").strip(),
+             "sqft": _num(get(r, "sqft")), "market_rent": _num(get(r, "mkt"))}
+        name = " ".join(str(get(r, "name") or "").split())
+        status = str(get(r, "status") or "").strip()
+        vacant = not status and (not name or name.lower().startswith("vacant"))
+        if name and not name.lower().startswith("vacant"):
+            u["resident_name"] = name
+        for key in ("move_in", "lease", "move_out"):
+            v = _iso(get(r, key))
+            if v not in (None, ""):
+                u[{"lease": "lease_expiration"}.get(key, key)] = v
+        u["balance"] = _num(get(r, "bal"))
+        rent, total, rr_ = 0, None, r
+        while rr_ < stop_row:
+            if rr_ > r and is_unit_row(rr_):
+                break
+            desc = str(get(rr_, "desc") or "").strip().lower()
+            amt = get(rr_, "amt")
+            if desc == "total":
+                total = _num(amt)
+                rr_ += 1
+                break
+            if amt not in (None, "") and re.fullmatch(r"(resident\s+)?rent", desc):
+                rent += _num(amt)
+            rr_ += 1
+        u["rent_charge"] = rent
+        u["total_charges"] = total if total is not None else rent
+        u["occupied_flag"] = 0 if vacant else 1
+        units.append(u)
+        r = rr_
+    if starred:
+        warnings.append(f"{starred} unit(s) are starred in the report as excluded from its occupancy calculation.")
+
+    # official counts: the Property Occupancy block's two "Total" rows, units under its "Units" header
+    official = {}
+    unit_col = None
+    for r in range(stop_row, ws.max_row + 1):
+        a = str(ws.cell(r, 1).value or "").strip().lower()
+        if a == "unit type occupancy":
+            break
+        for c in range(1, min(ws.max_column, 45) + 1):
+            if str(ws.cell(r, c).value or "").strip().lower() == "units":
+                unit_col = c
+        if unit_col and a == "total":
+            what = str(ws.cell(r, 4).value or "").strip().lower()
+            n = ws.cell(r, unit_col).value
+            if isinstance(n, (int, float)):
+                if what == "occupied":
+                    official["official_occupied_units"] = int(n)
+                elif what == "vacant":
+                    official["official_vacant_units"] = int(n)
+    if "official_occupied_units" in official and "official_vacant_units" in official:
+        official["official_units"] = official["official_occupied_units"] + official["official_vacant_units"]
+        official["official_occupancy"] = round(official["official_occupied_units"] / official["official_units"], 6) if official["official_units"] else None
+    else:
+        warnings.append("Property Occupancy block not found - official unit counts are missing; the model's Checks tab will flag this.")
+
+    data = {"as_of_date": as_of, **official, "units": units}
+    meta = {"property_name": property_name, "parsed_units": len(units), "source_format": "ResMan Rent Roll (charge blocks)",
+            "layout": "ResMan rent roll (header-driven)"}
+    if official.get("official_units") and official["official_units"] != len(units):
+        warnings.append(f"Parsed {len(units)} units but report summary says {official['official_units']} - investigate before generating.")
+    occ_n = sum(u["occupied_flag"] for u in units)
+    if official.get("official_occupied_units") is not None and occ_n != official["official_occupied_units"]:
+        warnings.append(f"{occ_n} units read as occupied but the summary says {official['official_occupied_units']}.")
+    no_rent = sum(1 for u in units if u["occupied_flag"] and u["rent_charge"] <= 0)
+    if no_rent:
+        warnings.append(f"{no_rent} occupied unit(s) carry no Resident Rent line (employee or comp units?) - in-place rent 0 for them.")
+    return data, meta, warnings
+
+
+# charge codes that are the unit's rent: the tenant's share, a voucher's share, short-term-rental rent
+RENT_CODES = {"rent", "subsidy", "hap", "strrent"}
+
+
 def parse_rent_roll(path):
     """RM rent-roll export -> deal rent_roll section.
 
@@ -327,6 +482,10 @@ def parse_rent_roll(path):
     warnings = []
     wb = load_workbook(path, data_only=True)
     ws = wb[wb.sheetnames[0]]
+
+    resman = _rr_find_resman(ws)
+    if resman:                                     # ResMan charge-block export (no 'As Of =', 'Description'/'Amount' columns)
+        return _parse_rr_resman(ws, resman, warnings)
 
     if _rr_is_summary_format(ws, _rr_header_row(ws)):
         return _parse_rr_summary(ws, warnings)
@@ -404,7 +563,10 @@ def parse_rent_roll(path):
                 total_charges = _num(amt)
                 break
             if code:
-                if code.lower() == "rent":
+                # a voucher unit splits its rent into the tenant's share ("rent") and the housing
+                # authority's ("Subsidy"); both are rent. Keeping only "rent" dropped $23,406/month on
+                # 13 Meadow Green units (2026-11-01). Short-term-rental units bill "strrent".
+                if code.lower() in RENT_CODES:
                     rent_named += _num(amt)
                 else:
                     other_charges.append(_num(amt))

@@ -156,11 +156,27 @@ def read(path):
         def row(label):
             r = find_row(ws, label, start=hdr + 1)
             return {y: num(ws.cell(r, c).value) for y, c in cols.items()} if r else {}
+        # every line, T12 beside Year 1, so the report can say in words why Year 1 differs from the seller's year
+        lines = []
+        y1 = cols.get(1)
+        nr = find_row(ws, "Net Operating Income", start=hdr + 1)
+        if y1 and nr:
+            for r in range(hdr + 1, nr + 1):
+                t, v = num(ws.cell(r, 2).value), num(ws.cell(r, y1).value)
+                lab = txt(ws.cell(r, 1).value)
+                if lab and (t is not None or v is not None) and not lab.lower().startswith("vacancy %"):
+                    lines.append({"label": lab, "t12": t, "year1": v})
         return {"years": sorted(cols), "egi": row("Effective Gross Income"), "opex": row("Total Operating Expenses"),
                 "noi": row("Net Operating Income"), "debt_service": row("Annual Mortgage Payment"),
-                "after_debt": row("Net Income After Debt Service"), "coc": row("Cash-on-Cash Return %"),
-                "gpr": row("Adjusted Gross Potential Rent")}
+                "after_debt": row("Cash Flow After Debt") if find_row(ws, "Cash Flow After Debt", start=hdr + 1) else row("Net Income After Debt Service"),
+                "coc": row("Cash-on-Cash Return %"), "gpr": row("Adjusted Gross Potential Rent"), "lines": lines}
     section("pro_forma", pro_forma)
+
+    # our bid and the levers (levers.py rebuilds the model's own cash flows; it refuses a model it cannot tie)
+    def levers_():
+        from levers import levers
+        return levers(wb)      # the workbook already open: a 1,000-unit model is not loaded twice on a 512 MB server
+    section("levers", levers_)
 
     # ---- debt, exit, returns ----
     def returns():

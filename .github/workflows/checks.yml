@@ -69,6 +69,8 @@ jobs:
       - name: "Underwriting PDF report (canned deal in, sections out, nothing undefined or NaN)"
         run: npm run check:underwriting-report
       - name: "Underwriting Excel template fixes (solver range, n/a IRR) and no uncomputed formulas"
-        run: python3 -m pip install openpyxl pandas && python3 scripts/checkUnderwritingModels.py
+        run: python3 -m pip install openpyxl pandas formulas && python3 scripts/checkUnderwritingModels.py
       - name: "Variance investigation: what the postings in Rent Manager show (each classification, the change explained, could not determine, nothing invented)"
         run: npm run check:variance-investigation
+      - name: "Variance review: every flag gets the same plain-English answer (each kind of mistake, nothing invented)"
+        run: npm run check:variance-review

@@ -30,8 +30,16 @@ def read_xlsx(path):
     try:
         for ws in wb.worksheets:
             rows = []
-            for row in ws.iter_rows(min_row=1, max_row=min(ws.max_row or 1, MAX_ROWS_PER_SHEET),
-                                    max_col=min(ws.max_column or 1, MAX_COLS), values_only=True):
+            max_row, max_col = ws.max_row, ws.max_column
+            if max_row is None or max_col is None:
+                # An export with no <dimension> record (a broker's rent rolls, Lakeview
+                # 2026-10-29) is "unsized" in read-only mode: max_row/max_column are None,
+                # and the old `or 1` read one blank row - "Workbook appears to be empty"
+                # for a 1,253-row rent roll. Size it by scanning, as pandas does.
+                from openpyxl.utils import range_boundaries
+                _, _, max_col, max_row = range_boundaries(ws.calculate_dimension(force=True))
+            for row in ws.iter_rows(min_row=1, max_row=min(max_row or 1, MAX_ROWS_PER_SHEET),
+                                    max_col=min(max_col or 1, MAX_COLS), values_only=True):
                 rows.append([_cell(v) for v in row])
             yield ws.title, rows
     finally:

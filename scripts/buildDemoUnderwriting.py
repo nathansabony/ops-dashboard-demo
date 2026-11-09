@@ -323,7 +323,7 @@ OM_EXTRACTED = {
                   "plan_note": "Interior renovation of 72 classic units at turnover (plank flooring, quartz-look counters, stainless appliances, lighting) for a $170 monthly premium, plus a clubhouse refresh and new monument signage."},
     "tax": {"county_pin": "R72 00811 0006, R72 00811 0007", "current_taxable_value": 6_900_000, "current_millage_rate": 23.97, "non_ad_valorem_tax": 0},
     "properties": [{"name": NAME, "address": ADDRESS, "units": 96, "year_built": 1987, "source_page": 3}],
-    "asking_price": 8_950_000,
+    "asking_price": 8_500_000,
     "rent_comps": RENT_COMPS,
     "sale_comps": SALE_COMPS,
     "confidence": {"property.name": 1.0, "property.address": 1.0, "property.year_built": 1.0, "property.units": 1.0, "property.site_acres": 0.95,
@@ -337,7 +337,7 @@ OM_EXTRACTED = {
 # What the review screen pre-fills when the sample OM is loaded: the showcase deal's house terms. See DEMO_ASSUMPTIONS in
 # the deal below - the same dictionary, so dropping the sample files and pressing Generate rebuilds this deal.
 DEMO_ASSUMPTIONS = {
-    "purchase_cap_rate": 0.062, "purchase_price_override": 0,
+    "purchase_cap_rate": 0.062, "purchase_price_override": 8_500_000,
     "ltv": 0.70, "loan_interest_rate": 0.055, "hold_period_years": 5, "exit_cap_rate": 0.060,
     "income_growth": 0.03, "expense_growth": 0.03, "tax_growth": 0.03,
     "stabilized_occupancy_target": 0.96,
@@ -392,7 +392,7 @@ def build_om_pdf(path, rr_units, t12tot):
              "market data are fictional and were generated for a software demonstration. Nothing here is an offer to sell.</p>"),
         page("Executive summary", f"<p><b>{NAME}</b> is a 96-unit garden-style apartment community on 7.4 acres in southwest Dayton, Ohio, built in 1987 and "
              "maintained by a single long-term owner. Eight three-story buildings hold a balanced mix of one, two and three bedroom homes, 93.8% occupied.</p>"
-             "<p>The asking price is <b>$8,950,000</b> ($93,229 per unit). 72 units retain original finishes and offer an interior renovation program at a measured $170 monthly premium.</p>"),
+             "<p>The asking price is <b>$8,500,000</b> ($88,542 per unit). 72 units retain original finishes and offer an interior renovation program at a measured $170 monthly premium.</p>"),
         page("Property overview", "<p>Year built: <b>1987</b> &middot; Site: <b>7.4 acres</b> &middot; Buildings: 8 three-story walk-ups &middot; Units: <b>96</b> &middot; Average unit size: 945 SF.</p>"
              "<p>Amenities: leasing office and clubhouse, fitness room, swimming pool, playground, laundry in 24 units, 164 open parking spaces. "
              "Parcel IDs R72 00811 0006 and R72 00811 0007, Montgomery County.</p><h3>Unit mix</h3><table><tr><th>Plan</th><th>Type</th><th class='r'>Units</th><th class='r'>SF</th><th class='r'>Market rent</th></tr>" + mix_rows + "</table>"),

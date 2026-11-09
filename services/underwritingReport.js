@@ -25,12 +25,18 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const crypto = require('crypto');
-const { reviewReasons, reviewFix, scoreDeal } = require('./underwritingDeals');
+const { reviewReasons, reviewFix, scoreDeal, shapeCard, reviewFor } = require('./underwritingDeals');
 
 // Bump when the layout or the facts change, so existing PDFs are rebuilt.
+// 16: their price vs the price we would pay, right under the bottom line
+// 15: the bottom line in plain English, our bid, and how to make it work (levers.py), leading page 1
+// 14: a deal underwritten by hand prints the review (checked / fixed / open) instead of the cautions
+// 13: cautions (Year 1 far from the T12; a price that is not the broker's ask) under the score
+// 12: a NEEDS REVIEW deal is scored too, held to an F
+// 11: the score is worked out from the shaped card, as on the tab and Home (it read the raw one, which has no gap to the max price)
 // 4: wider page so every report fits three pages; 3: an unsolved IRR from the earlier template ("NM") prints n/a;
 // 2: unit mix read in full, plain-language parse notes, clearer market-vs-in-place gap
-const REPORT_VERSION = 10;
+const REPORT_VERSION = 16;
 
 // ── formatting: nothing may print "undefined" or "NaN" ──────────────────────
 const isNum = v => typeof v === 'number' && Number.isFinite(v);
@@ -102,6 +108,127 @@ function plainNote(n) {
     .replace(/\s+/g, ' ').trim();
 }
 
+// ── the bottom line, in plain English ───────────────────────────────────────
+// The owner, 2026-11-01: the report should "explain in plain English why it's a good or bad deal", lead with the
+// price WE would pay rather than the broker's, and show "other ways to do things that could raise the score".
+// Every sentence is built from the model's own numbers (levers.py rebuilds its cash flows and must tie to its IRR);
+// nothing here is written by a language model.
+
+// What each Pro Forma line means when Year 1 differs from the seller's T12. Lines that are one thing to a reader
+// share words (rent and vacancy are one story: the rent roll replaces the T12's market rent and its vacancy) and net.
+const DRIVER_WORDS = [
+  [/^property tax/i, () => 'property tax re-set on the purchase price'],
+  [/^insurance/i, (l, u) => `insurance at ${perUnit(l.year1, u)} a unit (the seller pays ${perUnit(l.t12, u)})`],
+  [/^(repairs|turnover|controllable)/i, () => 'repairs and make-ready at our standard where the seller spends less'],
+  [/^labor|payroll/i, (l, u) => `payroll at ${perUnit(l.year1, u)} a unit (the seller pays ${perUnit(l.t12, u)})`],
+  [/^bad debt/i, () => 'bad debt at 2% of rent'],
+  [/^replacement reserves/i, () => 'replacement reserves of $250 a unit'],
+  [/^miscellaneous/i, () => 'one-time takeover costs of $250 a unit'],
+  [/^(base gross potential rent|vacancy|value-add)/i, () => 'rent and occupancy from today’s rent roll'],
+  [/concessions/i, () => 'move-in concessions'],
+  [/^other income/i, () => 'other income'],
+  [/^management fee/i, () => 'the 3% management fee'],
+  [/^utilit/i, () => 'utilities'],
+  [/^other controllable/i, () => 'other operating costs'],
+];
+const perUnit = (v, u) => isNum(v) && u ? '$' + Math.round(v / u).toLocaleString('en-US') : NA;
+// 'an 8-year', 'an 8.38% cap', 'an 11% …', 'an 18 …': the numbers read aloud with a vowel sound
+const an = s => (/^(8|11|18)(?!\d)|^8\d(?!\d)/.test(String(s).replace(/^[−$]/, '')) ? 'an ' : 'a ') + s;
+const SKIP_DRIVER = /^(adjusted gross potential rent|net rental income|effective gross income|total operating expenses|net operating income|noi margin)/i;
+
+function noiDrivers(lines, t12Noi, units) {
+  const out = new Map();
+  for (const l of lines || []) {
+    if (!l || SKIP_DRIVER.test(l.label) || !isNum(l.t12) || !isNum(l.year1)) continue;
+    // income lines help NOI when they rise, expense lines (positive amounts, below EGI) hurt it
+    const income = /rent|vacancy|bad debt|concession|other income|value-add/i.test(l.label) && !/^repairs/i.test(l.label);
+    const effect = income ? l.year1 - l.t12 : l.t12 - l.year1;
+    const hit = DRIVER_WORDS.find(([re]) => re.test(l.label));
+    const words = hit ? hit[1](l, units) : l.label.toLowerCase();
+    out.set(words, (out.get(words) || 0) + effect);
+  }
+  const floor = Math.abs(t12Noi || 0) * 0.01;
+  return [...out.entries()].map(([words, effect]) => ({ words, effect })).filter(d => Math.abs(d.effect) >= floor)
+    .sort((a, b) => a.effect - b.effect);
+}
+
+function bottomLine(facts, card, { price, units, irr, tgt, tgtTxt, meets }) {
+  const lv = facts.levers;
+  if (!lv || lv.error || !price) return null;
+  const bid = lv.bid && isNum(lv.bid.price) ? lv.bid : null;
+  const t12 = isNum(card.t12_noi) ? card.t12_noi : null;
+  const y1 = isNum(card.year1_noi) ? card.year1_noi : null;
+  const per = v => isNum(v) && units ? ` (${moneyK(v / units)} a unit)` : '';
+  const hold = isNum(lv.hold) ? lv.hold : card.hold_years;
+  const why = [];
+
+  why.push(card.price_from_ask
+    ? `The asking price is ${moneyK(price)}${per(price)}${t12 ? `, ${an(pct(t12 / price, 2))} cap rate on the seller's last 12 months of NOI` : ''}.`
+    : `No asking price was given, so the model prices it at the seller's T12 NOI ÷ our ${isNum(card.purchase_cap) ? pct(card.purchase_cap, 1) : '5.5%'} cap: ${moneyK(price)}${per(price)}.`);
+  why.push(`At that price we would earn ${pct(irr, 1)} a year on our equity over ${an(hold + '-year')} hold, against our ${tgtTxt} target.`);
+
+  if (t12 && y1) {
+    const drop = 1 - y1 / t12;
+    const drivers = noiDrivers(facts.pro_forma && facts.pro_forma.lines, t12, units);
+    const hurt = drivers.filter(d => d.effect < 0).slice(0, 5);
+    const help = drivers.filter(d => d.effect > 0).slice(-2).reverse();
+    if (Math.abs(drop) >= 0.03) {
+      let s = `Our Year-1 NOI is ${moneyK(y1)}, ${pct(Math.abs(drop), 0)} ${drop > 0 ? 'below' : 'above'} the seller's ${moneyK(t12)}`;
+      if (drop > 0 && hurt.length) s += `, because we underwrite what a new owner actually pays: ${hurt.map(d => `${d.words} (−${moneyK(-d.effect)})`).join('; ')}`;
+      if (help.length && drop > 0) s += `. Partly offset by ${help.map(d => `${d.words} (+${moneyK(d.effect)})`).join(' and ')}`;
+      if (drop < 0 && help.length) s += `, mainly ${help.map(d => `${d.words} (+${moneyK(d.effect)})`).join(' and ')}`;
+      why.push(s + '.');
+    } else {
+      why.push(`Our Year-1 NOI (${moneyK(y1)}) is within 3% of the seller's T12 (${moneyK(t12)}).`);
+    }
+    const yieldOnPrice = y1 / price;
+    const rate = (facts.inputs || []).find(i => /^loan interest rate/i.test(String(i.label || '')));
+    const r = rate && isNum(rate.value) ? rate.value : null;
+    // negative leverage: worth a sentence when the property yields less than the loan costs; the main reason when by a point or more
+    if (r != null && yieldOnPrice < r - 0.0025) {
+      const cf1 = facts.pro_forma && facts.pro_forma.after_debt ? (facts.pro_forma.after_debt[1] ?? facts.pro_forma.after_debt['1']) : null;
+      why.push(`At ${moneyK(price)} the property earns ${pct(yieldOnPrice, 1)} on the price in Year 1 while the loan costs ${pct(r, 1)}, so borrowing lowers our return instead of raising it`
+        + (isNum(cf1) && cf1 < 0 ? ` (Year 1 loses ${money(-cf1)} after the loan and our fee)` : '')
+        + (yieldOnPrice < r - 0.01 ? '. That is the main reason the return is low.' : '.'));
+    }
+  }
+
+  let headline;
+  if (meets) {
+    headline = `Works at ${moneyK(price)}: ${pct(irr, 1)} against our ${tgtTxt} target.` + (bid ? ` We could pay up to ${moneyK(bid.price)}${per(bid.price)} and still make ${tgtTxt}.` : '');
+  } else if (bid) {
+    headline = (bid.vs_price > -0.05 ? `Close at ${moneyK(price)} (${pct(irr, 1)}).` : `Does not work at ${moneyK(price)} (${pct(irr, 1)}).`)
+      + ` Our bid: ${moneyK(bid.price)}${per(bid.price)}, ${pct(Math.abs(bid.vs_price), 0)} below — the most we can pay and still make ${tgtTxt}.`;
+    why.push(`Our bid of ${moneyK(bid.price)} is ${an(pct(t12 ? t12 / bid.price : bid.cap_on_t12, 2))} cap rate on the seller's T12 NOI. A broker will compare that cap rate to recent sales, so it is the number to defend in an offer.`);
+  } else {
+    headline = `Does not work at ${moneyK(price)} (${pct(irr, 1)}), and no price between a 2% and a 15% cap on the T12 NOI makes ${tgtTxt}.`;
+  }
+
+  // a deal of several buildings: say whether buying only part of it does better (the Deal Combinations tab
+  // underwrites every mix through the full model)
+  const mixes = (Array.isArray(card.combos) ? card.combos : []).filter(m => isNum(m.irr) && m.mix);
+  if (mixes.length >= 3) {
+    const whole = mixes.reduce((a, m) => (isNum(m.units) && m.units > (a ? a.units : 0) ? m : a), null);
+    const parts = mixes.filter(m => m !== whole).sort((a, b) => b.irr - a.irr);
+    const best = parts[0];
+    if (whole && best) {
+      why.push(best.irr > whole.irr
+        ? `Buying only ${best.mix} does better: ${pct(best.irr, 1)} at its ${moneyK(best.ask)} ask${isNum(best.max_price) ? `, with our bid at ${moneyK(best.max_price)}` : ''}${best.irr >= tgt ? ` — it clears ${tgtTxt}` : ` — still short of ${tgtTxt}`}.`
+        : `Splitting it up does not help: each of the ${parts.length} smaller mixes of the buildings does worse than the whole package (the best, ${best.mix} on its own ask, makes ${pct(best.irr, 1)}).`);
+    }
+  }
+
+  const rows = (lv.levers || []).map(l => ({ label: l.label, how: l.how, irr: pct(l.irr, 1), change: isNum(l.change) ? (l.change >= 0 ? '+' : '−') + Math.abs(l.change * 100).toFixed(1) + ' pts' : NA, bid: isNum(l.bid) ? moneyK(l.bid) : (l.key === 'ltv' ? 'n/a' : NA), bidUp: isNum(l.bid) && bid ? '+' + moneyK(l.bid - bid.price) : '' }));
+  const tog = lv.together || {};
+  let leverNote = '';
+  if (isNum(tog.irr)) {
+    leverNote = tog.irr >= tgt
+      ? `Do all three of cheaper debt, lower costs and more income, and it reaches ${pct(tog.irr, 1)} at ${moneyK(price)} — the deal can work at this price if those are real.`
+      : `Even with cheaper debt, lower costs and more income together, it reaches only ${pct(tog.irr, 1)} at ${moneyK(price)}. The price is what has to move${isNum(tog.bid) ? `: with all three, our bid rises to ${moneyK(tog.bid)}` : ''}.`;
+  }
+  return { headline, why, rows, together: { irr: pct(tog.irr, 1), bid: isNum(tog.bid) ? moneyK(tog.bid) : NA, change: isNum(tog.change) ? '+' + (tog.change * 100).toFixed(1) + ' pts' : NA }, leverNote, bid: bid ? moneyK(bid.price) : null };
+}
+
 // ── the report, as data ─────────────────────────────────────────────────────
 function buildReport(facts, ctx = {}) {
   facts = facts || {};
@@ -120,7 +247,10 @@ function buildReport(facts, ctx = {}) {
   const irrFailed = card.irr_failed === true || (card.irr === 0 && isNum(card.equity_multiple) && Math.abs(card.equity_multiple - 1) > 1e-9);
   const irr = irrFailed ? null : (isNum(card.irr) ? card.irr : null);
   const meets = irrFailed ? false : (irr == null ? null : irr >= tgt);
-  const maxPrice = isNum(card.max_price) && card.max_price > 0 ? card.max_price : null;
+  // our bid: levers.py solves it exactly on the model's own cash flows; the workbook's solver interpolates between
+  // cap-rate columns (about $0.1M off), so the exact figure is used wherever both exist
+  const exactBid = facts.levers && facts.levers.bid && isNum(facts.levers.bid.price) ? facts.levers.bid.price : null;
+  const maxPrice = exactBid != null ? exactBid : isNum(card.max_price) && card.max_price > 0 ? card.max_price : null;
   const gap = maxPrice != null && price ? maxPrice - price : null;                    // house estimate
   const cap = price && isNum(card.t12_noi) ? card.t12_noi / price : null;             // house estimate
 
@@ -135,16 +265,16 @@ function buildReport(facts, ctx = {}) {
   const review = { needs: reasons.length > 0, reasons, fix: reasons.length ? reviewFix(Object.assign({}, card, { units, price, price_per_door: card.price_per_door })) : [] };
   const nr = 'n/r';
   const tiles = [
-    { label: 'PRICE RUN', value: moneyK(price), sub: isNum(card.price_per_door) ? money(card.price_per_door) + ' per unit' : NA, src: 'model: Debt & Exit tab · price = T12 NOI ÷ purchase cap, unless overridden' },
+    { label: card.price_from_ask ? 'THEIR ASK' : 'NO ASK · INCOME PRICE', value: moneyK(price), sub: isNum(card.price_per_door) ? money(card.price_per_door) + ' per unit' : NA, src: card.price_from_ask ? 'the broker’s asking price' : 'no ask: T12 NOI ÷ our purchase cap' },
     { label: 'UNITS', value: int(units), sub: isNum(card.occupancy) ? pct(card.occupancy, 1) + ' occupied' : NA, src: T('rent_roll', 'Rent Roll') },
     { label: 'T12 NOI', value: moneyK(card.t12_noi), sub: isNum(card.year1_noi) ? 'Year-1 NOI ' + moneyK(card.year1_noi) : NA, src: T('t12', 'T12 Actuals') },
     { label: 'IN-PLACE CAP RATE', value: pct(cap, 2), sub: OPT + ': T12 NOI ÷ price run', src: 'derived here, not quoted' },
     { label: 'LEVERED IRR', value: irrFailed ? 'n/a' : pct(irr, 1), sub: irrFailed ? 'equity not recovered' : (meets == null ? NA : (meets ? 'meets ' : 'below ') + tgtTxt + ' target'), src: `model: Debt & Exit, ${isNum(card.hold_years) ? card.hold_years + '-year hold' : 'hold period'}`, tone: meets === true ? 'good' : meets === false ? 'bad' : '' },
-    { label: `MAX PRICE @ ${tgtTxt} IRR`, value: maxPrice != null ? moneyK(maxPrice) : 'no solve', sub: gap != null ? `${gap >= 0 ? '+' : '−'}${moneyK(Math.abs(gap))} (${gap >= 0 ? '+' : '−'}${Math.abs(Math.round(gap / price * 100))}%) vs price run — ${OPT}` : 'the solver returned no price', src: 'model: Max Price Solver', tone: gap == null ? '' : gap >= 0 ? 'good' : 'bad' },
+    { label: `OUR BID @ ${tgtTxt} IRR`, value: maxPrice != null ? moneyK(maxPrice) : 'no solve', sub: gap != null ? `${gap >= 0 ? '+' : '−'}${moneyK(Math.abs(gap))} (${gap >= 0 ? '+' : '−'}${Math.abs(Math.round(gap / price * 100))}%) vs ${card.price_from_ask ? 'their ask' : 'the income price'} — ${OPT}` : 'the solver returned no price', src: exactBid != null ? 'the price that makes the target on the model’s cash flows' : 'model: Max Price Solver', tone: gap == null ? '' : gap >= 0 ? 'good' : 'bad' },
   ];
   if (review.needs) {
     for (const t of tiles) {
-      if (/^(PRICE RUN|IN-PLACE CAP RATE|LEVERED IRR|MAX PRICE)/.test(t.label)) { t.value = nr; t.sub = 'not reliable: see the review box'; t.tone = 'bad'; }
+      if (/^(THEIR ASK|NO ASK|IN-PLACE CAP RATE|LEVERED IRR|OUR BID)/.test(t.label)) { t.value = nr; t.sub = 'not reliable: see the review box'; t.tone = 'bad'; }
     }
   }
   const tiles2 = [
@@ -166,6 +296,19 @@ function buildReport(facts, ctx = {}) {
       ? ` The model's solver puts the most that could be paid and still reach ${tgtTxt} at ${moneyK(maxPrice)}, ${gap >= 0 ? 'above' : 'below'} the price run by ${moneyK(Math.abs(gap))} (${Math.abs(Math.round(gap / price * 100))}%; the gap is an ${OPT}).`
       : ` The model's max-price solver returned no price${meets ? '; the price run already meets the target, so the room above it was not solved' : ''}.`;
   }
+
+  // their price against ours (the owner, 2026-11-01: "for each deal, a price we're willing to pay versus the price they give")
+  const versus = (!review.needs && price && maxPrice != null) ? (() => {
+    const d = maxPrice - price, pc = d / price, per = v => isNum(units) && units ? ` · ${moneyK(v / units)} a unit` : '';
+    return {
+      theirLabel: card.price_from_ask ? 'THEIR ASKING PRICE' : 'NO ASK GIVEN', their: moneyK(price),
+      theirSub: card.price_from_ask ? `${per(price).slice(3) || ' '}` : `the price the income supports at our ${isNum(card.purchase_cap) ? pct(card.purchase_cap, 1) : '5.5%'} cap${per(price)}`,
+      our: moneyK(maxPrice), ourSub: `the most that makes ${tgtTxt}${per(maxPrice)}`,
+      gap: d >= 0 ? `${moneyK(d)} of room` : `${moneyK(Math.abs(d))} (${Math.abs(Math.round(pc * 100))}%)`,
+      gapSub: d >= 0 ? `we could pay ${Math.round(pc * 100)}% more and still make ${tgtTxt}` : `below ${card.price_from_ask ? 'their ask' : 'the income price'}: ${Math.abs(pc) <= 0.1 ? 'a negotiable gap' : Math.abs(pc) <= 0.2 ? 'a hard negotiation' : 'unlikely to close'}`,
+    };
+  })() : null;
+  const bottom = review.needs ? null : bottomLine(facts, card, { price, units, irr, tgt, tgtTxt, meets });
 
   // property & deal facts
   const mixBlend = mix.length ? mix.reduce((a, m) => ({ sf: a.sf + (m.avg_sf || 0) * (m.units || 0), mk: a.mk + (m.avg_market || 0) * (m.units || 0), n: a.n + (m.units || 0) }), { sf: 0, mk: 0, n: 0 }) : null;
@@ -275,7 +418,7 @@ function buildReport(facts, ctx = {}) {
   return {
     version: REPORT_VERSION,
     header: { name, address: text(prop.address) !== NA ? text(prop.address) : text(card.address), runDate: ctx.runDate ? shortDate(ctx.runDate) : NA, generated: ctx.generated ? shortDate(ctx.generated) : NA, file: text(ctx.file) },
-    review, score: review.needs ? null : scoreDeal(Object.assign({}, card, { needs_review: false, gap_pct: gap != null && price ? gap / price : null })), noRecord: !idx.known, tiles, tiles2, verdict, tgtTxt,
+    versus, bottom, review, score: scoreDeal(Object.assign(shapeCard(card), { needs_review: review.needs })), cautions: review.needs ? [] : shapeCard(card).cautions, handReview: reviewFor(shapeCard(card).name, path.basename(String(ctx.file || ''))), noRecord: !idx.known, tiles, tiles2, verdict, tgtTxt,
     facts: factsRows, stack, scenarios,
     rent: { rows: rentRows, mix: mixRows, mixMore },
     t12: { span: t12Span, rows: t12Rows, zeroLines, noi: money(t12.kpis && t12.kpis.noi), margin: pct(t12.kpis && t12.kpis.margin, 1), src: T('t12', 'T12 Actuals') },
@@ -291,11 +434,30 @@ function renderHtml(r) {
   const h = [];
   const row2 = (a, b, c) => `<tr><td>${esc(a)}</td><td class="r"><b>${esc(b)}</b></td><td class="src">${esc(c)}</td></tr>`;
   h.push(`<table><tr><td class="band"><h1>${esc(r.header.name)}</h1><p>${esc(r.header.address)}</p><p>Underwriting summary · model run ${esc(r.header.runDate)} · report generated ${esc(r.header.generated)}</p></td></tr></table>`);
+  if (r.bottom) h.push(`<table cellspacing="4"><tr><td class="bottom"><p class="big">${esc(r.bottom.headline)}</p>${r.bottom.why.map(x => `<p>• ${esc(x)}</p>`).join('')}</td></tr></table>`);
+  if (r.versus) h.push(`<table cellspacing="4"><tr><td class="vs"><p class="lbl">${esc(r.versus.theirLabel)}</p><p class="big">${esc(r.versus.their)}</p><p>${esc(r.versus.theirSub)}</p></td><td class="vs"><p class="lbl">THE PRICE WE WOULD PAY</p><p class="big good">${esc(r.versus.our)}</p><p>${esc(r.versus.ourSub)}</p></td><td class="vs"><p class="lbl">TO NEGOTIATE</p><p class="big">${esc(r.versus.gap)}</p><p>${esc(r.versus.gapSub)}</p></td></tr></table>`);
+  // the hand review sits under the numbers it vouches for when the page leads with the bottom line, else up top
+  const hr = r.handReview;
+  const hl = (t, xs) => (xs || []).length ? `<p><b>${t}</b></p>${xs.map(x => `<p>• ${esc(x)}</p>`).join('')}` : '';
+  const reviewBox = () => {
+    if (hr) h.push(`<table cellspacing="4"><tr><td class="reviewed"><p><b>Underwritten by hand ${esc(hr.reviewed || '')}${hr.current ? '' : ' (an earlier run)'}.</b> ${esc(hr.summary)}</p>${hl('What was checked', hr.checked)}${hl('What was wrong and is fixed', hr.fixed)}${hl('Still open', hr.open)}</td></tr></table>`);
+    else if (r.cautions && r.cautions.length) h.push(`<table cellspacing="4"><tr><td class="caution"><p><b>Check before relying on the score.</b></p>${r.cautions.map(x => `<p>• ${esc(x)}</p>`).join('')}</td></tr></table>`);
+  };
+  if (!r.bottom) reviewBox();
   if (r.review && r.review.needs) h.push(`<table cellspacing="4"><tr><td class="review"><p><b>NEEDS REVIEW: do not rely on this deal's price or returns.</b></p>${r.review.reasons.map(x => `<p>• ${esc(x)}</p>`).join('')}${(r.review.fix || []).map(x => `<p><b>What would fix it:</b> ${esc(x)}</p>`).join('')}</td></tr></table>`);
   const tile = t => `<td class="tile" width="33%"><p class="lbl">${esc(t.label)}</p><p class="big ${t.tone || ''}">${esc(t.value)}</p><p>${esc(t.sub)}</p><p class="src">${esc(t.src)}</p></td>`;
   h.push(`<table cellspacing="6"><tr>${r.tiles.slice(0, 3).map(tile).join('')}</tr><tr>${r.tiles.slice(3).map(tile).join('')}</tr></table>`);
   h.push(`<table><tr>${r.tiles2.map(t => `<td><p class="lbl">${esc(t[0].toUpperCase())}</p><p><b>${esc(t[1])}</b></p><p class="src">${esc(t[2])}</p></td>`).join('')}</tr></table>`);
-  h.push(`<p style="margin-top:8pt"><b>${esc(r.verdict)}</b></p>`);
+  const b = r.bottom;
+  if (b) {
+    h.push('<h2>How to make it work</h2>');
+    h.push(`<table><tr><th>If we could…</th><th class="r">IRR at ${esc(r.tiles[0].value)}</th><th class="r">Change</th><th class="r">Our bid becomes</th></tr>${b.rows.map(l => `<tr><td><b>${esc(l.label)}</b><br/><span class="src">${esc(l.how)}</span></td><td class="r">${esc(l.irr)}</td><td class="r">${esc(l.change)}</td><td class="r">${esc(l.bid)}${l.bidUp ? `<br/><span class="src">${esc(l.bidUp)}</span>` : ''}</td></tr>`).join('')}<tr class="tot"><td>Cheaper debt, lower costs and more income, together</td><td class="r">${esc(b.together.irr)}</td><td class="r">${esc(b.together.change)}</td><td class="r">${esc(b.together.bid)}</td></tr></table>`);
+    if (b.leverNote) h.push(`<p style="margin-top:4pt"><b>${esc(b.leverNote)}</b></p>`);
+    h.push(`<p class="src">house estimate: each line re-runs the model's own cash flows (property tax re-set at each price, as the model does) with that one change. "Our bid" is the price that makes ${esc(r.tgtTxt)}. The sizes are examples to judge against this property, not promises.</p>`);
+    reviewBox();
+  } else {
+    h.push(`<p style="margin-top:8pt"><b>${esc(r.verdict)}</b></p>`);
+  }
 
   h.push('<h2>Property and deal facts</h2>');
   if (r.noRecord) h.push('<p class="src">Original file names were not kept for this deal (run before the 2026-10-21 tracking); each figure is cited to the model tab it was read from.</p>');
@@ -308,6 +470,7 @@ function renderHtml(r) {
 
   if (r.score && r.score.score != null) {
     h.push(`<h2>Deal score: ${r.score.score} / 100 (${esc(r.score.grade)})</h2>`);
+    if (r.score.capped) h.push(`<p class="muted">${esc(r.score.note)}.</p>`);
     h.push(`<table><tr><th>Factor</th><th class="r">Points</th><th>What drove it</th></tr>${r.score.parts.map(p => `<tr><td>${esc(p.label)}</td><td class="r">${p.points} / ${p.weight}</td><td class="muted">${esc(p.why)}</td></tr>`).join('')}</table>`);
     h.push('<p class="src">house estimate: the score weighs the model\'s own results against our targets; the factors and thresholds are set on the Underwriting tab.</p>');
   }
@@ -369,7 +532,10 @@ function createReports({ dir, runPython, provenanceOf, markReport, reportMeta })
     if (!fs.existsSync(p) || fs.statSync(p).size < 500) return false;
     if (fs.statSync(p).mtimeMs < fs.statSync(modelPath(file)).mtimeMs - 5000) return false;     // the model was rewritten (5 s of slack: a git checkout or a copy writes the pair in either order)
     const meta = reportMeta ? reportMeta(file) : null;
-    return !meta || meta.v === REPORT_VERSION;
+    if (meta && meta.v !== REPORT_VERSION) return false;
+    // a hand review that changed after the PDF was built (config/underwriting-reviews.json) makes it stale too
+    if (meta && meta.name != null && (meta.review || '') !== reviewStamp(meta.name, file)) return false;
+    return true;
   }
 
   // One report at a time, whoever asks. Each build starts a Python process that loads a whole workbook, and the
@@ -393,7 +559,7 @@ function createReports({ dir, runPython, provenanceOf, markReport, reportMeta })
       const res = await runPython('html_to_pdf.py', [tmpHtml, out, footerText(report), `${report.header.name} - underwriting summary`], 120000);
       if (res.error) throw new Error(res.error);
       fs.renameSync(out, pdfPath(file));
-      if (markReport) markReport(file, { v: REPORT_VERSION, at: new Date().toISOString(), pages: res.pages });
+      if (markReport) markReport(file, { v: REPORT_VERSION, at: new Date().toISOString(), pages: res.pages, name: report.header.name, review: reviewStamp(report.header.name, file) });
       return { pages: res.pages, bytes: res.bytes };
     } finally {
       fs.unlink(tmpHtml, () => {});
@@ -430,6 +596,12 @@ function createReports({ dir, runPython, provenanceOf, markReport, reportMeta })
   }
 
   return { ensure, backfill, pdfPath, isFresh };
+}
+
+// what the hand review printed in a report said, as a short hash, so a review edited later rebuilds the PDF
+function reviewStamp(name, file) {
+  const r = reviewFor(name, path.basename(String(file || '')));
+  return r ? crypto.createHash('sha1').update(JSON.stringify(r)).digest('hex').slice(0, 12) : '';
 }
 
 // same stamp rule the board uses for "run date"

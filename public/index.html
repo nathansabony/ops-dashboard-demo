@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Portfolio Management Dashboard Demo</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="/vendor/chart.umd.js"></script>
 <script>
 // ── Who is signed in, and which tools they have (2026-10-07) ─────────────────
 // The server writes window.__OP_USER into the page (server.js, GET /). A tool the
@@ -195,14 +195,14 @@ function opCanAny() { for (var i = 0; i < arguments.length; i++) if (opCan(argum
   LocalChart.version='local-fallback'; LocalChart.instances=registry; window.Chart=LocalChart;
 })();
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="/vendor/xlsx.full.min.js"></script>
+<script src="/vendor/papaparse.min.js"></script>
+<script src="/vendor/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.4/tesseract.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500;600&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Inter',sans-serif;background:#F7F5F0;color:#14342A;font-size:13px;}
+body{font-family:'Inter',sans-serif;background:#F7F5F0;color:#14342A;font-size:13px;overflow-x:clip;}
 
 /* NAV */
 .nav{background:#FFFDFA;border-bottom:1px solid #E6E1D6;padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(62,58,51,0.06);}
@@ -1238,6 +1238,8 @@ select.bedit-input{text-align:left;width:auto;color:#14532D;}
 .uwd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;}
 .uwd-card{background:#FFFDFA;border:1px solid #E6E1D6;border-left:5px solid #C2B9A4;border-radius:12px;padding:14px 16px 12px;box-shadow:0 1px 3px rgba(62,58,51,.05);display:flex;flex-direction:column;gap:10px;}
 .uwd-card.pass{border-left-color:#14532D;} .uwd-card.fail{border-left-color:#8C2020;} .uwd-card.review{border-left-color:#8C2020;background:#FBF6F5;}
+.uwd-reviewed{margin:6px 0 4px;padding:7px 10px;border:1px solid #B9D3B0;border-left:4px solid #2F6B3A;background:#EEF5EA;color:#23452A;font-size:11.5px;line-height:1.45;border-radius:4px;} .uwd-reviewed b{display:block;margin-bottom:3px;}
+.uwd-caution{margin:6px 0 4px;padding:7px 10px;border:1px solid #E2C98F;border-left:4px solid #A06A00;background:#FBF4E4;color:#6B4A00;font-size:11.5px;line-height:1.45;border-radius:4px;} .uwd-caution b{display:block;margin-bottom:3px;}
 .uwd-review{margin:6px 0 4px;padding:7px 10px;border:1px solid #D9A3A3;border-left:4px solid #8C2020;background:#F7EDEC;color:#8C2020;font-size:11.5px;line-height:1.45;border-radius:4px;} .uwd-review b{display:block;margin-bottom:3px;letter-spacing:.02em;}
 .uwd-num .v.nr{color:#8C2020;font-style:italic;font-weight:600;}
 .uwd-unread{margin-top:14px;border:1px solid #D9A3A3;border-radius:6px;background:#FBF6F5;padding:10px 12px;} .uwd-unread h4{margin:0 0 6px;font-size:12px;color:#8C2020;} .uwd-unread .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12px;padding:4px 0;border-top:1px solid #EBD3D0;} .uwd-unread .row:first-of-type{border-top:0;} .uwd-unread .why{flex:1;min-width:200px;color:#5A5348;}
@@ -1588,6 +1590,70 @@ a.hm-ins-link:focus-visible{outline:2px solid #14532D;outline-offset:1px;}
 @media (max-width:980px){.vh-grid{grid-template-columns:minmax(0,1fr);}}
 .vh-col{display:flex;flex-direction:column;gap:14px;min-width:0;}
 .vh-card{background:#FFFDFA;border:1px solid #E6E1D6;border-radius:12px;padding:16px 18px;min-width:0;}
+/* Hand reviews (2026-11-01): the "Start here" tiles over the dashboard, and the
+   analyst report that leads a reviewed flag's card. */
+.vrv-start{border-left:5px solid #14342A;margin-bottom:14px;}
+.vrv-start .vh-h h3{font-size:18px;}
+.vrv-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;}
+.vrv-tile{display:flex;flex-direction:column;gap:5px;text-align:left;background:#fff;border:1px solid #E6E1D6;border-radius:10px;
+  padding:12px 13px;cursor:pointer;font-family:inherit;color:#14342A;min-width:0;}
+.vrv-tile:hover{border-color:#14342A;box-shadow:0 2px 8px rgba(20,52,42,.08);}
+.vrv-tile-top{display:flex;align-items:center;gap:8px;}
+.vrv-tile-n{width:22px;height:22px;border-radius:50%;background:#14342A;color:#fff;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex:none;}
+.vrv-tile-where{font-size:14px;font-weight:800;line-height:1.2;}
+.vrv-tile-line{font-size:11.5px;color:#6B645A;font-weight:700;}
+.vrv-tile-h{font-size:12.5px;line-height:1.4;color:#2B2722;}
+.vrv-tile-foot{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:6px;border-top:1px dashed #E6E1D6;font-size:11.5px;color:#6B645A;}
+.vrv-tile-foot b{color:#8C2020;font-size:13px;}
+.vrv-tile-go{margin-left:auto;font-weight:800;color:#14342A;white-space:nowrap;}
+.vrv-chip{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:999px;border:1px solid;white-space:nowrap;letter-spacing:.01em;}
+.vrv-rowtag{background:#EAF3EC;color:#14653B;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.vrv-report{background:#FFFDFA;border:1px solid #E6E1D6;border-left:5px solid #14342A;border-radius:12px;padding:18px 20px;margin:10px 0 14px;color:#2B2722;}
+.vrv-eyebrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#6B645A;}
+.vrv-title{margin:8px 0 4px;font-size:20px;line-height:1.25;color:#14342A;font-weight:900;letter-spacing:-.01em;}
+.vrv-plain{background:#fff;border:1px solid #E6E1D6;border-left:5px solid #857D70;border-radius:9px;padding:9px 13px;margin:0 0 8px;}
+.vrv-plain p{margin:2px 0 0;font-size:15.5px;line-height:1.45;font-weight:700;color:#2B2722;}
+.vrv-plain-h{font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#857D70;}
+.vrv-found{background:#F4F8F5;border-left-color:#14342A;margin-bottom:12px;} .vrv-found .vrv-plain-h{color:#14342A;}
+.vrv-loading{opacity:.9;} .vrv-limit{color:#8F4419;}
+.vrv-figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:6px;}
+.vrv-fig{background:#fff;border:1px solid #E6E1D6;border-radius:9px;padding:9px 11px;display:flex;flex-direction:column;gap:2px;min-width:0;}
+.vrv-fig span{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#857D70;}
+.vrv-fig b{font-size:19px;color:#14342A;font-variant-numeric:tabular-nums;}
+.vrv-fig b.vrv-conf{font-size:15px;}
+.vrv-fig small{font-size:11px;color:#6B645A;line-height:1.35;}
+.vrv-fig-hot{border-color:#DEB4B4;background:#FCF6F5;} .vrv-fig-hot b{color:#8C2020;}
+.vrv-sec{margin-top:14px;}
+.vrv-sec h3{margin:0 0 6px;font-size:11px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:#14342A;border-bottom:1px solid #E6E1D6;padding-bottom:4px;}
+.vrv-lead{margin:0;font-size:14px;line-height:1.6;}
+.vrv-list{margin:0;padding-left:18px;font-size:13.5px;line-height:1.55;} .vrv-list li{margin:3px 0;}
+/* Drawn at its own proportions, never stretched: a wide screen made the bars and month labels smear sideways. */
+.vrv-chart{width:100%;max-width:680px;height:auto;display:block;}
+.vrv-dim{font-size:11.5px;color:#857D70;line-height:1.4;}
+.vrv-cov{display:flex;align-items:center;gap:10px;font-size:12.5px;margin-bottom:8px;flex-wrap:wrap;}
+.vrv-cov-bar{width:140px;height:9px;border-radius:9px;background:#F0D9D6;overflow:hidden;flex:none;}
+.vrv-cov-bar i{display:block;height:100%;background:#14653B;}
+.vrv-tablewrap{overflow-x:auto;}
+.vrv-table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:640px;}
+.vrv-table th{text-align:left;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#857D70;border-bottom:1px solid #D8D1C2;padding:6px 8px 6px 0;}
+.vrv-report .vrv-table td{border-bottom:1px solid #EFEBE2;padding:7px 8px 7px 0;vertical-align:top;text-align:left;font-family:inherit;font-weight:400;font-size:12.5px;color:#2B2722;}
+.vrv-report .vrv-table th{text-align:left;} .vrv-report .vrv-table th.vrv-r{text-align:right;}
+.vrv-report .vrv-table td.vrv-r{text-align:right;font-family:'JetBrains Mono',Consolas,monospace;font-weight:600;}
+.vrv-r{text-align:right;font-variant-numeric:tabular-nums;} .vrv-nw{white-space:nowrap;}
+.vrv-st{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;line-height:1.35;}
+.vrv-st-ok{background:#EAF3EC;color:#14653B;} .vrv-st-warn{background:#F7F1E3;color:#7A4E0E;} .vrv-st-bad{background:#F7EDEC;color:#8C2020;}
+.vrv-file{display:block;color:#14342A;font-weight:700;text-decoration:none;font-size:12px;margin:1px 0;word-break:break-word;}
+.vrv-file:hover{text-decoration:underline;}
+.vrv-nofile{font-size:11.5px;color:#B42318;font-weight:700;}
+.vrv-actions{margin:0;padding-left:20px;font-size:13.5px;line-height:1.55;} .vrv-actions li{margin:5px 0;}
+.vrv-who{display:inline-block;font-size:10.5px;font-weight:800;background:#14342A;color:#fff;border-radius:5px;padding:1px 7px;margin-right:7px;vertical-align:1px;}
+.vrv-checked .vrv-list{font-size:12.5px;color:#4A443C;}
+.vrv-divider{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#857D70;margin:4px 0 8px;display:flex;align-items:center;gap:10px;}
+.vrv-divider::after{content:'';flex:1;border-top:1px solid #E6E1D6;}
+#vrv-overlay{position:fixed;inset:0;background:rgba(20,30,25,.45);z-index:9000;overflow:auto;padding:30px 16px;}
+.vrv-ov-in{max-width:980px;margin:0 auto;}
+.vrv-ov-bar{display:flex;align-items:center;gap:10px;background:#FFFDFA;border-radius:10px;padding:8px 12px;font-size:12.5px;color:#6B645A;}
+@media (max-width:640px){.vrv-report{padding:14px 13px;} .vrv-title{font-size:17px;} .vrv-headline{font-size:14px;}}
 .vh-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
 .vh-h h3{margin:0;font-size:15px;font-weight:900;color:#14342A;letter-spacing:-.01em;}
 .vh-top .vh-h h3{font-size:18px;}
@@ -2152,6 +2218,20 @@ body[data-tab="admin"]       {--tab:#475569;--tab-tint:#F8FAFC;--tab-tint-2:#F1F
 /* ── visible keyboard focus everywhere, in the accent ── */
 :focus-visible{outline:2px solid var(--tab);outline-offset:2px;}
 
+/* ── laptops: tighten the nav so every tab (Service Requests last) fits at 1280-1560px ── */
+@media (min-width:901px) and (max-width:1560px){
+  .nav{padding:0 16px;gap:10px;}
+  .nav-tabs{gap:0;}
+  .tab{padding:8px 8px;font-size:12.5px;}
+  .nav input[type="text"],.nav input[type="search"]{max-width:190px;}
+  .logo{font-size:15.5px;}
+}
+@media (min-width:901px) and (max-width:1360px){
+  .tab{padding:8px 6px;font-size:12px;}
+  .nav input[type="text"],.nav input[type="search"]{max-width:120px;}
+  .logo{font-size:14px;}
+  .demo-tag{margin-left:5px;}
+}
 /* ── phones: the nav scrolls instead of running off the edge; grids stack ── */
 @media (max-width:900px){
   .nav{height:auto;flex-wrap:wrap;gap:8px;padding:10px 14px;}
@@ -2270,8 +2350,9 @@ body[data-tab="admin"]       {--tab:#475569;--tab-tint:#F8FAFC;--tab-tint-2:#F1F
    ranking, the tier edge, the hover and the click are untouched. */
 .vt-rail.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:4px;align-content:start;}
 .vt-rail.cards .vt-row{display:grid;align-items:center;column-gap:6px;row-gap:0;margin-bottom:0;padding:5px 8px;
-  grid-template-columns:auto auto auto minmax(0,1fr) auto;
-  grid-template-areas:"rank score amt title pdf" "sub sub sub sub sub";}
+  grid-template-columns:auto auto minmax(0,1fr) auto;
+  grid-template-areas:"rank score amt pdf" "title title title title" "sub sub sub sub" "rev rev rev rev";}
+.vt-rail.cards .vt-rowtag-slot,.vt-rail.cards .vt-rtag{grid-area:rev;justify-self:start;margin-top:3px;}
 /* .vt-rmain stacked the title over the sub line. In a card the two are grid
    items of the card itself, so the first line can carry all four leads. */
 .vt-rail.cards .vt-rmain{display:contents;}
@@ -5837,8 +5918,8 @@ function homeRender(s) {
     else if (d.noneSolved) {
       // nothing on the board has a result: say so in words, name the newest run and why it has none
       $('hm-deal').innerHTML = `<div class="hm-deal-top"><div><div class="hm-deal-name">No deal has solved yet</div>
-          <div class="hm-deal-sub">The newest run, ${esc(d.name)}${d.ranOn ? ' (' + esc(new Date(d.ranOn + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })) + ')' : ''}, could not be scored.</div></div>
-          <div class="hm-score-badge none"><span class="rc-grade rc-none">–</span><div><b>Not scored</b><small>Needs review</small></div></div></div>
+          <div class="hm-deal-sub">The newest run, ${esc(d.name)}${d.ranOn ? ' (' + esc(new Date(d.ranOn + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })) + ')' : ''}, has no usable result yet.</div></div>
+          ${d.score == null ? '<div class="hm-score-badge none"><span class="rc-grade rc-none">–</span><div><b>Not scored</b><small>Needs review</small></div></div>' : `<div class="hm-score-badge"><span class="rc-grade ${ebGradeClass(d.grade)}">${esc(d.grade)}</span><div><b>${d.score} / 100</b><small>Needs review</small></div></div>`}</div>
         ${(d.problems || []).map(t => `<div class="hm-deal-warn">${esc(t)}</div>`).join('')}
         ${d.fix ? `<div class="hm-deal-warn"><b>What would fix it:</b> ${esc(d.fix)}</div>` : ''}
         ${d.key && opCan('underwriting') ? `<button type="button" class="hm-go" onclick="homeOpenDeal(this.dataset.key)" data-key="${esc(d.key)}">Open it on the board →</button>` : ''}`;
@@ -5861,7 +5942,7 @@ function homeRender(s) {
           ${stat('Buy price at target', d.buyPrice == null ? (d.verdict === 'meets' ? 'Any price' : '—') : fmtK(d.buyPrice), d.buyPrice == null ? (d.verdict === 'meets' ? 'clears ' + tgt + ' at every price tested' : d.verdict === 'review' ? 'not reliable' : 'no price clears the target') : 'highest price that still clears ' + tgt)}
         </div>
         ${(d.problems || []).map(t => `<div class="hm-deal-warn">${esc(t)}</div>`).join('')}
-        ${(d.newerNotScored || []).length ? `<div class="hm-deal-warn"><b>Newer runs not scored:</b> ${d.newerNotScored.map(n => `${opCan('underwriting') && n.key ? `<a href="#" onclick="homeOpenDeal(this.dataset.key);return false" data-key="${esc(n.key)}">${esc(n.name)}</a>` : esc(n.name)} (${esc(n.needsReview ? 'needs review' : 'not solved')}: ${esc(n.reason)}${n.fix ? '. To fix: ' + esc(n.fix) : ''})`).join('; ')}</div>` : ''}
+        ${(d.newerNotScored || []).length ? `<div class="hm-deal-warn"><b>Newer runs without a usable result:</b> ${d.newerNotScored.map(n => `${opCan('underwriting') && n.key ? `<a href="#" onclick="homeOpenDeal(this.dataset.key);return false" data-key="${esc(n.key)}">${esc(n.name)}</a>` : esc(n.name)} (${n.score != null ? esc(n.grade + ' · ' + n.score + '/100, ') : ''}${esc(n.needsReview ? 'needs review' : 'not solved')}: ${esc(n.reason)}${n.fix ? '. To fix: ' + esc(n.fix) : ''})`).join('; ')}</div>` : ''}
         ${d.key && opCan('underwriting') ? `<button type="button" class="hm-go" onclick="homeOpenDeal(this.dataset.key)" data-key="${esc(d.key)}">Open the full analysis →</button>` : ''}
         ${(d.unsolved && d.unsolved.length) || (s.unreadable && s.unreadable.length) ? `<details class="hm-unsolved"><summary><b>${(d.unsolved || []).length + (s.unreadable || []).length}</b> deal${(d.unsolved || []).length + (s.unreadable || []).length === 1 ? '' : 's'} did not solve</summary>
           ${(d.unsolved || []).map(u => `<div class="hm-unsolved-row"><b>${esc(u.name)}</b> <small>${esc(u.ranOn)}</small><div>${esc(u.reason)}</div></div>`).join('')}
@@ -10848,7 +10929,7 @@ function getAllSearchableActiveTenants() {
         <option value="best">Best score</option>
         <option value="irr">Highest IRR</option>
         <option value="coc">Highest cash-on-cash</option>
-        <option value="gap">Best gap to max price</option>
+        <option value="gap">Best gap to our bid</option>
         <option value="price">Highest price</option>
         <option value="units">Most units</option>
       </select>
@@ -10856,7 +10937,7 @@ function getAllSearchableActiveTenants() {
     <div class="uwd-grid uwd-top" id="uwd-top"></div>
     <div class="uwd-rest" id="uwd-rest-h" style="display:none">The rest, in the same order</div>
     <div class="uwd-grid" id="uwd-grid"></div>
-    <div class="uwd-note" id="uwd-note" style="display:none">* house estimate — in-place cap rate is the T12 NOI divided by the price the model was run at (the price is itself NOI ÷ the purchase cap rate unless overridden), so read it as "what the model assumed", not a quoted cap rate. IRR, max price and the exit scenarios are the model's own numbers; the gap is max price minus the price run.</div>
+    <div class="uwd-note" id="uwd-note" style="display:none">* house estimate — in-place cap rate is the T12 NOI divided by the price the model was run at (the price is itself NOI ÷ the purchase cap rate unless overridden), so read it as "what the model assumed", not a quoted cap rate. IRR and the exit scenarios are the model's own numbers. Our bid is the most we can pay and still make the IRR target, solved on the model's own cash flows; the gap is our bid minus the price run.</div>
     <div id="uwd-unreadable" style="display:none"></div>
     <details id="uwd-hidden-wrap" style="display:none;margin-top:14px">
       <summary style="cursor:pointer;font-size:12px;font-weight:700;color:#6B645A" id="uwd-hidden-sum"></summary>
@@ -12440,6 +12521,7 @@ async function downloadBudgetExcel(){
     setTimeout(loadLiveData, 300);
     setTimeout(loadMoveData, 600);
     setTimeout(loadDupPayData, 900);
+    loadVarReviews();
   });
 
   // ── Duplicate payments (services/duplicatePayments.js) ──────────────────────
@@ -13078,7 +13160,7 @@ async function downloadBudgetExcel(){
     let src;
     if (!scopeKey) src = _moveData.portfolio;
     else if (scopeKey.indexOf('prop:') === 0) src = _moveData.properties && _moveData.properties[scopeKey.slice(5)];
-    else src = _moveData.entities[scopeKey];
+    else src = _moveData.entities && _moveData.entities[scopeKey];
     return src || null;
   }
 
@@ -14375,7 +14457,7 @@ async function downloadBudgetExcel(){
         members, contact: top.contact, tag: `$0 at ${members.length} properties`,
         score: top.score, scoreRaw: top.scoreRaw, scoreParts: null, scoreAdj: [],
         preliminary: g.list.some(f => f.preliminary),
-        why: `${top.label} has not been entered for <b>${varEsc(range)}</b> at ${members.length} properties — about ${fmtExact(missing)} that normally posts.`,
+        why: `${top.label} has not been entered at ${members.length} properties starting <b>${varEsc(L[g.first] || range)}</b> (each for its own months, listed below) — about ${fmtExact(missing)} that normally posts.`,
       });
       g.list.forEach(f => drop.add(f));
     });
@@ -14772,9 +14854,9 @@ async function downloadBudgetExcel(){
   window.varOpenScopeFlag = function(idx) {
     const f = _varScopeFlags[idx];
     if (!f) return;
-    _varCategory = f.category || 'variance';
-    varSetView('tracker');
-    varOpenCard(varFlagId(f));
+    // Same page as every other way in (2026-11-02): a pill whose flag the tracker no longer lists (it
+    // opened nothing) still has its own numbers, so the case is built from the flag itself.
+    window.varOpenCaseTab(f);
   };
 
   // ── Automated root-cause drill-down ─────────────────────────────────────────
@@ -15320,7 +15402,7 @@ async function downloadBudgetExcel(){
     if (f.reason === 'zeroGroup') {
       const n = (f.members || []).length;
       return { headline: 'Not entered',
-        detail: `${varEsc(f.label)} posted <b>$0</b> for ${varEsc(f.monthLabel)} at every property below. They all went blank within a month of each other, so this is one set of entries that has not been made, not ${n} separate problems.`,
+        detail: `${varEsc(f.label)} posted <b>$0</b> at every property below, starting ${varEsc((f.zeroMonthLabels && f.zeroMonthLabels[0]) || f.monthLabel)} — each for the months listed beside it. They all went blank within a month of each other, so this is one set of entries that has not been made, not ${n} separate problems.`,
         reasons: [],
         action: `Ask accounting to book ${varEsc(f.label.toLowerCase())} for ${varEsc(f.monthLabel)} at these buildings, or confirm it was stopped on purpose.` };
     }
@@ -16134,11 +16216,11 @@ async function downloadBudgetExcel(){
     // row's button is invalid HTML and the parser would close the row early — and its
     // click stops here so it does not also open the card.
     _varRowFlags.set(varFlagId(f), f);
-    const pdfChip = `<span class="vt-pdf" role="button" tabindex="0" title="Print this flag as a PDF report: why it was flagged, and what Rent Manager shows"
+    const pdfChip = `<span class="vt-pdf" role="button" tabindex="0" title="Open the case: the numbers, what we caught, the bills, our analysis, next steps"
         onclick="varReportFromRow(event,'${varAttr(varFlagId(f))}')"
-        onkeydown="if(event.key==='Enter'||event.key===' '){varReportFromRow(event,'${varAttr(varFlagId(f))}')}">⎙ PDF</span>`;
+        onkeydown="if(event.key==='Enter'||event.key===' '){varReportFromRow(event,'${varAttr(varFlagId(f))}')}">Case →</span>`;
     return `<button class="vt-row ${tierCls}${varFlagId(f) === _varSelId ? ' on' : ''}" id="vtrow-${pos}"
-        data-fid="${varAttr(varFlagId(f))}" onclick="${ctx.onOpen || 'varOpenCard'}('${varAttr(varFlagId(f))}')" title="${varAttr(varWhyText(f))}">
+        data-fid="${varAttr(varFlagId(f))}" onclick="varReportFromRow(event,'${varAttr(varFlagId(f))}')" title="${varAttr(varWhyText(f))}">
       ${ctx.rank ? `<span class="vt-rank">${ctx.rank}</span>` : ''}
       <span class="vt-rscore" title="Importance ${f.score || '–'}/5 — open the card for how it was scored" style="${f.score ? varScoreStyle(f.score) : ''}">${f.score || '–'}</span>
       <span class="vt-ramt" style="color:${meta.text};">${varHeadline(f)}</span>
@@ -16146,6 +16228,7 @@ async function downloadBudgetExcel(){
         <span class="vt-rtitle"${ctx.card ? ` title="${varAttr(title)}"` : ''}>${ctx.hideTier ? '' : `<span class="vt-rdot">${meta.dot}</span>`}${varEsc(title)}</span>
         <span class="vt-rsub"${ctx.card ? ` title="${varAttr(subFull)}"` : ''}>${varEsc(subFull)}</span>
         ${ctx.tag ? `<span class="vt-rtag"${ctx.tagTitle ? ` title="${varAttr(ctx.tagTitle)}"` : ''}>${varEsc(ctx.tag)}</span>` : ''}
+        ${varReviewFor(f) ? `<span class="vt-rtag vrv-rowtag" title="${varAttr(varReviewFor(f).headline || '')}">✓ Reviewed · ${varEsc(varReviewFor(f).verdictLabel || '')}</span>` : ''}
       </span>
       ${pdfChip}
     </button>`;
@@ -16738,7 +16821,335 @@ async function downloadBudgetExcel(){
     if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  // ── Hand reviews (2026-11-01, the owner) ──────────────────────────────────────
+  // "On each one, there's a clear English description explaining … why these
+  // actually got flagged rather than just the number jump itself … each one should
+  // open as its own kind of report … and highlight a few of them at the top." The
+  // write-ups live in config/variance-reviews.json (GET /api/variance/reviews),
+  // one per flag, keyed by the flag id minus its rule suffix. Everything a review
+  // says was read from Rent Manager on its `reviewed` date; the live numbers the
+  // detector computed are printed beside it, never mixed into it.
+  let _varReviews = {};
+  async function loadVarReviews() {
+    try {
+      const r = await fetch('/api/variance/reviews', { credentials: 'same-origin' });
+      if (!r.ok) return;
+      const data = await r.json();
+      _varReviews = (data && data.reviews) || {};
+      if (typeof renderFlaggedSummary === 'function') renderFlaggedSummary();
+    } catch (e) { /* no reviews this session */ }
+  }
+  const varReviewKey = f => `${f.scope.key}|${f.key}|${f.monthLabel || ''}`;
+  function varReviewFor(f) { return (f && f.scope && _varReviews[varReviewKey(f)]) || null; }
+  const VAR_VERDICT = {
+    error:    { bg: '#F7EDEC', fg: '#8C2020', bd: '#DEB4B4', word: 'Booking error' },
+    unpaid:   { bg: '#F9F0E6', fg: '#8F4419', bd: '#E0BE97', word: 'Unpaid / past due' },
+    question: { bg: '#F7F1E3', fg: '#7A4E0E', bd: '#E3CB94', word: 'Needs an answer' },
+    process:  { bg: '#F7F1E3', fg: '#7A4E0E', bd: '#E3CB94', word: 'Process problem' },
+    timing:   { bg: '#EDF1F5', fg: '#2D4A66', bd: '#B9C8D8', word: 'Timing, not cost' },
+    real:     { bg: '#EAF3EC', fg: '#14653B', bd: '#B5D3BE', word: 'Real cost' },
+    // the kinds services/varianceReview.js assigns
+    duplicate:       { bg: '#F7EDEC', fg: '#8C2020', bd: '#DEB4B4', word: 'Same bill entered twice' },
+    'wrong-account': { bg: '#F7EDEC', fg: '#8C2020', bd: '#DEB4B4', word: 'Wrong kind of account' },
+    correction:      { bg: '#F9F0E6', fg: '#8F4419', bd: '#E0BE97', word: 'Back-dated or corrected bill' },
+    concentration:   { bg: '#F7F1E3', fg: '#7A4E0E', bd: '#E3CB94', word: 'One big bill' },
+    paperwork:       { bg: '#F7F1E3', fg: '#7A4E0E', bd: '#E3CB94', word: 'No backup on file' },
+    unexplained:     { bg: '#EFEBE2', fg: '#4A443C', bd: '#CFC8B8', word: 'Not explained' },
+  };
+  function varVerdictChip(rv) {
+    const v = VAR_VERDICT[rv.verdict] || VAR_VERDICT.question;
+    return `<span class="vrv-chip" style="background:${v.bg};color:${v.fg};border-color:${v.bd};">${varEsc(rv.verdictLabel || v.word)}</span>`;
+  }
+  function varReviewParts(id) {
+    const [scope, key, month] = String(id).split('|');
+    return { scope, key, month };
+  }
+  function varReviewWhere(id) {
+    const { scope, key } = varReviewParts(id);
+    const item = configItem(key) || {};
+    let place = scope === 'portfolio' || scope === '' ? 'All Entities' : scope;
+    if (scope.indexOf('prop:') === 0 && _liveData && _liveData.properties[scope.slice(5)]) {
+      const p = _liveData.properties[scope.slice(5)];
+      place = `${String(p.name || '').replace(/\s+/g, ' ').trim()}${p.entity && p.entity !== p.name ? ' · ' + p.entity : ''}`;
+    }
+    return { place, line: item.label || key };
+  }
+  // Invoices and backup: share of the listed bills (by dollars) that have a file.
+  function varReviewCoverage(rv) {
+    const rows = (rv.bills || []).filter(b => b.billId || (b.files && b.files.length));
+    const all = rows.reduce((t, b) => t + Math.abs(b.amount || 0), 0);
+    const withFile = rows.filter(b => b.files && b.files.length);
+    const covered = withFile.reduce((t, b) => t + Math.abs(b.amount || 0), 0);
+    return { n: rows.length, nFile: withFile.length, pct: all ? covered / all : 0, covered, all };
+  }
+  function varReviewFileUrl(id, b, file, rv) {
+    const parsed = varReviewParts(id);
+    const scope = (rv && rv.scope != null ? rv.scope : parsed.scope), key = parsed.key;
+    const q = new URLSearchParams({ scope, key, from: b.month, to: b.month, posting: b.posting, attachment: String(file.id) });
+    return `/api/variance/invoice/file?${q.toString()}`;
+  }
+  // The line's months around the reviewed one, as bars — the flagged month in red.
+  function varReviewChartSvg(id, rv, f) {
+    if (!_liveData) return '';
+    const { scope, key, month } = varReviewParts(id);
+    const labels = _liveData.months || [];
+    const series = fullSeries(f && f.scope ? f.scope.key : (scope === 'portfolio' ? '' : scope), key);
+    if (!series.length) return '';
+    let end = labels.indexOf(month);
+    const focus = end;
+    if (end < 0) end = labels.length - 1;
+    end = Math.min(labels.length - 1, end + 3);
+    const start = Math.max(0, end - 15);
+    const vals = series.slice(start, end + 1).map(v => (Number.isFinite(v) ? v : 0));
+    const labs = labels.slice(start, end + 1);
+    const W = 640, H = 150, padL = 8, padB = 22, padT = 16;
+    const max = Math.max(1, ...vals.map(v => Math.abs(v)));
+    const bw = (W - padL * 2) / vals.length;
+    const zero = vals.some(v => v < 0) ? (H - padB) / 2 + padT / 2 : H - padB;
+    const scale = (vals.some(v => v < 0) ? (zero - padT) : (H - padB - padT)) / max;
+    const bars = vals.map((v, i) => {
+      const x = padL + i * bw + bw * 0.15, w = bw * 0.7;
+      const h = Math.abs(v) * scale, y = v >= 0 ? zero - h : zero;
+      const on = start + i === focus;
+      return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(1, h).toFixed(1)}" rx="2"
+          fill="${on ? '#B42318' : (v < 0 ? '#9DB8A6' : '#C9C1B0')}"><title>${varEsc(labs[i])}: ${fmtExact(v)}</title></rect>
+        ${on ? `<text x="${(x + w / 2).toFixed(1)}" y="${(y - 4).toFixed(1)}" text-anchor="middle" font-size="10.5" font-weight="800" fill="#8C2020">${fmtExact(v)}</text>` : ''}
+        <text x="${(x + w / 2).toFixed(1)}" y="${H - 7}" text-anchor="middle" font-size="9.5" fill="${on ? '#8C2020' : '#857D70'}" font-weight="${on ? 800 : 500}">${varEsc(labs[i])}</text>`;
+    }).join('');
+    return `<svg class="vrv-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMinYMid meet" role="img" aria-label="${varEsc(month)} against the months around it">
+      <line x1="${padL}" x2="${W - padL}" y1="${zero}" y2="${zero}" stroke="#D8D1C2"/>${bars}</svg>`;
+  }
+  // The report itself. `f` is the live flag when there is one (its numbers are the
+  // detector's, shown as such); a review whose flag has since been resolved still
+  // renders from the review alone.
+  function varReviewHtml(id, rv, f) {
+    const esc = varEsc;
+    const { place, line } = varReviewWhere(id);
+    const { month } = varReviewParts(id);
+    const cov = varReviewCoverage(rv);
+    const reviewed = rv.reviewed ? new Date(rv.reviewed + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+    const flagged = f && Number.isFinite(f.curr)
+      ? `<div class="vrv-fig"><span>${f.reason === 'trend' ? 'Last 12 months' : 'Flagged month'}</span><b>${fmtExact(f.curr)}</b><small>${Number.isFinite(f.prev) ? `vs ${fmtExact(f.prev)} ${f.reason === 'trend' ? 'the 12 months before' : 'before'}` : ''}</small></div>` : '';
+    const money = v => `${v < 0 ? '−' : ''}${fmtExact(Math.abs(v))}`;
+    const bills = (rv.bills || []).map(b => {
+      const files = (b.files || []).length && b.posting
+        ? b.files.map(x => `<a class="vrv-file" href="${esc(varReviewFileUrl(id, b, x, rv))}" target="_blank" rel="noopener" title="Open the file attached to this bill in Rent Manager">📄 ${esc(x.name)}</a>`).join('')
+        : `<span class="vrv-nofile">${b.billId ? 'none attached' : '—'}</span>`;
+      return `<tr>
+        <td class="vrv-nw">${esc(b.date || '')}</td>
+        <td><b>${esc(b.vendor || '')}</b><div class="vrv-dim">${esc(b.ref || '')}${b.billId ? ` · bill #${esc(b.billId)}` : ''}${b.account ? ` · ${esc(b.account)}` : ''}</div></td>
+        <td class="vrv-r vrv-nw">${money(b.amount || 0)}</td>
+        <td><span class="vrv-st vrv-st-${esc(b.tone || 'ok')}">${esc(b.status || '')}</span>${b.note ? `<div class="vrv-dim">${esc(b.note)}</div>` : ''}</td>
+        <td>${files}</td></tr>`;
+    }).join('');
+    const pct = Math.round(cov.pct * 100);
+    return `<article class="vrv-report" id="vrv-report">
+      <div class="vrv-eyebrow">${rv.auto ? 'Automatic review' : 'Analyst review'} · ${esc(reviewed)} ${varVerdictChip(rv)}</div>
+      <h2 class="vrv-title">${esc(line)} — ${esc(place)} — ${esc(month)}</h2>
+      ${varWhyFoundHtml(f, rv)}
+      <div class="vrv-figs">
+        ${flagged}
+        ${rv.atIssue ? `<div class="vrv-fig vrv-fig-hot"><span>At issue</span><b>${fmtExact(rv.atIssue)}</b><small>${esc(rv.atIssueLabel || '')}</small></div>` : ''}
+        <div class="vrv-fig"><span>Backup on file</span><b>${cov.n ? pct + '%' : '—'}</b><small>${cov.n ? `${cov.nFile} of ${cov.n} bills have an invoice · ${fmtExact(cov.covered)} of ${fmtExact(cov.all)}` : 'no bills behind these postings'}</small></div>
+        <div class="vrv-fig"><span>Confidence</span><b class="vrv-conf">${esc(String(rv.confidence || '').split(/[—.]/)[0] || '—')}</b><small>${esc(String(rv.confidence || '').split(/—/).slice(1).join('—').trim())}</small></div>
+      </div>
+      <section class="vrv-sec"><h3>Bottom line</h3><p class="vrv-lead">${esc(varBottomLineAfter(rv))}</p></section>
+      <section class="vrv-sec"><h3>The line, month by month</h3>${varReviewChartSvg(id, rv, f)}
+        <div class="vrv-dim">Live from Rent Manager's P&amp;L (accrual). The flagged month is red.</div></section>
+      ${varDecompHtml(rv)}
+      ${(rv.whatHappened || []).length ? `<section class="vrv-sec"><h3>What happened</h3><ul class="vrv-list">${rv.whatHappened.map(s => `<li>${esc(s)}</li>`).join('')}</ul></section>` : ''}
+      ${bills ? `<section class="vrv-sec"><h3>The bills behind it</h3>
+        <div class="vrv-cov"><div class="vrv-cov-bar"><i style="width:${pct}%"></i></div>
+          <span><b>${pct}%</b> of these dollars have an invoice attached in Rent Manager — ${cov.nFile} of ${cov.n} bills. Click a file to open it.</span></div>
+        <div class="vrv-tablewrap"><table class="vrv-table"><thead><tr><th>Date</th><th>Vendor · reference</th><th class="vrv-r">Amount</th><th>Status in Rent Manager</th><th>Invoice / backup</th></tr></thead>
+        <tbody>${bills}</tbody></table></div></section>` : ''}
+      ${(rv.actions || []).length ? `<section class="vrv-sec"><h3>What we recommend</h3><ol class="vrv-actions">${rv.actions.map(a => `<li><span class="vrv-who">${esc(a.who)}</span>${esc(a.do)}</li>`).join('')}</ol></section>` : ''}
+      ${(rv.alsoFound || []).length ? `<section class="vrv-sec"><h3>Also in the data</h3><ul class="vrv-list">${rv.alsoFound.map(a => `<li><b>${esc((VAR_VERDICT[a.verdict] || {}).word || a.verdict)}:</b> ${esc(a.headline)}</li>`).join('')}</ul></section>` : ''}
+      ${(rv.questions || []).length ? `<section class="vrv-sec"><h3>Open questions</h3><ul class="vrv-list">${rv.questions.map(s => `<li>${esc(s)}</li>`).join('')}</ul></section>` : ''}
+      ${(rv.checked || []).length ? `<section class="vrv-sec vrv-checked"><h3>What we checked</h3><ul class="vrv-list">${rv.checked.map(s => `<li>${esc(s)}</li>`).join('')}</ul>
+        <div class="vrv-dim">House analysis of Rent Manager data (General Ledger, bills, payments and attachments) as of ${esc(reviewed)}${rv.auto ? ' — built automatically from rules, not a person\u2019s review' : ''}. Bills keyed or paid after that date are not in it.</div>
+        ${(rv.limits || []).filter(l => /did not finish|could not be/.test(l)).map(l => `<div class="vrv-dim vrv-limit">Not checked: ${esc(l)}</div>`).join('')}</section>` : ''}
+    </article>`;
+  }
+  // The same review for the printed report: plain, serif, in the report's own CSS.
+  function varReviewPrintHtml(id, rv) {
+    const esc = varEsc;
+    const cov = varReviewCoverage(rv);
+    const money = v => `${v < 0 ? '−' : ''}${fmtExact(Math.abs(v))}`;
+    return `<section class="flow"><h2>${rv.auto ? 'Automatic review' : 'Analyst review'} · ${esc(rv.reviewed || '')} · ${esc(rv.verdictLabel || '')}</h2>
+      <p>${esc(varBottomLineAfter(rv))}</p>
+      ${(rv.decomposition || []).length ? `<h3>Where the change came from</h3><table class="list narrow"><thead><tr><th></th><th class="r">Earlier 12 months</th><th class="r">Latest 12 months</th><th class="r">Change</th></tr></thead><tbody>${rv.decomposition.map(x => `<tr><td>${esc(x.label)}</td><td class="r m">${fmtExact(x.prev)}</td><td class="r m">${fmtExact(x.cur)}</td><td class="r m">${x.change < 0 ? '−' : '+'}${fmtExact(Math.abs(x.change))}</td></tr>`).join('')}</tbody></table>` : ''}
+      ${(rv.whatHappened || []).length ? `<h3>What happened</h3><ul>${rv.whatHappened.map(s => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}
+      ${(rv.bills || []).length ? `<h3>The bills behind it — ${Math.round(cov.pct * 100)}% of dollars have an invoice (${cov.nFile} of ${cov.n} bills)</h3>
+        <table class="list"><thead><tr><th>Date</th><th>Vendor · reference</th><th class="r">Amount</th><th>Status</th><th>Invoice</th></tr></thead><tbody>
+        ${rv.bills.map(b => `<tr><td class="m nw">${esc(b.date || '')}</td><td>${esc(b.vendor || '')}<br><span class="muted">${esc(b.ref || '')}${b.billId ? ` · bill #${esc(b.billId)}` : ''}</span></td>
+          <td class="r m nw">${money(b.amount || 0)}</td><td>${esc(b.status || '')}${b.note ? `<br><span class="muted">${esc(b.note)}</span>` : ''}</td>
+          <td>${(b.files || []).map(x => esc(x.name)).join('<br>') || '<span class="muted">none</span>'}</td></tr>`).join('')}</tbody></table>` : ''}
+      ${(rv.actions || []).length ? `<h3>What we recommend</h3><ol>${rv.actions.map(a => `<li><b>${esc(a.who)}:</b> ${esc(a.do)}</li>`).join('')}</ol>` : ''}
+      ${(rv.alsoFound || []).length ? `<h3>Also in the data</h3><ul>${rv.alsoFound.map(a => `<li>${esc(a.headline)}</li>`).join('')}</ul>` : ''}
+      ${(rv.questions || []).length ? `<h3>Open questions</h3><ul>${rv.questions.map(s => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}
+      ${(rv.checked || []).length ? `<p class="muted">Checked: ${rv.checked.map(esc).join('; ')}. Confidence: ${esc(rv.confidence || '')}${rv.auto ? ' Built automatically from rules over Rent Manager data; nothing in Rent Manager was changed.' : ''}</p>` : ''}
+      ${(rv.limits || []).filter(l => /did not finish|could not be/.test(l)).map(l => `<p class="muted">Not checked: ${esc(l)}</p>`).join('')}
+    </section>`;
+  }
+  // The "Start here" card: the reviews flagged startHere, in that order.
+  function varStartHereHtml() {
+    // follows the entity / property pick (2026-11-02): a review belongs to the property in its id
+    const inScope = id => {
+      if (!_varEntity) return true;
+      const sc = varReviewParts(id).scope;
+      if (_varEntity.indexOf('prop:') === 0) return sc === _varEntity;
+      const p = sc.indexOf('prop:') === 0 && _liveData && _liveData.properties && _liveData.properties[sc.slice(5)];
+      return sc === _varEntity || !!(p && p.entity === _varEntity);
+    };
+    const picks = Object.entries(_varReviews).filter(([id, rv]) => rv.startHere && inScope(id))
+      .sort((a, b) => a[1].startHere - b[1].startHere);
+    if (!picks.length) return '';
+    const others = Object.keys(_varReviews).length - Object.values(_varReviews).filter(rv => rv.startHere).length;
+    const tiles = picks.map(([id, rv], i) => {
+      const { place, line } = varReviewWhere(id);
+      const { month } = varReviewParts(id);
+      return `<button class="vrv-tile" onclick="varOpenReview('${varAttr(id)}')" title="Open the full review">
+        <span class="vrv-tile-top"><span class="vrv-tile-n">${i + 1}</span>${varVerdictChip(rv)}</span>
+        <span class="vrv-tile-where">${varEsc(place)}</span>
+        <span class="vrv-tile-line">${varEsc(line)} · ${varEsc(month)}</span>
+        <span class="vrv-tile-h">${varEsc(rv.headline || '')}</span>
+        <span class="vrv-tile-foot">${rv.atIssue ? `<b>${fmtExact(rv.atIssue)}</b> ${varEsc(rv.atIssueLabel || '')}` : ''}<span class="vrv-tile-go">Open report →</span></span>
+      </button>`;
+    }).join('');
+    return `<section class="vh-card vrv-start">
+      <div class="vh-h"><h3>Start here</h3>
+        <span class="vh-sub">reviewed by the house analyst in Rent Manager — bills, invoices and payments read, with our conclusion and what to do${others > 0 ? ` · ${others} more reviewed flags carry a ✓ Reviewed tag below` : ''}</span></div>
+      <div class="vrv-tiles">${tiles}</div>
+    </section>`;
+  }
+  // Open a review: its flag's card when the flag is still open (the review leads
+  // the card), otherwise the review on its own.
+  window.varOpenReview = function (id) {
+    const rv = _varReviews[id];
+    if (!rv) return;
+    const all = typeof computeAllActiveFlags === 'function' ? computeAllActiveFlags() : [];
+    const pool = all.concat(all.flatMap(f => (f.members ? f.members.map(m => m.f) : [])));
+    const f = pool.find(x => x && x.scope && varReviewKey(x) === id);
+    window.varOpenCaseTab(f || null, id);
+  };
+
+  // ── The plain-English reason, from the flag's own numbers ────────────────────
+  // The owner, 2026-11-02: "at the top, in plain English what the actual issue is
+  // before we dive into the numbers … one sentence as to why this thing was flagged."
+  function varWhySentence(f) {
+    if (!f || !f.scope) return '';
+    const L = (_liveData && _liveData.months) || [];
+    const $ = fmtExact;
+    const m = f.monthLabel || (f.giMonth != null ? L[f.giMonth] : '') || 'the latest month';
+    const prevLabel = f.giMonth != null ? (L[f.giMonth - 1] || 'the month before') : 'the month before';
+    const where = f.scope.type === 'Portfolio' ? 'the whole portfolio' : (f.scope.label || 'this scope');
+    const line = f.label || f.key;
+    const up = (f.curr || 0) >= (f.prev || 0);
+    const normal = f.histAvg != null ? f.histAvg : f.mean;
+    switch (f.reason) {
+      case 'varGroup': { const n = (f.members || []).length; return `${line} jumped at ${n} ${f.scope.entity || ''} buildings in ${m} — the same move at each, so it is one card.`.replace(/\s+/g, ' '); }
+      case 'zeroGroup': { const n = (f.members || []).length; return `${line} posted nothing in ${m} at ${n} buildings that all normally have it — one set of entries that has not been made.`; }
+      case 'negative': return `${line} at ${where} posted a negative ${$(f.curr)} in ${m} — a credit or reversal rather than a cost.`;
+      case 'zero': case 'zeroRun': {
+        const zms = f.zeroMonthLabels || (f.monthLabel ? [f.monthLabel] : []);
+        const list = zms.length > 1 ? `${zms.slice(0, -1).join(', ')} and ${zms[zms.length - 1]}` : (zms[0] || m);
+        return `${line} at ${where} had nothing posted in ${list}, on a line that normally runs about ${$(normal != null ? normal : f.prev || 0)} a month.`;
+      }
+      case 'missedCycle': return `${line} at ${where} did not get its usual bill in ${m}.`;
+      case 'trend': {
+        const end = String(f.monthLabel || '').replace(/^12 mo to /, '');
+        return `${line} at ${where} is running about ${$(Math.abs((f.curr || 0) - (f.prev || 0)))} a year ${up ? 'higher' : 'lower'}${pctDisplayable(f.pct) ? ` (${Math.round(Math.abs(f.pct) * 100)}%)` : ''} over the 12 months to ${end || 'now'} than over the 12 months before.`;
+      }
+      case 'singleMonth': return `${line} at ${where} was ${$(f.curr)} in ${m}, over the limit for a single month on this line.`;
+      default: {
+        const d = Math.abs((f.curr || 0) - (f.prev || 0));
+        const band = f.bandLo != null ? ` and ${up ? 'above' : 'below'} its usual ${$(f.bandLo)}–${$(f.bandHi)} a month` : '';
+        return `${line} at ${where} was ${$(f.curr)} in ${m}, ${up ? 'up' : 'down'} ${$(d)} from ${$(f.prev)} in ${prevLabel}${pctDisplayable(f.pct) ? ` (${Math.round(Math.abs(f.pct) * 100)}%)` : ''}${band}.`;
+      }
+    }
+  }
+  // The reviews of the flags about to be clicked are asked for now, in the background, so the card
+  // finds them waiting (POST /api/variance/investigate/warm reads them one at a time). Hand-reviewed
+  // flags have nothing to wait for; each request is sent once per page load.
+  const _varWarmSent = new Set();
+  function varWarmReviews(flags) {
+    const reqs = [];
+    for (const f of flags) {
+      if (varReviewFor(f)) continue;
+      const r = varInvestigationRequest(f);
+      if (!r) continue;
+      const k = JSON.stringify(r);
+      if (_varWarmSent.has(k)) continue;
+      _varWarmSent.add(k); reqs.push(r);
+    }
+    if (!reqs.length) return;
+    fetch('/api/variance/investigate/warm', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requests: reqs }) }).catch(() => {});
+  }
+  // The two blocks every review opens with.
+  function varWhyFoundHtml(f, rv) {
+    const why = f ? varWhySentence(f) : (rv && rv.whyFlagged) || '';
+    return `${why ? `<div class="vrv-plain"><div class="vrv-plain-h">Why it was flagged</div><p>${varEsc(why)}</p></div>` : ''}
+      <div class="vrv-plain vrv-found"><div class="vrv-plain-h">What we found${rv.auto ? ' · automatic review' : ''}</div><p>${varEsc(rv.headline || '')}</p></div>`;
+  }
+  function varDecompHtml(rv) {
+    if (!(rv.decomposition || []).length) return '';
+    return `<section class="vrv-sec"><h3>Where the change came from</h3><div class="vrv-tablewrap"><table class="vrv-table"><thead><tr><th>Payee</th><th class="vrv-r">Earlier 12 months</th><th class="vrv-r">Latest 12 months</th><th class="vrv-r">Change</th></tr></thead><tbody>${
+      rv.decomposition.map(x => `<tr><td><b>${varEsc(x.label)}</b></td><td class="vrv-r">${fmtExact(x.prev)}</td><td class="vrv-r">${fmtExact(x.cur)}</td><td class="vrv-r">${x.change < 0 ? '−' : '+'}${fmtExact(Math.abs(x.change))}</td></tr>`).join('')}</tbody></table></div></section>`;
+  }
+  // The automatic review for a flag nobody has reviewed by hand: asked of the server once
+  // (GET /api/variance/investigate carries it), kept for the session, drawn into a slot the
+  // card leaves for it. The slot shows the plain "why" at once; the rest arrives with Rent Manager.
+  const _varAutoReviews = {};
+  const _varAutoLoading = new Set();
+  function varAutoReviewBody(f, inv) {
+    if (inv && inv.review) return `${varReviewHtml(varReviewKey(f), inv.review, f)}<div class="vrv-divider">The detector's reading — live numbers and the automatic Rent Manager check</div>`;
+    const why = (inv && (inv.error || inv.reason)) || 'there is nothing to look at';
+    return `<article class="vrv-report"><div class="vrv-eyebrow">Automatic review</div>
+      ${varWhyFoundHtml(f, { auto: true, headline: 'The automatic review could not be built for this flag.' })}
+      <p class="vrv-dim">${varEsc(String(why))}${inv && inv.error ? ` <button class="vh-more" style="margin-left:6px;" onclick="varRetryAutoReview('${varAttr(varFlagId(f))}')">Try again</button>` : ''}</p></article>`;
+  }
+  function varAutoReviewWaiting(f) {
+    return `<article class="vrv-report vrv-loading"><div class="vrv-eyebrow">Automatic review · reading Rent Manager…</div>
+      <div class="vrv-plain"><div class="vrv-plain-h">Why it was flagged</div><p>${varEsc(varWhySentence(f))}</p></div>
+      <div class="vrv-plain vrv-found"><div class="vrv-plain-h">What we found</div><p>Checking the bills, payments and invoices behind this flag in Rent Manager — the first one after a restart takes up to a minute, later ones a few seconds.</p></div></article>`;
+  }
+  function varAutoReviewSlot(f) {
+    if (!varInvestigationRequest(f)) return '';
+    const id = varFlagId(f);
+    const got = _varAutoReviews[id];
+    if (!got) varLoadAutoReview(f);
+    return `<div id="vrv-auto" data-id="${varAttr(id)}">${got ? varAutoReviewBody(f, got) : varAutoReviewWaiting(f)}</div>`;
+  }
+  async function varLoadAutoReview(f) {
+    const id = varFlagId(f);
+    if (_varAutoLoading.has(id)) return;
+    _varAutoLoading.add(id);
+    let inv;
+    try { inv = await varReportInvestigation(f); } catch (e) { inv = { error: (e && e.message) || String(e) }; }
+    _varAutoLoading.delete(id);
+    if (inv == null) return;
+    _varAutoReviews[id] = inv;
+    const slot = document.getElementById('vrv-auto');
+    if (slot && slot.getAttribute('data-id') === id) slot.innerHTML = varAutoReviewBody(f, inv);
+  }
+  window.varRetryAutoReview = function (id) {
+    delete _varAutoReviews[id];
+    if (typeof renderFlaggedSummary === 'function') renderFlaggedSummary();
+  };
+  // The top of the PDF: the plain sentence, then the answer.
+  function varReportTopHtml(f, ctx) {
+    const esc = varEsc;
+    const rv = varReviewFor(f) || (ctx && ctx.investigation && ctx.investigation.review) || null;
+    let found = '';
+    if (rv) found = `<div class="plain found"><div class="plain-h">What we found · ${esc(rv.verdictLabel || '')}${rv.auto ? ' · automatic review' : ''}</div><p>${esc(rv.headline || '')}</p></div>`;
+    else if (ctx && ctx.investigation && ctx.investigation.error) found = `<div class="plain found"><div class="plain-h">What we found</div><p>Rent Manager could not be read for this report (${esc(ctx.investigation.error)}), so there is no review of the bills.</p></div>`;
+    return `<div class="plain"><div class="plain-h">Why it was flagged</div><p>${esc(varWhySentence(f))}</p></div>${found}`;
+  }
+
   function varDetailHtml(f, siblings, rollups) {
+    _varRowFlags.set(varFlagId(f), f);
+    const rv = varReviewFor(f);
     const where = f.scope.type === 'Property'
       ? `<b>${varEsc(f.scope.label)}</b>${f.scope.entity ? ` <span style="color:#C2B9A4;">(${varEsc(f.scope.entity)})</span>` : ''}`
       : (f.scope.type === 'Entity' ? `<b>${varEsc(f.scope.label)}</b> <span style="color:#C2B9A4;">(entity)</span>`
@@ -16758,6 +17169,7 @@ async function downloadBudgetExcel(){
         <span class="vt-crumb">${varEsc((varCatList().find(c => c.key === (f.category || 'variance')) || {}).label || '')}
           › <b>${varEsc(f.label)}</b> › ${where}</span>
       </div>
+      ${rv ? `<div class="vrv-compact" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:1px solid #B5D3BE;border-left:5px solid #14342A;background:#F6F3EA;border-radius:8px;padding:7px 10px;margin:0 0 8px;font-size:12.5px;">${varVerdictChip(rv)}<span style="flex:1;min-width:200px;font-weight:700;color:#14342A;">${varEsc(rv.headline || '')}</span><button class="vh-more" onclick="varReportFromRow(null,'${varAttr(varFlagId(f))}')">Open the case →</button></div>` : varAutoReviewSlot(f)}
       <div id="var-browser-detail"></div>
       <div id="var-line-strip"></div>
       ${sibChips}${rollChips}`;
@@ -16909,7 +17321,7 @@ async function downloadBudgetExcel(){
   function varReportChartSvg(o) {
     const n = o.vals.length;
     if (!n) return '';
-    const W = 700, TOP = 8, PH = 150, H = TOP + PH + 36, colW = W / n;
+    const W = 700, TOP = o.compact ? 16 : 8, PH = o.compact ? 96 : 150, H = TOP + PH + (o.compact ? 18 : 36), colW = W / n;
     const nums = o.vals.filter(v => v != null && Number.isFinite(v));
     const band = o.bandLo != null && o.bandHi != null && Number.isFinite(o.bandLo) && Number.isFinite(o.bandHi);
     const mean = o.mean != null && Number.isFinite(o.mean) ? o.mean : null;
@@ -16938,6 +17350,10 @@ async function downloadBudgetExcel(){
       }
       const lab = `${o.labels[i] || ''}${partial ? ' MTD' : ''}`;
       g += `<text x="${p(cx)}" y="${TOP + PH + 14}" text-anchor="middle" font-size="10" font-family="Georgia, serif"${focus ? ' font-weight="700"' : ''} fill="#000">${varEsc(lab)}</text>`;
+      if (o.compact) {
+        if (focus && has) g += `<text x="${p(cx)}" y="${p(Math.min(y(v), y(0)) - 4)}" text-anchor="middle" font-size="10.5" font-weight="700" fill="#000">${varEsc(fmtExact(v))}</text>`;
+        return;
+      }
       const money = has ? fmtExact(v) : '—';
       const fit = money.length * 5.4 > colW - 4 ? ` textLength="${p(colW - 4)}" lengthAdjust="spacingAndGlyphs"` : '';
       g += `<text x="${p(cx)}" y="${TOP + PH + 28}" text-anchor="middle" font-size="9" font-family="'JetBrains Mono', Consolas, monospace"${focus ? ' font-weight="700"' : ''} fill="#000"${fit}>${varEsc(money)}</text>`;
@@ -16974,13 +17390,13 @@ async function downloadBudgetExcel(){
     // ── 3. the key line
     const kl = [];
     if (f.score) kl.push(`Importance <b>${esc(f.score)}/5</b>`);
-    kl.push(`<b>${esc(tierLabel)}</b>`);
+    kl.push(`Tier <b>${esc(tierLabel)}</b>`);
     if (/^(mom|varGroup)$/.test(f.reason || '') && Number.isFinite(f.curr) && Number.isFinite(f.prev)) {
       const d = f.curr - f.prev;
       const prevLabel = (f.giMonth != null && L[f.giMonth - 1]) || 'the month before';
       kl.push(`${d >= 0 ? '▲' : '▼'} ${fmtExact(Math.abs(d))} vs ${esc(prevLabel)} (${varPctTxt(f.curr, f.prev)})`);
     } else if (txt.headline) kl.push(rich(txt.headline));
-    if (/^(mom|varGroup|trend)$/.test(f.reason || '') && f.impact) kl.push(`${fmtExact(Math.abs(f.impact))} a year*`);
+    if (/^(mom|varGroup|trend)$/.test(f.reason || '') && f.impact) kl.push(`${fmtExact(Math.abs(f.impact))} a year if it stays at the new level*`);
     else if (f.reason === 'zeroGroup' && f.impact) kl.push(`${fmtExact(f.impact)} missing*`);
     const sub = [];
     sub.push(`Who to ask: <b>${esc(f.contact || 'Accounting')}</b>`);
@@ -16988,6 +17404,7 @@ async function downloadBudgetExcel(){
     if (f.tag) sub.push(`Rule: ${esc(f.tag)}`);
 
     // ── 4 / 4b. the chart and its figures, the strip's own rows
+    const chartList = [];
     const charts = varStripRows(f).map(r => {
       const win = t12Window(r.scopeKey);
       const scopeLabel = scopeLabelOf(r.scopeKey);
@@ -17002,8 +17419,9 @@ async function downloadBudgetExcel(){
       const band = src.bandLo != null && src.bandHi != null && Number.isFinite(src.bandLo) && Number.isFinite(src.bandHi);
       const mean = src.mean != null && Number.isFinite(src.mean) ? src.mean : null;
       const partialLast = isPartialMonthCell(CURRENT_YEAR, vals.length - 1, vals.length);
-      const svg = varReportChartSvg({ vals, labels: win.labels, isFocus, partialLast, color: tier.color,
-        mean, bandLo: band ? src.bandLo : null, bandHi: band ? src.bandHi : null, title: `${f.label} · ${scopeLabel}` });
+      const svgOpts = { vals, labels: win.labels, isFocus, partialLast, color: tier.color,
+        mean, bandLo: band ? src.bandLo : null, bandHi: band ? src.bandHi : null, title: `${f.label} · ${scopeLabel}` };
+      const svg = varReportChartSvg(svgOpts);
       const legend = [`<span><i class="sw" style="background:${tier.color};"></i>flagged month</span>`];
       if (mean != null) legend.push(`<span><i class="sw dash"></i>trailing-12 mean* ${fmtExact(mean)}/mo</span>`);
       if (band) legend.push(`<span><i class="sw band"></i>normal range* ${fmtExact(src.bandLo)}–${fmtExact(src.bandHi)}</span>`);
@@ -17012,6 +17430,7 @@ async function downloadBudgetExcel(){
         + (win.ly ? `<th class="ly">${esc(win.ly.label)}<br>last yr</th>` : '');
       const td = vals.map((v, i) => `<td${isFocus(i) ? ' class="f"' : ''}>${fmtExact(v)}</td>`).join('')
         + (win.ly ? `<td class="ly">${fmtExact(win.ly.data[key])}</td>` : '');
+      chartList.push(`<div class="cchart"><div class="chart-h"><b>${esc(scopeLabel)}</b> · last ${vals.length} months, accrual</div>${varReportChartSvg({ ...svgOpts, compact: true })}<div class="legend">${legend.join('')}</div></div>`);
       return `<div class="chart">
         <div class="chart-h"><b>${esc(f.label)}</b> · ${esc(scopeLabel)} · trailing ${vals.length} months, exact dollars, accrual</div>
         ${svg}
@@ -17198,11 +17617,15 @@ async function downloadBudgetExcel(){
         .cover { page-break-after:always; break-after:page; }
         .rpt { page-break-after:always; break-after:page; }
         .rpt:last-child { page-break-after:auto; break-after:auto; }
+        .plain { border:1.5px solid #000; border-left-width:6px; padding:6px 10px; margin:8px 0; break-inside:avoid; page-break-inside:avoid; }
+        .plain.found { background:#f1f1f1; }
+        .plain-h { font-size:7.5pt; text-transform:uppercase; letter-spacing:.09em; }
+        .plain p { font-size:11.5pt; font-weight:700; line-height:1.35; margin:3px 0 0; }
       `;
   function varReportDoc(titleText, bodyHtml) {
     return `<!doctype html><html><head><meta charset="utf-8">
       <title>${varEsc(titleText)}</title>
-      <style>${VAR_REPORT_CSS}</style></head><body>
+      <style>${VAR_REPORT_CSS}${VAR_CASE_CSS}</style></head><body>
       <div class="noprint" style="background:#F5F2EB;border:1px solid #ccc;padding:8px 12px;margin-bottom:14px;font-family:sans-serif;font-size:12px;">
         Use your browser's Print dialog (⌘P / Ctrl-P) — choose <b>Save as PDF</b> to send it.
       </div>
@@ -17212,6 +17635,169 @@ async function downloadBudgetExcel(){
   function varFlagReportHtml(f, ctx) {
     const p = varFlagReportParts(f, ctx);
     return varReportDoc(p.title, p.body);
+  }
+
+  // ── The one-page case report (2026-11-02, the owner, after the the regional manager meeting) ────────
+  // "I don't want to scroll for 10 minutes... everything compacted into one overall chart. First what
+  // was caught and why it was flagged, then how you dug in, what you verified and concluded, then the
+  // next actionable steps." Every variance opens THIS, in a new tab: the Start here tiles, the row's
+  // Report chip, a review whose flag has closed. The older long report is kept under "Full workings".
+  const VAR_CASE_CSS = `
+    .case{font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;color:#1B2B24;font-size:12.5px;line-height:1.4;}
+    .case .chead{display:flex;justify-content:space-between;align-items:baseline;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#5E675F;border-bottom:2px solid #14342A;padding-bottom:4px;}
+    .case h1{font-size:19px;line-height:1.2;margin:8px 0 4px;color:#14342A;}
+    .case .chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px;}
+    .case .chip{border:1px solid #D8D1C2;background:#FAF8F3;border-radius:999px;padding:2px 9px;font-size:11.5px;}
+    .case .panel{border:1px solid #E1DCCE;border-radius:10px;margin:0 0 10px;background:#fff;break-inside:avoid;page-break-inside:avoid;}
+    .case .ph{display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid #EEE9DC;background:#F6F3EA;border-radius:10px 10px 0 0;}
+    .case .pn{width:20px;height:20px;border-radius:50%;background:#14342A;color:#fff;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;}
+    .case .ph h2{margin:0;padding:0;border:0;font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;color:#14342A;}
+    .case .ph .sub2{font-size:11px;color:#5E675F;margin-left:auto;}
+    .case .pb{padding:9px 12px;}
+    .case .two{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;}
+    .case .two.even{grid-template-columns:minmax(0,1fr) minmax(0,1fr);}
+    @media screen and (max-width:760px){.case .two,.case .two.even{grid-template-columns:minmax(0,1fr);}}
+    /* On paper the page is ~720px wide: keep the side-by-side columns, and let a panel run on rather than leave half a page blank. */
+    @media print{.case .panel{break-inside:auto;page-break-inside:auto;} .case .ph{break-after:avoid;page-break-after:avoid;} .case tr,.case .concl{break-inside:avoid;page-break-inside:avoid;}}
+    .case h3{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#5E675F;margin:0 0 3px;}
+    .case p{margin:3px 0;}
+    .case .lead{font-size:13.5px;font-weight:700;color:#14342A;}
+    .case ul.tight{margin:2px 0;padding-left:16px;} .case ul.tight li{margin:2px 0;}
+    .case ul.ticks{list-style:none;margin:2px 0;padding:0;} .case ul.ticks li{margin:2px 0;padding-left:17px;position:relative;}
+    .case ul.ticks li::before{content:'✓';position:absolute;left:0;color:#14653B;font-weight:700;}
+    .case .cchart svg{width:100%;height:auto;display:block;}
+    @media screen and (max-width:600px){.case .cchart{overflow-x:auto;} .case .cchart svg{min-width:640px;} .case{font-size:13.5px;}}
+    .case .concl{border:1.5px solid #14342A;border-left-width:6px;border-radius:6px;padding:7px 10px;background:#FAF8F3;}
+    .case .concl .vc{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border:1px solid;border-radius:999px;padding:1px 8px;margin-bottom:3px;}
+    .case .concl .ct{font-size:13px;font-weight:700;}
+    .case .concl .cf{font-size:11.5px;color:#5E675F;margin-top:3px;}
+    .case table{border-collapse:collapse;width:100%;font-size:11.5px;}
+    .case th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:#5E675F;border-bottom:1px solid #D8D1C2;padding:2px 6px 2px 0;}
+    .case td{padding:3px 6px 3px 0;border-bottom:1px solid #EEE9DC;vertical-align:top;}
+    .case .r{text-align:right;} .case .nw{white-space:nowrap;} .case .dim{color:#5E675F;font-size:11px;} .case .m{font-variant-numeric:tabular-nums;}
+    .case .bad td{background:#FBF1F0;}
+    .case ol.steps{margin:2px 0;padding:0;list-style:none;counter-reset:s;} .case ol.steps li{counter-increment:s;display:flex;gap:8px;margin:4px 0;align-items:flex-start;}
+    .case ol.steps li::before{content:counter(s);width:18px;height:18px;border-radius:50%;background:#14342A;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px;}
+    .case .who{display:inline-block;font-size:10.5px;font-weight:700;background:#EAF3EC;color:#14653B;border-radius:4px;padding:0 6px;margin-right:6px;}
+    .case details{border:1px dashed #BDB6A8;border-radius:8px;padding:5px 10px;margin:4px 0 8px;background:#FCFBF8;}
+    .case details summary{cursor:pointer;font-weight:700;font-size:12px;color:#14342A;}
+    .case .cfoot{font-size:10.5px;color:#5E675F;margin-top:6px;}
+  `;
+  // An older automatic review repeated its headline as the first words of its bottom line.
+  function varBottomLineAfter(rv) {
+    const h = String(rv.headline || '').trim(), b = String(rv.bottomLine || '').trim();
+    return h && b.indexOf(h) === 0 ? b.slice(h.length).trim() : b;
+  }
+  function varCaseVerdict(rv, inv) {
+    if (rv) { const v = VAR_VERDICT[rv.verdict] || VAR_VERDICT.question; return { bg: v.bg, fg: v.fg, bd: v.bd, word: rv.verdictLabel || v.word }; }
+    if (inv && inv.likely) return { bg: '#F7F1E3', fg: '#7A4E0E', bd: '#E3CB94', word: VAR_INV_KIND[inv.likely.kind] || inv.likely.kind };
+    return { bg: '#EDF1F5', fg: '#2D4A66', bd: '#B9C8D8', word: 'No cause found yet' };
+  }
+  // f may be null: a review whose flag has since closed renders from the review alone.
+  function varCaseReportParts(f, ctx, reviewId) {
+    ctx = ctx || {};
+    const esc = varEsc;
+    const inv = ctx.investigation && !ctx.investigation.error && ctx.investigation.supported !== false ? ctx.investigation : null;
+    // a hand review wins; else the automatic review the investigation carries (same shape)
+    const rv = f ? (varReviewFor(f) || (inv && inv.review) || null) : (_varReviews[reviewId] || null);
+    const id = f ? varReviewKey(f) : reviewId;
+    const base = f ? varFlagReportParts(f, ctx) : null;
+    const P = base ? base.pieces : null;
+    const prepared = ctx.prepared || new Date();
+    const money = v => `${v < 0 ? '−' : ''}${fmtExact(Math.abs(v))}`;
+    const wh = f ? null : varReviewWhere(id);
+    const where = f ? P.scopeTxt : wh.place;
+    const lineName = f ? f.label : wh.line;
+    const month = f ? P.month : varReviewParts(id).month;
+    const title = `${lineName} — ${where} — ${month}`;
+
+    // 1. what was caught, and why
+    const chips = P ? P.kl.map(k => `<span class="chip">${k}</span>`).join('') + (f.contact ? `<span class="chip">Who to ask: <b>${esc(f.contact)}</b></span>` : '')
+      : `<span class="chip">Reviewed ${esc(rv ? rv.reviewed || '' : '')}</span>`;
+    const chartHtml = P && P.chartList.length
+      ? P.chartList[0] + (P.chartList.length > 1 ? `<div class="dim">${P.chartList.length - 1} more building${P.chartList.length > 2 ? 's' : ''} charted under Full workings.</div>` : '')
+      : (rv ? varReviewChartSvg(id, rv, f).replace('class="vrv-chart"', 'style="width:100%;max-width:680px;height:auto"') : '');
+    const reasons = P ? (P.txt.reasons || []).slice(0, 3) : [];
+    const lead = P ? (P.txt.headline ? varReportRich(P.txt.headline) : '') : esc(rv ? rv.headline || '' : '');
+    const whyBlock = `${lead ? `<p class="lead">${lead}</p>` : ''}
+      ${P && P.txt.detail && !reasons.length ? `<p>${varReportRich(P.txt.detail)}</p>` : ''}
+      ${reasons.length ? `<ul class="tight">${reasons.map(r => `<li>${varReportRich(r)}</li>`).join('')}</ul>` : ''}
+      ${f && f.note ? `<p class="dim"><b>Note${f.adjTag ? ` · ${esc(f.adjTag)}` : ''}:</b> ${esc(f.note)}</p>` : ''}`;
+    const group = P && P.members ? P.members : '';
+
+    // 2. how we dug in
+    const found = [];
+    let checked = [], concl, foundTable = '';
+    if (rv) {
+      checked = (rv.checked || []).slice(0, 6);
+      (rv.whatHappened || []).slice(0, 4).forEach(s => found.push(s));
+      const cov = varReviewCoverage(rv);
+      const rows = (rv.bills || []).slice(0, 6).map(b => `<tr class="${b.tone === 'bad' ? 'bad' : ''}"><td class="nw">${esc(b.date || '')}</td>
+        <td><b>${esc(b.vendor || '')}</b><div class="dim">${esc(b.ref || '')}${b.billId ? ` · bill #${esc(b.billId)}` : ''}${b.note ? ` · ${esc(b.note)}` : ''}</div></td>
+        <td class="r m nw">${money(b.amount || 0)}</td><td>${esc(b.status || '')}</td>
+        <td>${(b.files || []).length && b.posting ? b.files.map(x => `<a href="${esc(varReviewFileUrl(id, b, x, rv))}" target="_blank" rel="noopener">📄 ${esc(x.name)}</a>`).join('<br>') : '<span class="dim">none</span>'}</td></tr>`).join('');
+      if (rows) foundTable = `<h3>The bills behind it — ${Math.round(cov.pct * 100)}% of dollars have an invoice attached (${cov.nFile} of ${cov.n})${(rv.bills || []).length > 6 ? ` · top 6 of ${rv.bills.length} shown` : ''}</h3>
+        <table><thead><tr><th>Date</th><th>Vendor · reference</th><th class="r">Amount</th><th>Status in Rent Manager</th><th>Invoice</th></tr></thead><tbody>${rows}</tbody></table>`;
+      const vc = varCaseVerdict(rv, inv);
+      concl = `<span class="vc" style="background:${vc.bg};color:${vc.fg};border-color:${vc.bd}">${esc(vc.word)}</span>
+        <div class="ct">${esc(rv.headline || '')}</div><p>${esc(varBottomLineAfter(rv))}</p>
+        <div class="cf">${rv.atIssue ? `<b>${fmtExact(rv.atIssue)}</b> ${esc(rv.atIssueLabel || '')} · ` : ''}Confidence: ${esc(String(rv.confidence || '—'))}</div>`;
+    } else if (inv) {
+      checked = (inv.checked || []).slice(0, 6);
+      (inv.findings || []).slice(0, 3).forEach(x => found.push(`${VAR_INV_KIND[x.kind] || x.kind}: ${x.headline} (${x.pctOfChange != null ? Math.round(x.pctOfChange * 100) + '% of the change' : money(x.dollars)})`));
+      (inv.housekeeping || []).slice(0, 2).forEach(h => found.push(`${VAR_INV_KIND[h.kind] || h.kind}: ${h.headline}`));
+      const vc = varCaseVerdict(null, inv);
+      concl = `<span class="vc" style="background:${vc.bg};color:${vc.fg};border-color:${vc.bd}">${esc(vc.word)}</span>
+        <div class="ct">${esc(inv.likely ? inv.likely.headline : (inv.mode === 'no-change' ? 'The postings did not change.' : 'The postings Rent Manager returned do not show what changed.'))}</div>
+        <p>${esc(inv.summary || '')}</p>
+        <div class="cf">${inv.likely ? `Confidence: ${esc(inv.likely.confidence)} · ` : ''}House reading of Rent Manager's General Ledger and bills.${(inv.limits || []).length ? ' Not checked: ' + esc(inv.limits.join(' ')) : ''}</div>`;
+    } else {
+      const why = ctx.investigation && ctx.investigation.error ? `Rent Manager could not be read for this report: ${String(ctx.investigation.error).replace(/[.\s]+$/, '')}.` : 'This line has no General Ledger postings behind it to dig into, so the answer comes from the P&L figures alone.';
+      concl = `<span class="vc" style="background:#EDF1F5;color:#2D4A66;border-color:#B9C8D8">Not investigated</span><div class="ct">${esc(why)}</div>`;
+    }
+
+    // 3. next steps
+    const steps = [];
+    if (rv) (rv.actions || []).forEach(a => steps.push(`<li><div><span class="who">${esc(a.who)}</span>${esc(a.do)}</div></li>`));
+    else if (inv) {
+      if (inv.next) steps.push(`<li><div><span class="who">Accounting</span>${esc(inv.next)}</div></li>`);
+      (inv.housekeeping || []).slice(0, 2).forEach(h => { if (h.next) steps.push(`<li><div><span class="who">Accounting</span>${esc(h.next)}</div></li>`); });
+    }
+    if (!steps.length && P && P.txt.action) steps.push(`<li><div>${varReportRich(P.txt.action)}</div></li>`);
+    if (!steps.length) steps.push('<li><div>Nothing to fix in Rent Manager is indicated. If this month is expected, mark the flag normal on the Variances tab.</div></li>');
+    const qs = rv && (rv.questions || []).length ? `<h3 style="margin-top:6px">Still open</h3><ul class="tight">${rv.questions.slice(0, 3).map(q => `<li>${esc(q)}</li>`).join('')}</ul>` : '';
+
+    // everything else, folded away
+    const fold = base ? [P.chartList.slice(1).join(''), P.season, P.pattern, P.score, P.postings].filter(Boolean).join('')
+      : '';
+
+    const body = `<div class="case">
+      <div class="chead"><span><b>Demo Portfolio Co.</b> · Variance case</span><span>Prepared ${esc(prepared.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' }))}</span></div>
+      <h1>${esc(title)}</h1>
+      <div class="chips">${chips}</div>
+      <section class="panel"><div class="ph"><span class="pn">1</span><h2>What we caught</h2><span class="sub2">and why it was flagged</span></div>
+        <div class="pb two"><div>${chartHtml}</div><div>${whyBlock}</div></div>${group ? `<div class="pb" style="padding-top:0">${group}</div>` : ''}</section>
+      <section class="panel"><div class="ph"><span class="pn">2</span><h2>How we dug in</h2><span class="sub2">what we verified and what we conclude</span></div>
+        <div class="pb two even"><div>
+          ${checked.length ? `<h3>Checked</h3><ul class="ticks">${checked.map(c => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}
+          ${found.length ? `<h3 style="margin-top:6px">Found</h3><ul class="tight">${found.map(c => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}
+        </div><div><h3>Conclusion</h3><div class="concl">${concl}</div></div></div>
+        ${foundTable ? `<div class="pb" style="padding-top:0">${foundTable}</div>` : ''}</section>
+      <section class="panel"><div class="ph"><span class="pn">3</span><h2>Next steps</h2><span class="sub2">what would fix it</span></div>
+        <div class="pb"><ol class="steps">${steps.join('')}</ol>${qs}</div></section>
+      ${fold ? `<details><summary>Full workings — season check, scoring, every posting</summary>${fold}</details>` : ''}
+      <div class="cfoot">${rv ? `Reviewed ${esc(rv.reviewed || '')} by House from Rent Manager data (General Ledger, bills, payments, attachments); bills keyed or paid later are not in it. ` : ''}Source: Rent Manager P&amp;L (accrual)${P ? ` pulled ${esc(P.pulled)}` : ''}. Trailing-12 mean and normal range are house estimates. Internal, not for distribution.</div>
+    </div>`;
+    return { title: `${title} · Variance case`, body, inv: ctx.investigation };
+  }
+  function varCaseDoc(titleText, bodyHtml, fid) {
+    return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${varEsc(titleText)}</title>
+      <style>${VAR_REPORT_CSS}${VAR_CASE_CSS}
+        body{font-family:'Inter',system-ui,sans-serif;background:#F1EEE5;font-size:12.5px;} @media screen{body{max-width:1080px;padding:14px 18px;}} @page{size:letter portrait;margin:10mm;}
+        .toolbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;} .toolbar button{font:inherit;font-size:12px;border:1px solid #14342A;background:#fff;color:#14342A;border-radius:6px;padding:3px 10px;cursor:pointer;}
+        @media print{.toolbar{display:none;} details > *{display:block;}}</style></head><body>
+      <div class="toolbar">${fid ? `<button onclick="try{opener.varOpenCard(${JSON.stringify(String(fid)).replace(/"/g, '&quot;')});opener.focus();}catch(e){alert('Go back to the Variances tab to mark this normal or resolved.')}">Mark normal / resolve in the tracker</button>` : ''}<button onclick="window.print()">⎙ Print / save as PDF</button></div>
+      ${bodyHtml}</body></html>`;
   }
 
   // ── What we found in Rent Manager (2026-10-22, the owner) ────────────────────────
@@ -17237,6 +17823,7 @@ async function downloadBudgetExcel(){
     const H = '<h2>What we found in Rent Manager</h2>';
     if (inv.error) return `<section>${H}<p class="muted">Investigation not available: ${esc(inv.error)}</p></section>`;
     if (inv.supported === false) return `<section>${H}<p class="muted">Investigation not run: ${esc(inv.reason || 'there is nothing to look at')}</p></section>`;
+    if (inv.mode === 'trend') return '';        // a run-rate flag: the review above already splits the change by payee
     const kind = k => VAR_INV_KIND[k] || k;
     const sgn = inv.target < 0 ? -1 : 1;
     const signed = v => `${v < 0 ? '−' : '+'}${fmtExact(Math.abs(v))}`;
@@ -17283,7 +17870,7 @@ async function downloadBudgetExcel(){
   // A group card is read at the entity (or the portfolio when its buildings span
   // entities) — the one place where "one bill split across buildings" is visible.
   const _varInvCache = {};
-  const VAR_INV_WAIT_MS = 180000;
+  const VAR_INV_WAIT_MS = 420000;
   function varInvestigationRequest(f) {
     const item = configItem(f.key);
     if (!(item && item.glRefs && item.glRefs.length)) return null;     // a move count or a roll-up: no postings behind it
@@ -17298,7 +17885,8 @@ async function downloadBudgetExcel(){
       const w = varGLWindow(f);
       month = w ? w.to : null;
     }
-    return month ? { scope, key: f.key, month } : null;
+    if (!month) return null;
+    return f.reason === 'trend' ? { scope, key: f.key, month, trend: '1' } : { scope, key: f.key, month };
   }
   async function varReportInvestigation(f) {
     const req = varInvestigationRequest(f);
@@ -17378,12 +17966,526 @@ async function downloadBudgetExcel(){
     const built = await varBuildReport(f);
     if (w.closed) return;
     w.document.open();
-    w.document.write(varReportDoc(built.title, built.body));
+    w.document.write(varCaseDoc(built.title, built.body, varFlagId(f)));
     w.document.close();
-    // Give the new document a tick to lay out before handing it to the printer;
-    // printing an unlaid-out document produces a blank first page in some browsers.
-    setTimeout(() => { try { w.focus(); w.print(); } catch (e) {} }, 400);
   };
+  // Every way into a case (rows, Start here, a closed review) — the page inside the Variances tab
+  // since 2026-11-03 ("I want it to stay on the website"), no longer a new tab.
+  window.varOpenCaseTab = function (flagArg, reviewId) {
+    return window.varOpenCase(flagArg && flagArg.scope ? flagArg : null, reviewId);
+  };
+
+  // ── The case page, inside the site (2026-11-03, the owner) ─────────────────────────────────
+  // "I don't like how it opens in a new tab. I want it to stay on the website ... a very clear
+  // here's the property, here's what we caught, show that little chart, show all the numbers for
+  // each month and how much it jumped, the real line from the P&L, an option at the top to see the
+  // full T12 ... that you dug into it and what you found with the bills and how that impacted the
+  // variance. But then also real analysis, what does this mean? ... Have a section that said did
+  // one of these happen?" Every way into a flag (rows, Start here, the card) lands here; the Variances
+  // tab's own screen is swapped out for it, and Back (or the browser's back) puts the tab back.
+  // The analysis is rules over Rent Manager's own postings: each "did this happen?" says what in the
+  // postings answers it, or that Rent Manager cannot, and who to ask.
+  let _varCase = null;   // { f, id, inv, invLoading, t12 }
+  const VAR_CASE_PAGE_CSS = `
+    #var-case-page .case{font-size:13px;}
+    #var-case-page .case .panel{margin:0 0 14px;}
+    #var-case-page .case .pb{padding:12px 14px;}
+    .vcp-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 10px;}
+    .vcp-top button{font:inherit;font-size:12.5px;border:1px solid #14342A;background:#fff;color:#14342A;border-radius:7px;padding:5px 12px;cursor:pointer;}
+    .vcp-top button.on{background:#14342A;color:#fff;}
+    .vcp-top .back{border-color:#D8D1C2;color:#5E675F;}
+    .vcp-top .sp{flex:1;}
+    .vcp-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:0 0 10px;}
+    .vcp-kpi{border:1px solid #E1DCCE;border-radius:8px;padding:7px 10px;background:#FAF8F3;}
+    .vcp-kpi span{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#5E675F;}
+    .vcp-kpi b{display:block;font-size:17px;font-variant-numeric:tabular-nums;color:#14342A;margin-top:1px;}
+    .vcp-kpi small{font-size:11.5px;color:#5E675F;}
+    .vcp-kpi.hot{border-color:#E8B4AE;background:#FBF1F0;} .vcp-kpi.hot b{color:#8C2020;}
+    .vcp-scroll{overflow-x:auto;margin:6px 0 0;}
+    .vcp-grid{border-collapse:collapse;font-size:11.5px;min-width:100%;}
+    .vcp-grid th,.vcp-grid td{padding:4px 7px;border-bottom:1px solid #EEE9DC;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;}
+    .vcp-grid th{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:#5E675F;background:#F6F3EA;position:sticky;top:0;}
+    .vcp-grid td:first-child,.vcp-grid th:first-child{text-align:left;position:sticky;left:0;background:#fff;z-index:1;}
+    .vcp-grid th:first-child{background:#F6F3EA;}
+    .vcp-grid .f{background:#FBF1F0 !important;color:#8C2020;font-weight:700;}
+    .vcp-grid tr.ln td{font-weight:700;color:#14342A;border-top:1px solid #D8D1C2;}
+    .vcp-grid tr.on td{background:#FFF7E6;} .vcp-grid tr.on td:first-child{background:#FFF7E6;box-shadow:inset 4px 0 0 #B7791F;}
+    .vcp-grid tr.sub td{color:#5C564B;} .vcp-grid tr.sub td:first-child{padding-left:22px;}
+    .vcp-grid tr.sec td{background:#F6F3EA;font-weight:700;color:#14342A;text-align:left;}
+    .vcp-grid td.tot,.vcp-grid th.tot{border-left:2px solid #D8D1C2;font-weight:700;}
+    .vcp-grid .up{color:#8C2020;} .vcp-grid .dn{color:#14653B;}
+    .vcp-ask{display:grid;gap:6px;margin:4px 0 0;}
+    .vcp-q{display:grid;grid-template-columns:132px minmax(0,1fr);gap:10px;align-items:start;border:1px solid #EEE9DC;border-radius:8px;padding:7px 10px;background:#fff;}
+    .vcp-q .st{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;border-radius:999px;padding:2px 8px;text-align:center;border:1px solid;}
+    .vcp-q .st.yes{background:#FBF1F0;color:#8C2020;border-color:#E8B4AE;}
+    .vcp-q .st.maybe{background:#FBF4E6;color:#7A4E0E;border-color:#E3CB94;}
+    .vcp-q .st.no{background:#F1F5F1;color:#3D6B4A;border-color:#C5D9C9;}
+    .vcp-q .st.unknown{background:#EDF1F5;color:#2D4A66;border-color:#B9C8D8;}
+    .vcp-q b{color:#14342A;} .vcp-q .why{color:#4A524B;margin-top:2px;} .vcp-q .means{color:#14342A;margin-top:3px;font-size:12px;}
+    .vcp-q.dim{opacity:.72;}
+    .vcp-read{border:1.5px solid #14342A;border-left-width:6px;border-radius:8px;padding:9px 12px;background:#FAF8F3;margin:0 0 10px;}
+    .vcp-read h3{margin:0 0 4px;} .vcp-read p{margin:3px 0;}
+    .vcp-work{display:grid;gap:4px;margin:2px 0 10px;} .vcp-work div{border-left:3px solid #D8D1C2;padding:2px 8px;}
+    .vcp-loading{color:#5E675F;font-style:italic;}
+    @media screen and (max-width:640px){.vcp-q{grid-template-columns:minmax(0,1fr);} .vcp-q .st{justify-self:start;}}
+  `;
+  function varCasePageEl() {
+    let el = document.getElementById('var-case-page');
+    if (!el) {
+      const page = document.getElementById('page-variances');
+      if (!page) return null;
+      el = document.createElement('div');
+      el.id = 'var-case-page';
+      page.insertBefore(el, page.firstChild);
+      const st = document.createElement('style');
+      st.textContent = VAR_CASE_CSS + VAR_CASE_PAGE_CSS + '#page-variances.var-case-mode > *:not(#var-case-page){display:none !important;}';
+      document.head.appendChild(st);
+    }
+    return el;
+  }
+  window.varOpenCase = function (flagArg, reviewId) {
+    const f = flagArg && flagArg.scope ? flagArg : null;
+    const id = f ? varReviewKey(f) : reviewId;
+    if (!f && !(id && _varReviews[id])) return;
+    if (typeof showPageByName === 'function' && document.body.dataset.tab !== 'variances') showPageByName('variances');
+    _varCase = { f, id, inv: null, invLoading: !!f, t12: false };
+    try { if (!(history.state && history.state.varCase)) history.pushState({ varCase: true }, '', location.pathname + location.search + '#variances/case'); } catch (e) {}
+    const page = document.getElementById('page-variances');
+    if (page) page.classList.add('var-case-mode');
+    varRenderCasePage();
+    window.scrollTo(0, 0);
+    const scopeKey = f ? f.scope.key : varCaseScopeKey(id);
+    if (scopeKey != null) varEnsureAcct(scopeKey, () => { if (_varCase) varRenderCasePage(); });
+    if (f) {
+      const mine = _varCase;
+      varReportInvestigation(f).then(inv => { if (_varCase !== mine) return; mine.inv = inv; mine.invLoading = false; varRenderCasePage(); },
+        e => { if (_varCase !== mine) return; mine.inv = { error: (e && e.message) || String(e) }; mine.invLoading = false; varRenderCasePage(); });
+    }
+  };
+  window.varCloseCase = function (fromPop) {
+    _varCase = null;
+    const page = document.getElementById('page-variances');
+    if (page) page.classList.remove('var-case-mode');
+    const el = document.getElementById('var-case-page');
+    if (el) el.innerHTML = '';
+    if (!fromPop && history.state && history.state.varCase) { try { history.back(); } catch (e) {} }
+  };
+  window.addEventListener('popstate', () => { if (_varCase && !(history.state && history.state.varCase)) window.varCloseCase(true); });
+  window.varCaseToggleT12 = function () { if (!_varCase) return; _varCase.t12 = !_varCase.t12; varRenderCasePage(); };
+  window.varCaseResolve = function () {
+    const c = _varCase; if (!c || !c.f) return;
+    const fid = varFlagId(c.f);
+    window.varCloseCase();
+    setTimeout(() => window.varOpenCard(fid), 0);
+  };
+  window.varCasePrint = function () { if (_varCase && _varCase.f) window.varPrintFlagReport(_varCase.f); else window.print(); };
+  function varCaseScopeKey(id) {
+    const s = varReviewParts(id).scope;
+    return s === 'portfolio' ? '' : s;
+  }
+
+  // The months on the page: the trailing 12 plus the month in progress, or — when the flagged month
+  // is older than that — the 13 months that end three months after it.
+  function varCaseWindow(gi) {
+    const L = (_liveData && _liveData.months) || [];
+    let end = L.length - 1;
+    if (gi != null && gi >= 0 && gi < end - 12) end = Math.min(L.length - 1, gi + 3);
+    const start = Math.max(0, end - 12);
+    const idx = []; for (let i = start; i <= end; i++) idx.push(i);
+    return { idx, labels: idx.map(i => L[i]), partial: !!(_liveData && _liveData.partialCurrentMonth) && end === L.length - 1 };
+  }
+  const VAR_CASE_FAMILY = { payroll: 'payroll', mgmtWages: 'payroll', repairsMaint: 'repairs', majRepairs: 'repairs', turnover: 'repairs', renCapital: 'repairs',
+    waterSewer: 'utility', electric: 'utility', heatingGas: 'utility', propTax: 'tax', insurance: 'insurance', mgmtFees: 'fees', mortgage: 'mortgage' };
+
+  // ── "Did one of these happen?" ──────────────────────────────────────────────────────────
+  // Each question is answered from the flagged month's postings and the review; `means` is what it
+  // would mean for the building if the answer is yes. States: yes (seen in Rent Manager), maybe (the
+  // postings point that way), no (looked, not there), unknown (Rent Manager cannot say — ask).
+  const VAR_WORK_KINDS = [
+    ['HVAC / air conditioning', /hvac|a\/c\b|\bac\b|air ?cond|refrigerat|heat pump|condens|mini ?split/i],
+    ['Boiler / heat', /boiler|burner|radiator|steam|heating|\bheat\b|fuel/i],
+    ['Plumbing', /plumb|leak|pipe|drain|sewer line|water heater|toilet|faucet|rooter|clog/i],
+    ['Roof / exterior', /roof|gutter|leader|facade|fa[cç]ade|masonry|pointing|sidewalk|concrete/i],
+    ['Electrical', /electric(al|ian)|wiring|panel|breaker|lighting/i],
+    ['Elevator', /elevator/i],
+    ['Fire / life safety', /fire|sprinkler|alarm|extinguish|smoke det/i],
+    ['Apartment turn / paint', /paint|turn ?over|make ?ready|vacan|plaster|sheetrock/i],
+    ['Flooring / tile', /floor|tile|carpet|vinyl/i],
+    ['Appliances', /appliance|fridge|refrigerator|stove|range|oven|washer|dryer|dishwasher/i],
+    ['Pest control', /pest|extermin|bed ?bug|rodent/i],
+    ['Violations / permits / fines', /violation|permit|\bdob\b|code case|fine\b|court|\bdpw\b|summons|penalt/i],
+    ['Supplies (store runs)', /home ?depot|lowe'?s|hardware|supply|amazon/i],
+  ];
+  function varCaseFacts(c) {
+    const f = c.f, rv = c.rv, inv = c.inv && !c.inv.error ? c.inv : null;
+    const posts = inv && inv.postings && inv.postings.cur ? inv.postings.cur : [];
+    let findings = inv ? (inv.findings || []) : [];
+    // A 12-month flag is answered from the split by payee, not from one month's postings.
+    const trend = !!(rv && rv.trend) || /^12 mo to /.test((f && f.monthLabel) || '');
+    if (trend && rv && rv.decomposition) {
+      const usd = v => fmtExact(Math.abs(v));
+      findings = rv.decomposition.filter(d => d.kind !== 'journal' && d.change > 0).flatMap(d => (d.kind === 'new'
+        ? [{ kind: 'new-vendor', headline: `${d.label} is new: nothing in the 12 months before, ${usd(d.cur)} in the last 12` }]
+        : d.cur >= 1.25 * d.prev && d.prev > 0 ? [{ kind: 'vendor-more', headline: `${d.label}: ${usd(d.prev)} → ${usd(d.cur)} over 12 months (+${Math.round((d.cur / d.prev - 1) * 100)}%)` }] : []));
+    }
+    const kinds = new Set(findings.map(x => x.kind));
+    const text = p => `${p.vendor || ''} ${p.description || ''} ${p.reference || ''} ${(p.accounts || [p.account || '']).join(' ')}`;
+    const match = re => groupsOf().filter(p => p.amount > 0 && re.test(text(p)));
+    const groupsOf = () => groups;
+    const sum = list => list.reduce((s, p) => s + (p.amount || 0), 0);
+    const L = (_liveData && _liveData.months) || [];
+    const label = f ? (f.monthLabel || (f.giMonth != null ? L[f.giMonth] : '')) : varReviewParts(c.id).month;
+    const mon = (/^([A-Z][a-z]{2})/.exec(label || '') || [])[1];
+    const monthNum = mon ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(mon) + 1 : 0;
+    const curr = f && Number.isFinite(f.curr) ? f.curr : (inv && inv.totals ? inv.totals.cur : null);
+    const prev = f && Number.isFinite(f.prev) ? f.prev : (inv && inv.totals ? inv.totals.prev : null);
+    const find = k => findings.find(x => x.kind === k);
+    // One bill is often several postings (one per GL account): group them so "one big job" sees the bill.
+    const gm = new Map();
+    for (const p of posts) {
+      const k = `${p.vendor || ''}|${p.invoiceNo || p.reference || p.txnId || p.id}`;
+      const g = gm.get(k) || { vendor: p.vendor, description: p.description, reference: p.reference, date: p.date, txnType: p.txnType, amount: 0, accounts: [], parts: [] };
+      g.amount += p.amount || 0; g.parts.push(p);
+      const acct = String(p.account || '').replace(/^d+(-d+)?s*/, '');
+      if (acct && g.accounts.indexOf(acct) === -1) g.accounts.push(acct);
+      gm.set(k, g);
+    }
+    const groups = [...gm.values()].sort((a, b) => b.amount - a.amount);
+    const top = groups.filter(g => g.amount > 0)[0] || null;
+    return { f, rv, inv, posts, groups, findings, kinds, find, match, sum, text, monthNum, label, curr, prev, top,
+      delta: curr != null && prev != null ? curr - prev : null, loaded: !!inv || (trend && !!rv), verdict: rv ? rv.verdict : null, trend,
+      journalTrend: trend && rv && rv.decomposition ? rv.decomposition.find(d => d.kind === 'journal') : null,
+      count: trend ? null : (inv && inv.postingCount ? inv.postingCount : null) };
+  }
+  function varCaseQuestions(fam, X) {
+    const extra = X.trend ? [varCaseLowYearQ(X)] : [];
+    return varCaseQuestionsFor(fam, X).concat(extra);
+  }
+  // "The rise" is sometimes the earlier year being the odd one out: read the year before it.
+  function varCaseLowYearQ(X) {
+    return { ask: 'Was the earlier year unusually low?', means: 'Then the latest year is a return to normal, not new spending — check why the earlier year was low (a vacancy, a credit, costs booked elsewhere).', test: () => {
+      const f = X.f; if (!f || f.giMonth == null) return { state: 'unknown', why: 'The month is not on hand.' };
+      const s = fullSeries(f.scope.key, f.key), g = f.giMonth;
+      if (g < 35) return { state: 'unknown', why: 'Rent Manager history here does not reach three years back.' };
+      const sum = (a, b) => { let t = 0; for (let i = a; i <= b; i++) t += Number.isFinite(s[i]) ? s[i] : 0; return t; };
+      const y0 = sum(g - 35, g - 24), y1 = sum(g - 23, g - 12), y2 = sum(g - 11, g);
+      const txt = `Three years: ${fmtExact(y0)} → ${fmtExact(y1)} → ${fmtExact(y2)}.`;
+      return y0 > 0 && y1 < 0.75 * y0 ? { state: 'yes', why: `${txt} The middle year dropped ${Math.round((1 - y1 / y0) * 100)}% before this rise.` } : { state: 'no', why: `${txt} The earlier year was not unusually low.` };
+    } };
+  }
+  function varCaseQuestionsFor(fam, X) {
+    const money = v => fmtExact(Math.abs(v || 0));
+    const q = (ask, test, means) => ({ ask, test, means });
+    const R = (state, why) => ({ state, why });
+    const need = fn => () => (X.loaded ? fn() : R('unknown', 'Waiting for the bills from Rent Manager…'));
+    const cite = list => list.slice(0, 3).map(p => `${p.vendor || 'no payee'} ${money(p.amount)}${p.description && p.description !== p.vendor ? ` (“${String(p.description).slice(0, 60)}”)` : ''}`).join('; ');
+    const newVendor = need(() => { const g = X.find('new-vendor'); return g ? R('yes', g.headline + '.') : R('no', 'Every payee this month also billed in the months before.'); });
+    const vendorMore = need(() => { const g = X.find('vendor-more'); return g ? R('yes', g.headline + '.') : R('no', 'No regular payee billed more than usual.'); });
+    const oneBig = need(() => {
+      const g = X.find('one-big-bill');
+      if (g) return R('yes', g.headline + '.');
+      if (X.top && X.curr > 0 && X.top.amount >= 0.5 * X.curr) return R('yes', `${cite([X.top])} is ${Math.round(X.top.amount / X.curr * 100)}% of the month.`);
+      return R('no', X.top ? `The biggest posting (${cite([X.top])}) is under half the month.` : 'No single posting stands out.');
+    });
+    const volume = need(() => {
+      const n = X.count; if (!n) return R('unknown', 'Posting counts not available.');
+      return n.cur >= 1.4 * Math.max(1, n.prev) && n.cur - n.prev >= 3 ? R('yes', `${n.cur} postings this month against ${n.prev} the month before.`) : R('no', `${n.cur} postings this month against ${n.prev} the month before — about the same number of jobs.`);
+    });
+    const cycle = need(() => { const g = X.find('cycle'); return g ? R('yes', g.headline + '.') : R('no', 'No sign of a bill that only lands every quarter or year.'); });
+    const catchUp = need(() => {
+      const g = X.find('catch-up');
+      if (g) return R('yes', g.headline + '.');
+      if (X.verdict === 'correction') return R('yes', X.rv.headline);
+      return R('no', 'No bill covers earlier months and none was keyed long after its date.');
+    });
+    const dup = need(() => (X.verdict === 'duplicate' || X.kinds.has('duplicate') ? R('yes', X.verdict === 'duplicate' ? X.rv.headline : X.find('duplicate').headline + '.') : R('no', 'No invoice number or amount repeats on two bills.')));
+    const wrong = need(() => {
+      if (X.verdict === 'wrong-account') return R('yes', X.rv.headline);
+      const g = X.find('wrong-place'); return g ? R('maybe', g.headline + '.') : R('no', 'The same vendor did not post to another building or line in a way that points here.');
+    });
+    const journal = need(() => { if (X.trend) { const jt = X.journalTrend; return jt ? R('yes', `Journal entries: ${fmtExact(jt.prev)} in the earlier 12 months, ${fmtExact(jt.cur)} in the latest.`) : R('no', 'No journal entries in either year.'); } const j = X.posts.filter(p => p.txnType === 'JOURNL'); return j.length ? R('yes', `${j.length} journal ${j.length === 1 ? 'entry' : 'entries'} this month (${money(X.sum(j))}) — moved here by hand, not billed.`) : R('no', 'No journal entries this month.'); });
+    const words = (re, yesTxt, noTxt) => need(() => { const m = X.match(re); return m.length ? R('yes', `${yesTxt}: ${cite(m)}.`) : R('no', noTxt); });
+    const card = words(/\bamex\b|american express|credit card|\bcc\b|\bciti\b|capital one|card charge|visa|mastercard/i, 'Card charges this month', 'Nothing this month was paid by card.');
+    const missing = need(() => {
+      const g = X.find('missing-bill');
+      if (g) return R('yes', g.headline + '.');
+      return X.curr != null && Math.abs(X.curr) < 1 ? R('yes', `Nothing posted in ${X.label}.`) : R('no', 'The usual payees all posted this month.');
+    });
+    const ask = who => () => R('unknown', `Rent Manager does not record this — ask ${who}.`);
+    if (fam === 'payroll') return [
+      q('Was someone added — a new hire or a new contractor?', newVendor, `A new person is a step up that stays: about ${money((X.delta || 0) * (X.trend ? 1 : 12))} a year at this level. Check it was approved and is in the budget.`),
+      q('Did the usual payroll company bill more — a raise, more hours or overtime?', vendorMore, 'A raise is permanent (budget it); overtime is temporary — ask what caused it: a vacancy, an emergency, a super covering two buildings.'),
+      q('Was there an extra pay run this month?', need(() => { if (X.trend) return R('no', 'A 12-month total is not moved by when pay dates fall.'); const n = X.count; return n && n.cur > n.prev ? R('maybe', `${n.cur} payroll postings this month against ${n.prev} the month before — a third bi-weekly pay date falls in two months each year.`) : R('no', n ? `${n.cur} postings, the same rhythm as the month before (${n.prev}).` : 'Posting counts not available.'); }), 'Then it is timing, not cost: the next month comes back down and nothing needs fixing.'),
+      q('Was a bonus, back pay or other one-off paid?', words(/bonus|severance|retro|back ?pay|holiday|vacation pay|payout/i, 'One-off wording on these postings', 'No posting is worded as a bonus, back pay or payout.'), 'A one-off does not repeat — mark the flag normal once it is confirmed.'),
+      q('Was staff cost moved here from another building or line?', need(() => { const w = wrong(); return w.state !== 'no' ? w : journal(); }), 'Then the building is not paying more — the cost was re-allocated. Make sure the other building came down by the same amount.'),
+      q('Was a late bill or a skipped month caught up?', catchUp, 'Then two months landed in one; the run rate has not changed.'),
+      q('Is the same bill in twice?', dup, 'That is a mistake to void before it is paid twice.'),
+      q('Did hours go up because of vacancies or turnover work?', ask('the property manager'), 'Supers doing turn work shows up in payroll; it should ease once units are leased.'),
+    ];
+    if (fam === 'repairs') return [
+      q('Was it one big job?', oneBig, 'One job does not repeat. Ask what it was, that it was approved, and whether it replaced something — a replacement is a capital item, not repairs.'),
+      q('Was it many smaller jobs?', volume, 'Volume creeping up across many jobs is an older building or more vendor calls — watch the next two months.'),
+      q('Is it the season’s work (cooling in summer, heat in winter)?', need(() => {
+        const hv = X.match(VAR_WORK_KINDS[0][1]), ht = X.match(VAR_WORK_KINDS[1][1]);
+        if (hv.length && X.monthNum >= 4 && X.monthNum <= 9) return R('yes', `Cooling work in ${X.label}: ${cite(hv)}.`);
+        if (ht.length && (X.monthNum >= 9 || X.monthNum <= 3)) return R('yes', `Heating work in ${X.label}: ${cite(ht)}.`);
+        return R('no', 'None of the biggest postings is seasonal cooling or heating work.');
+      }), 'Expected for the time of year — compare with the same month last year before calling it a problem.'),
+      q('Was it an emergency — a leak, flood or fire?', words(/leak|flood|water damage|fire|emergency|burst|overflow|mold/i, 'Emergency wording', 'Nothing is worded as a leak, flood, fire or emergency.'), 'Ask whether an insurance claim was filed; above the deductible, insurance should carry part of it.'),
+      q('Was it a violation, fine or permit?', words(VAR_WORK_KINDS[11][1], 'Violation / fine wording', 'No violation, fine or permit charge.'), 'A fine is avoidable cost — ask what the violation was and that it is cured, so it does not come back.'),
+      q('Is it really a capital replacement booked as repairs?', need(() => {
+        const m = X.match(/replace|install|new |upgrade|roof|boiler|compressor|condenser|water heater|elevator/i).filter(p => p.amount >= 5000);
+        return m.length ? R('maybe', `Replacement-sized work: ${cite(m)}.`) : R('no', 'No single replacement-sized job ($5,000+) worded as a replacement or install.');
+      }), 'If it replaced equipment, it belongs in capital (REN Capital), which takes it out of operating expense.'),
+      q('Was a new vendor used?', newVendor, 'A new vendor is worth one question: who brought them in, and was the price compared?'),
+      q('Was it paid on a card instead of through a bill?', card, 'Card charges skip approval and often have no invoice — ask for the receipts and make sure the same job was not also billed.'),
+      q('Is the same bill in twice, or on the wrong building?', need(() => { const d = dup(); return d.state !== 'no' ? d : wrong(); }), 'That is a mistake to fix before it is paid twice or charged to the wrong owner.'),
+    ];
+    if (fam === 'utility') return [
+      q('Is it a quarterly or annual bill landing this month?', cycle, 'Then it is timing: the cost is real but belongs to several months — compare the whole quarter, not the month.'),
+      q('Did the usual provider charge more?', vendorMore, 'A modest rise (under ~40%) is usually a rate change and holds; a much bigger one is usage.'),
+      q('Is there a leak or a usage spike?', need(() => {
+        const g = X.find('vendor-more'), cy = X.find('cycle');
+        const big = (g && /\+(\d+)%/.test(g.headline) && +/\+(\d+)%/.exec(g.headline)[1] >= 40) || (cy && /(\d+)% more/.test((cy.evidence || []).join(' ')) && +/(\d+)% more/.exec((cy.evidence || []).join(' '))[1] >= 40);
+        return big ? R('maybe', 'The bill is 40% or more above the usual one.') : R('no', 'The bill is not far enough above the usual one to point at a leak.');
+      }), 'Have the super check for running toilets, leaks and open taps; a leak keeps costing until it is found.'),
+      q('Was an estimated reading caught up, or a late bill keyed now?', catchUp, 'Then earlier months were under-billed and this month carries them — the run rate has not changed.'),
+      q('Are there late fees or penalties?', words(/late|penalt|interest|reconnect|shut ?off/i, 'Late-fee wording', 'No late fee or penalty on these postings.'), 'Late fees are avoidable — find the bill that was paid late.'),
+      q('Is another building’s meter billed here, or the same bill twice?', need(() => { const d = dup(); return d.state !== 'no' ? d : wrong(); }), 'A meter on the wrong building or a doubled bill is a mistake to correct.'),
+    ];
+    if (fam === 'tax') return [
+      q('Is this the new tax year’s bill — a new rate or assessment?', need(() => {
+        const g = X.find('vendor-more');
+        if (g && (X.monthNum === 7 || X.monthNum === 8)) return R('yes', `${g.headline}. In New Jersey the third-quarter bill (due August 1) is the first at the new tax year’s rate.`);
+        if (g) return R('maybe', g.headline + '.');
+        return R('no', 'The tax payee billed about what it usually does.');
+      }), 'A higher bill at the new rate holds for the whole tax year — worth checking the assessment for an appeal.'),
+      q('Were two quarters paid together, or one paid twice?', need(() => { const d = dup(); if (d.state !== 'no') return d; const c = catchUp(); return c; }), 'Then it is timing (two quarters) or a mistake (twice) — the second is money to recover.'),
+      q('Was a quarter missed?', missing, 'A missed quarter accrues interest — make sure it was paid, not just not posted.'),
+      q('Did the lender pay it from escrow (a journal entry, not a bill)?', journal, 'Escrow payments land when the lender pays them, not on the tax calendar.'),
+      q('Did an abatement or PILOT end?', ask('the owner'), 'An ending abatement is a permanent step up — it belongs in the budget and the valuation.'),
+    ];
+    if (fam === 'insurance') return [
+      q('Is a year of premium booked in one month?', need(() => { const c = cycle(); if (c.state !== 'no') return c; return X.verdict === 'timing' ? R('yes', X.rv.headline) : R('no', 'No bill here covers a whole policy year.'); }), 'Then the month is overstated and the rest of the year understated — the cost is real, the timing is not.'),
+      q('Did the renewal cost more?', vendorMore, 'A renewal increase holds for the policy year — check it against the broker’s quote.'),
+      q('Is there a new policy alongside the old one?', newVendor, 'Two policies on one building is paying twice for cover — ask the broker.'),
+      q('Is the premium financed (AFCO or similar)?', words(/afco|financ|premium finance|ipfs|first insurance funding/i, 'Premium finance wording', 'No premium-finance payee or wording.'), 'A financed premium is paid monthly to the finance company; the bill itself is not past due.'),
+      q('Is the same bill in twice, or on the wrong building?', need(() => { const d = dup(); return d.state !== 'no' ? d : wrong(); }), 'A mistake to correct with accounting.'),
+    ];
+    if (fam === 'fees') return [
+      q('Did the usual fee not post this month?', missing, 'Then the month is understated until it posts — check it was billed, not skipped.'),
+      q('Did income move? (the fee is a share of collections)', () => {
+        const s = fullSeries(X.f ? X.f.scope.key : varCaseScopeKey(X.id || ''), 'totalIncome');
+        const gi = X.f ? X.f.giMonth : null;
+        if (gi == null || !s.length || gi < 1) return R('unknown', 'Income for the month is not on hand.');
+        const a = s[gi], b = s[gi - 1];
+        const ch = b ? (a - b) / Math.abs(b) : 0;
+        return Math.abs(ch) >= 0.1 ? R('yes', `Total income ${ch > 0 ? 'rose' : 'fell'} ${Math.round(Math.abs(ch) * 100)}% (${fmtExact(b)} → ${fmtExact(a)}).`) : R('no', `Total income was about flat (${fmtExact(b)} → ${fmtExact(a)}).`);
+      }, 'A fee that follows income is not a problem in itself.'),
+      q('Were two months billed together?', catchUp, 'Timing only — the next month should be back to normal.'),
+      q('Is it on the wrong line or building?', wrong, 'A mistake to move with accounting.'),
+    ];
+    if (fam === 'mortgage') return [
+      q('Did a payment not post?', missing, 'Usually a posting gap, not a missed payment — confirm with the lender statement.'),
+      q('Did the interest charged go up (a rate reset)?', vendorMore, 'A rate reset is permanent until the next one — it changes the debt service coverage.'),
+      q('Were two months posted together?', catchUp, 'Timing only.'),
+      q('Was it moved here by journal entry?', journal, 'Check the other side of the entry.'),
+    ];
+    return [
+      q('Was it one big bill?', oneBig, 'One bill does not repeat — ask what it was.'),
+      q('Was a new vendor used?', newVendor, 'Ask who brought them in.'),
+      q('Did the usual vendor bill more?', vendorMore, 'A price change holds; a one-off does not.'),
+      q('Is it a quarterly or annual bill landing?', cycle, 'Timing, not cost.'),
+      q('Was something caught up from earlier months?', catchUp, 'Timing, not cost.'),
+      q('Is the same bill in twice, or on the wrong building?', need(() => { const d = dup(); return d.state !== 'no' ? d : wrong(); }), 'A mistake to correct.'),
+    ];
+  }
+  function varCaseWork(X) {
+    // "Major repairs, you try and figure out what the repair was": the biggest postings, read for what they were.
+    const posts = X.groups.filter(p => p.amount > 0).slice(0, 6);
+    return posts.map(p => {
+      const acct = p.accounts.join(' ');
+      const kinds = VAR_WORK_KINDS.filter(([, re]) => re.test(acct)).concat(VAR_WORK_KINDS.filter(([, re]) => re.test(X.text(p)))).map(([k]) => k);
+      return { p, kind: kinds[0] || null };
+    });
+  }
+
+  function varRenderCasePage() {
+    const el = varCasePageEl();
+    if (!el || !_varCase) return;
+    const c = _varCase, f = c.f, esc = varEsc;
+    const inv = c.inv && !c.inv.error && c.inv.supported !== false ? c.inv : null;
+    const rv = f ? (varReviewFor(f) || (inv && inv.review) || null) : (_varReviews[c.id] || null);
+    c.rv = rv;
+    const L = (_liveData && _liveData.months) || [];
+    const wh = f ? null : varReviewWhere(c.id);
+    const scopeKey = f ? f.scope.key : varCaseScopeKey(c.id);
+    const key = f ? f.key : varReviewParts(c.id).key;
+    const lineName = f ? f.label : wh.line;
+    const scopeTxt = f ? (f.scope.type === 'Portfolio' ? 'All Entities' : (f.scope.type === 'Property' && f.scope.entity && f.scope.entity !== f.scope.label ? `${f.scope.label} · ${f.scope.entity}` : f.scope.label)) : wh.place;
+    const monthLabel = f ? (f.monthLabel || (f.giMonth != null ? L[f.giMonth] : '')) : varReviewParts(c.id).month;
+    const gi = f && f.giMonth != null ? f.giMonth : L.indexOf(String(monthLabel || '').replace(/^12 mo to /, ''));
+    const trend = !!(f && f.reason === 'trend') || /^12 mo to /.test(monthLabel || '');
+    const money = v => (v == null || !Number.isFinite(v) ? '—' : `${v < 0 ? '−' : ''}${fmtExact(Math.abs(v))}`);
+    const signed = v => (v == null || !Number.isFinite(v) ? '—' : `${v < 0 ? '−' : '+'}${fmtExact(Math.abs(v))}`);
+    const pct = (a, b) => (Number.isFinite(a) && Number.isFinite(b) && b ? `${a >= b ? '+' : '−'}${Math.round(Math.abs(a - b) / Math.abs(b) * 100)}%` : '');
+    const W = varCaseWindow(gi);
+    const series = fullSeries(scopeKey, key);
+    const at = i => (series[i] != null && Number.isFinite(series[i]) ? series[i] : null);
+    const focus = i => i === gi || (trend && gi >= 0 && i <= gi && i > gi - 12);
+
+    // ── header
+    const tier = f ? (URGENCY_META[f.urgency] || URGENCY_META.watch) : null;
+    const chips = [];
+    if (f && f.score) chips.push(`<span class="chip">Importance <b>${esc(f.score)}/5</b></span>`);
+    if (f) chips.push(`<span class="chip">Tier <b>${esc(f.urgency ? f.urgency.charAt(0).toUpperCase() + f.urgency.slice(1) : 'Watch')}</b></span>`);
+    if (f && f.contact) chips.push(`<span class="chip">Who to ask: <b>${esc(f.contact)}</b></span>`);
+    if (rv) chips.push(`<span class="chip">${rv.auto ? 'Automatic review' : 'Reviewed by hand'} ${esc(rv.reviewed || '')}</span>`);
+    const top = `<div class="vcp-top">
+      <button class="back" onclick="varCloseCase()">← Back to Variances</button>
+      <span class="sp"></span>
+      <button class="${c.t12 ? 'on' : ''}" onclick="varCaseToggleT12()">${c.t12 ? 'Hide' : 'Show'} the full T12 P&amp;L</button>
+      ${f ? '<button onclick="varCasePrint()">⎙ Print / PDF</button><button onclick="varCaseResolve()">Mark normal / resolve</button>' : ''}
+    </div>
+    <div class="chead"><span>Portfolio Management Dashboard · Variance case</span><span>${esc(scopeTxt)}</span></div>
+    <h1>${esc(lineName)} — ${esc(scopeTxt)} — ${esc(monthLabel)}</h1><div class="chips">${chips.join('')}</div>`;
+
+    // ── full T12 (the whole P&L for this scope), on demand
+    let t12 = '';
+    if (c.t12) {
+      const head = `<tr><th>Line</th>${W.labels.map((m, k) => `<th class="${W.idx[k] === gi ? 'f' : ''}">${esc(m)}${W.partial && k === W.labels.length - 1 ? '<br>MTD' : ''}</th>`).join('')}<th class="tot">12 mo total</th></tr>`;
+      const closed = W.idx.slice(W.partial ? -13 : -12).slice(0, 12);
+      const rows = METRICS.map(([k, lab]) => {
+        const s = fullSeries(scopeKey, k);
+        if (!s.length) return '';
+        const tot = closed.reduce((a, i) => a + (Number.isFinite(s[i]) ? s[i] : 0), 0);
+        const cls = k === key ? 'on' : (/^(totalIncome|noi|totalExpense)$/.test(k) ? 'ln' : '');
+        return `<tr class="${cls}"><td>${esc(lab)}</td>${W.idx.map(i => `<td class="${k === key && i === gi ? 'f' : ''}">${money(s[i])}</td>`).join('')}<td class="tot">${money(tot)}</td></tr>`;
+      }).join('');
+      t12 = `<section class="panel"><div class="ph"><span class="pn">P</span><h2>Full T12 P&amp;L — ${esc(scopeTxt)}</h2><span class="sub2">every line, exact dollars, accrual · ${esc(lineName)} highlighted</span></div>
+        <div class="pb"><div class="vcp-scroll"><table class="vcp-grid"><thead>${head}</thead><tbody>${rows}</tbody></table></div>
+        <div class="dim" style="margin-top:4px;">12 mo total is the last 12 closed months. Source: Rent Manager P&amp;L (Report 45), accrual.</div></div></section>`;
+    }
+
+    // ── 1. what we caught: the numbers
+    const sum12 = to => { if (to < 11) return null; let t = 0; for (let i = to - 11; i <= to; i++) t += at(i) || 0; return t; };
+    const curV = trend ? (f && Number.isFinite(f.curr) ? f.curr : sum12(gi)) : at(gi);
+    const prevV = trend ? (f && Number.isFinite(f.prev) ? f.prev : sum12(gi - 12)) : (gi > 0 ? at(gi - 1) : null);
+    const lyV = trend ? null : (gi >= 12 ? at(gi - 12) : null);
+    const mean = f && Number.isFinite(f.mean) ? f.mean : null;
+    const kpis = [
+      `<div class="vcp-kpi hot"><span>${trend ? 'Last 12 months' : `${esc(monthLabel)} (flagged)`}</span><b>${money(curV)}</b><small>${esc(lineName)}</small></div>`,
+      `<div class="vcp-kpi"><span>${trend ? 'The 12 months before' : `vs ${esc(L[gi - 1] || 'month before')}`}</span><b>${signed(curV != null && prevV != null ? curV - prevV : null)}</b><small>${money(prevV)} ${pct(curV, prevV)}</small></div>`,
+      mean != null && !trend ? `<div class="vcp-kpi"><span>vs its usual month*</span><b>${signed(curV - mean)}</b><small>trailing-12 mean ${money(mean)}</small></div>` : '',
+      lyV != null ? `<div class="vcp-kpi"><span>vs ${esc(L[gi - 12])} last year</span><b>${signed(curV - lyV)}</b><small>${money(lyV)} ${pct(curV, lyV)}</small></div>` : '',
+      f && f.impact && /^(mom|varGroup|trend)$/.test(f.reason || '') && !(rv && /^(timing|correction|duplicate|wrong-account)$/.test(rv.verdict)) ? `<div class="vcp-kpi"><span>If it stays at this level*</span><b>${money(Math.abs(f.impact))}</b><small>a year</small></div>` : '',
+      f && f.bandLo != null && Number.isFinite(f.bandLo) && Number.isFinite(f.bandHi) ? `<div class="vcp-kpi"><span>Normal range*</span><b style="font-size:14px">${money(f.bandLo)} – ${money(f.bandHi)}</b><small>a month</small></div>` : '',
+    ].join('');
+    const vals = W.idx.map(i => at(i));
+    const chart = vals.some(v => v != null) ? `<div class="cchart">${varReportChartSvg({ vals: vals.map(v => (v == null ? 0 : v)), labels: W.labels, isFocus: k => focus(W.idx[k]), partialLast: W.partial,
+      color: tier ? tier.color : '#B42318', mean, bandLo: f && Number.isFinite(f.bandLo) ? f.bandLo : null, bandHi: f && Number.isFinite(f.bandHi) ? f.bandHi : null, title: `${lineName} · ${scopeTxt}`, compact: true })}</div>` : '';
+    // the line, month by month, with its GL accounts
+    const acc = varAcctFor(scopeKey);
+    let acctRows = '';
+    if (acc && acc !== 'loading' && !acc.error && acc.lines && acc.lines[key]) {
+      const aIdx = new Map((acc.months || []).map((l, i) => [l, i]));
+      acctRows = acc.lines[key].filter(l => l.kind !== 'head' && l.kind !== 'total').map(l => {
+        const v = W.labels.map(lab => (aIdx.has(lab) ? l.s[aIdx.get(lab)] : null));
+        if (!v.some(x => x)) return '';
+        return `<tr class="sub"><td>${esc(l.name)}</td>${v.map((x, k) => `<td class="${W.idx[k] === gi ? 'f' : ''}">${x == null ? '—' : money(x)}</td>`).join('')}</tr>`;
+      }).join('');
+    }
+    const acctNote = !acc || acc === 'loading' ? `<tr class="sub"><td colspan="${W.labels.length + 1}" class="vcp-loading" style="text-align:left">Loading the GL accounts in this line…</td></tr>` : '';
+    const chg = W.idx.map((i, k) => { const a = at(i), b = i > 0 ? at(i - 1) : null; return a != null && b != null ? a - b : null; });
+    const lineTable = `<div class="vcp-scroll"><table class="vcp-grid"><thead><tr><th>${esc(lineName)}</th>${W.labels.map((m, k) => `<th class="${focus(W.idx[k]) ? 'f' : ''}">${esc(m)}${W.partial && k === W.labels.length - 1 ? '<br>MTD' : ''}</th>`).join('')}</tr></thead><tbody>
+      <tr class="ln"><td>P&amp;L line (Report 45)</td>${vals.map((v, k) => `<td class="${focus(W.idx[k]) ? 'f' : ''}">${money(v)}</td>`).join('')}</tr>
+      <tr><td>Change vs month before</td>${chg.map((v, k) => `<td class="${focus(W.idx[k]) ? 'f' : (v > 0 ? 'up' : v < 0 ? 'dn' : '')}">${signed(v)}</td>`).join('')}</tr>
+      ${mean != null ? `<tr><td>vs usual month*</td>${vals.map((v, k) => `<td class="${focus(W.idx[k]) ? 'f' : ''}">${v == null ? '—' : signed(v - mean)}</td>`).join('')}</tr>` : ''}
+      ${acctRows}${acctNote}</tbody></table></div>`;
+    const txt = f ? varFlagText(f) : null;
+    const why = f ? `<p class="lead">${varReportRich(txt.headline || '')}</p>${(txt.reasons || []).slice(0, 3).map(r => `<p>${varReportRich(r)}</p>`).join('')}${f.note ? `<p class="dim"><b>Note:</b> ${esc(f.note)}</p>` : ''}`
+      : (rv ? `<p class="lead">${esc(rv.headline || '')}</p>` : '');
+    const s1 = `<section class="panel"><div class="ph"><span class="pn">1</span><h2>What we caught</h2><span class="sub2">the numbers, and why it was flagged</span></div>
+      <div class="pb"><div class="vcp-kpis">${kpis}</div><div class="two"><div>${chart}</div><div>${why}</div></div>${lineTable}
+      <div class="dim" style="margin-top:4px;">* house estimates from the trailing 12 months. P&amp;L from Rent Manager, accrual${_liveData && _liveData.refreshedAt ? `, pulled ${esc(new Date(_liveData.refreshedAt).toLocaleString())}` : ''}.</div></div></section>`;
+
+    // ── 2. what we dug into in Rent Manager
+    let s2body;
+    if (c.invLoading && !rv) s2body = '<p class="vcp-loading">Reading the postings, bills and invoices in Rent Manager — the first look at a flag can take a minute or two…</p>';
+    else if (!rv && !inv) s2body = `<p>${esc(c.inv && c.inv.error ? `Rent Manager could not be read: ${c.inv.error}` : 'This line has no General Ledger postings behind it to dig into.')}</p>`;
+    else {
+      const delta = curV != null && prevV != null ? curV - prevV : null;
+      const share = a => (delta && Math.abs(delta) >= 1 ? `${Math.round(a / Math.abs(delta) * 100)}%` : '—');
+      const cov = rv ? varReviewCoverage(rv) : null;
+      const bills = rv ? (rv.bills || []) : [];
+      const brow = bills.map(b => `<tr class="${b.tone === 'bad' ? 'on' : ''}"><td>${esc(b.date || '')}</td><td style="text-align:left;white-space:normal"><b>${esc(b.vendor || '')}</b><div class="dim">${esc(b.ref || '')}${b.billId ? ` · bill #${esc(b.billId)}` : ''}${b.note ? ` · ${esc(b.note)}` : ''}</div></td>
+        <td>${money(b.amount || 0)}</td><td>${trend ? '—' : share(b.amount || 0)}</td><td style="text-align:left;white-space:normal">${esc(b.status || '')}</td>
+        <td style="text-align:left">${(b.files || []).length && b.posting ? b.files.map(x => `<a href="${esc(varReviewFileUrl(c.id, b, x, rv))}" target="_blank" rel="noopener">📄 ${esc(x.name)}</a>`).join('<br>') : '<span class="dim">none</span>'}</td></tr>`).join('');
+      const listed = bills.reduce((s, b) => s + (b.amount || 0), 0);
+      const billTable = brow ? `<h3 style="margin-top:10px">The bills behind ${esc(monthLabel)} — ${Math.round(cov.pct * 100)}% of dollars have an invoice attached (${cov.nFile} of ${cov.n})</h3>
+        <div class="vcp-scroll"><table class="vcp-grid"><thead><tr><th style="text-align:left">Date</th><th style="text-align:left">Vendor · reference</th><th>Amount</th><th title="The bill's amount against the jump from the month before">Share of the jump</th><th style="text-align:left">Status in Rent Manager</th><th style="text-align:left">Invoice</th></tr></thead><tbody>${brow}</tbody></table></div>
+        ${delta != null && !trend ? `<div class="dim" style="margin-top:4px;">The month moved ${signed(delta)} against ${esc(L[gi - 1] || 'the month before')}; the bills listed come to ${money(listed)} of ${money(curV)} in the month.</div>` : ''}` : '';
+      const decomp = rv && rv.decomposition && rv.decomposition.length ? `<h3 style="margin-top:10px">Where the change came from, by payee</h3><div class="vcp-scroll"><table class="vcp-grid"><thead><tr><th>Payee</th><th>12 months before</th><th>Last 12 months</th><th>Change</th></tr></thead><tbody>
+        ${rv.decomposition.map(d => `<tr><td>${esc(d.label)}${d.kind === 'new' ? ' <span class="dim">(new)</span>' : ''}</td><td>${money(d.prev)}</td><td>${money(d.cur)}</td><td class="${d.change > 0 ? 'up' : 'dn'}">${signed(d.change)}</td></tr>`).join('')}</tbody></table></div>` : '';
+      const checked = (rv ? rv.checked : inv.checked) || [];
+      const found = rv ? (rv.whatHappened || []) : (inv.findings || []).slice(0, 3).map(x => x.headline);
+      const vc = varCaseVerdict(rv, inv);
+      const concl = rv ? `<span class="vc" style="background:${vc.bg};color:${vc.fg};border-color:${vc.bd}">${esc(vc.word)}</span><div class="ct">${esc(rv.headline || '')}</div><p>${esc(varBottomLineAfter(rv))}</p>
+          <div class="cf">${rv.atIssue ? `<b>${fmtExact(rv.atIssue)}</b> ${esc(rv.atIssueLabel || '')} · ` : ''}Confidence: ${esc(String(rv.confidence || '—'))}</div>`
+        : `<span class="vc" style="background:${vc.bg};color:${vc.fg};border-color:${vc.bd}">${esc(vc.word)}</span><div class="ct">${esc(inv.likely ? inv.likely.headline : 'The postings do not show what changed.')}</div><p>${esc(inv.summary || '')}</p>`;
+      s2body = `<div class="two even"><div>${checked.length ? `<h3>Checked</h3><ul class="ticks">${checked.slice(0, 7).map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+          ${found.length ? `<h3 style="margin-top:6px">Found</h3><ul class="tight">${found.slice(0, 5).map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}</div>
+        <div><h3>Conclusion</h3><div class="concl">${concl}</div>${c.invLoading ? '<p class="vcp-loading" style="margin-top:6px">Still reading Rent Manager for the latest bills…</p>' : ''}</div></div>${billTable}${decomp}`;
+    }
+    const s2 = `<section class="panel"><div class="ph"><span class="pn">2</span><h2>What we dug into</h2><span class="sub2">bills, invoices and payments in Rent Manager, and what they did to the month</span></div><div class="pb">${s2body}</div></section>`;
+
+    // ── 3. what could explain it — our analysis
+    const fam = VAR_CASE_FAMILY[key] || 'other';
+    const X = varCaseFacts({ ...c, rv, inv });
+    X.id = c.id;
+    const qs = varCaseQuestions(fam, X).map(x => ({ ...x, r: x.test() }));
+    const order = { yes: 0, maybe: 1, unknown: 2, no: 3 };
+    const shown = qs.slice().sort((a, b) => order[a.r.state] - order[b.r.state]);
+    const stWord = { yes: 'Seen in RM', maybe: 'Possible', no: 'Not seen', unknown: 'Ask' };
+    const qHtml = shown.map(x => `<div class="vcp-q${x.r.state === 'no' ? ' dim' : ''}"><span class="st ${x.r.state}">${stWord[x.r.state]}</span><div><b>${esc(x.ask)}</b><div class="why">${esc(x.r.why)}</div>${x.r.state === 'yes' || x.r.state === 'maybe' ? `<div class="means"><b>What it means:</b> ${esc(x.means)}</div>` : ''}</div></div>`).join('');
+    // "Most likely": the earlier year being the low one reframes a 12-month rise; otherwise the answer
+    // that names the payee the conclusion is about, then the first seen.
+    const lead = rv ? ((/^(.+?)(?::| accounts | billed | is new| did not appear)/.exec(rv.headline || '') || [])[1] || '').trim() : '';
+    const hits = shown.filter(x => x.r.state === 'yes' || x.r.state === 'maybe')
+      .map((x, i) => ({ x, w: (/unusually low/.test(x.ask) && x.r.state === 'yes' ? -2 : 0) + (lead && x.r.why.indexOf(lead) !== -1 ? -1 : 0) + (x.r.state === 'maybe' ? 0.5 : 0), i }))
+      .sort((a, b) => a.w - b.w || a.i - b.i).map(o => o.x);
+    const famTxt = { payroll: 'Payroll is a fixed cost: a step up usually stays until someone decides otherwise, so the question is whether it was a decision.',
+      repairs: 'Repair spend is lumpy; one month means little on its own. What matters is what the work was, whether it was approved, and whether it will come back.',
+      utility: 'Utilities move with season, rates and billing cycles; the real risks are a leak that keeps running and fees that were avoidable.',
+      tax: 'Taxes move once a year with the rate and the assessment; anything in between is timing or a mistake.',
+      insurance: 'Insurance moves at renewal; between renewals a jump is timing (how the premium was booked) or a policy change.',
+      fees: 'Management fees follow collections; a gap or a double is a posting matter, not a cost change.',
+      mortgage: 'Interest moves with the rate and the balance; a jump between resets is a posting matter.', other: '' }[fam];
+    const timingRead = (rv && /^(timing|correction|duplicate|wrong-account)$/.test(rv.verdict)) || (hits[0] && /caught up|quarterly or annual|year of premium|two quarters|two months|extra pay run|unusually low/.test(hits[0].ask));
+    const yearly = !timingRead && f && f.impact && /^(mom|varGroup|trend)$/.test(f.reason || '') ? ` If it stays at this level it is about ${fmtExact(Math.abs(f.impact))} a year${fam === 'repairs' ? ' — unlikely for repair work, which does not usually repeat' : ''}.` : '';
+    const read = !f && rv ? `<p><b>${esc(rv.verdictLabel || '')}.</b> ${esc(rv.headline || '')}</p><p>${esc(varBottomLineAfter(rv))}</p>`
+      : !X.loaded && !rv ? '<p class="vcp-loading">Our read comes once the bills are in.</p>'
+      : `<p>${rv ? `<b>${esc(rv.verdictLabel || '')}.</b> ${esc(rv.headline || '')}` : ''}</p>
+         ${!X.loaded ? '<p class="vcp-loading">The checks below fill in once the bills are read from Rent Manager.</p>' : hits.length ? `<p><b>Most likely:</b> ${esc(hits[0].ask.replace(/\?$/, ''))} — ${esc(hits[0].r.why)} ${esc(hits[0].means)}</p>` : '<p>None of the usual explanations shows in the postings — this one needs a person to say what happened.</p>'}
+         <p class="dim">${esc(famTxt)}${esc(yearly)}</p>`;
+    const work = fam === 'repairs' && X.loaded ? varCaseWork(X) : [];
+    const workHtml = work.length ? `<h3>What the work was — the biggest postings in ${esc(monthLabel)}</h3><div class="vcp-work">${work.map(w => `<div><b>${money(w.p.amount)}</b> · ${esc(w.p.vendor || 'no payee')}${w.kind ? ` · <b>${esc(w.kind)}</b>` : ''}<div class="dim">${w.p.accounts.length ? `${esc(w.p.accounts.map((a, i) => w.p.parts.length > 1 ? `${a} ${money(w.p.parts.filter(x => String(x.account || '').replace(/^d+(-d+)?s*/, '') === a).reduce((s, x) => s + x.amount, 0))}` : a).join(' · '))} · ` : ''}${esc(w.p.description || w.p.reference || '')}${w.p.date ? ` · ${esc(w.p.date)}` : ''}</div></div>`).join('')}</div>` : '';
+    const s3 = `<section class="panel"><div class="ph"><span class="pn">3</span><h2>What could explain it</h2><span class="sub2">our analysis — did one of these happen?</span></div>
+      <div class="pb"><div class="vcp-read"><h3>Our read</h3>${read}</div>${workHtml}${f ? `<div class="vcp-ask">${qHtml}</div>` : '<p class="dim">This flag is closed, so Rent Manager was not read again — the review above is the analysis.</p>'}
+      <div class="dim" style="margin-top:6px;">Each answer is read from Rent Manager's postings and bills for ${esc(monthLabel)}; “Ask” means Rent Manager does not record it. House analysis — internal.</div></div></section>`;
+
+    // ── 4. next steps
+    const steps = [];
+    if (rv) (rv.actions || []).forEach(a => steps.push(`<li><div><span class="who">${esc(a.who)}</span>${esc(a.do)}</div></li>`));
+    else if (inv && inv.next) steps.push(`<li><div><span class="who">Accounting</span>${esc(inv.next)}</div></li>`);
+    shown.filter(x => x.r.state === 'unknown' && X.loaded).slice(0, 2).forEach(x => steps.push(`<li><div><span class="who">Ask</span>${esc(x.ask)}</div></li>`));
+    if (!steps.length) steps.push('<li><div>Nothing to fix in Rent Manager is indicated. If this month is expected, mark the flag normal.</div></li>');
+    const openQs = rv && (rv.questions || []).length ? `<h3 style="margin-top:6px">Still open</h3><ul class="tight">${rv.questions.slice(0, 4).map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '';
+    const s4 = `<section class="panel"><div class="ph"><span class="pn">4</span><h2>Next steps</h2><span class="sub2">who does what</span></div><div class="pb"><ol class="steps">${steps.join('')}</ol>${openQs}</div></section>`;
+
+    el.innerHTML = `<div class="case">${top}${t12}${s1}${s2}${s3}${s4}</div>`;
+  }
+
   // One flag → { title, body, inv }. Nothing in here throws: a failed investigation
   // or a failed pull is a line in the report, and a flag that cannot be built at
   // all becomes a page that says so (one bad flag must not sink a pack).
@@ -17395,7 +18497,7 @@ async function downloadBudgetExcel(){
     try { postings = await varReportPostings(f, inv, inv && inv.error ? { noFetch: inv.error } : null); }
     catch (e) { postings = [{ title: '', reason: (e && e.message) || String(e) }]; }
     try {
-      const p = varFlagReportParts(f, { postings, investigation: inv, prepared: new Date() });
+      const p = varCaseReportParts(f, { postings, investigation: inv, prepared: new Date() });
       return { ...p, inv };
     } catch (e) {
       const why = (e && e.message) || String(e);
@@ -17410,7 +18512,7 @@ async function downloadBudgetExcel(){
     if (ev) { ev.stopPropagation(); ev.preventDefault(); }
     const f = _varRowFlags.get(fid);
     if (!f) { alert('That flag is no longer on screen — refresh the view and try again.'); return; }
-    window.varPrintFlagReport(f);
+    window.varOpenCase(f);
   };
 
   // ── The report pack (2026-10-22): the 20 highest-ranked variances in one window ─
@@ -17421,38 +18523,42 @@ async function downloadBudgetExcel(){
   // flag becomes a page that says so — it never aborts the pack.
   const VAR_PACK_SIZE = 20;
   let _varPackFlags = [];
-  function varPackCause(inv) {
+  function varPackCause(inv, f) {
+    const hand = f ? varReviewFor(f) : null;
+    if (hand) return `${hand.verdictLabel} — ${hand.headline}`;
     if (inv == null) return '—';
     if (inv.error) return `Investigation not available: ${inv.error}`;
     if (inv.supported === false) return 'No postings to investigate';
     if (inv.mode === 'no-change') return 'No change in the postings';
+    if (inv.review) return `${inv.review.verdictLabel} — ${inv.review.headline}`;
     if (inv.likely) return `${VAR_INV_KIND[inv.likely.kind] || inv.likely.kind} — ${inv.likely.headline}`;
     return 'Could not determine from the postings';
   }
   function varReportPackCover(items, prepared, scopeText) {
     const esc = varEsc;
     const L = (_liveData && _liveData.months) || [];
-    const found = items.filter(i => i.inv && i.inv.likely).length;
-    const unknown = items.filter(i => i.inv && i.inv.ok && !i.inv.likely && i.inv.mode !== 'no-change' && i.inv.supported !== false).length;
+    const found = items.filter(i => varReviewFor(i.f) || (i.inv && i.inv.review ? i.inv.review.verdict !== 'unexplained' : i.inv && i.inv.likely)).length;
+    const unknown = items.filter(i => !varReviewFor(i.f) && i.inv && i.inv.ok && i.inv.mode !== 'no-change' && i.inv.supported !== false && (i.inv.review ? i.inv.review.verdict === 'unexplained' : !i.inv.likely)).length;
     const failed = items.filter(i => i.inv && i.inv.error).length;
     const rows = items.map(i => {
       const f = i.f || {};
       const sc = f.scope || {};
       const where = sc.type === 'Portfolio' ? 'All Entities' : (sc.type === 'Property' && sc.entity && sc.entity !== sc.label ? `${sc.label} (${sc.entity})` : (sc.label || ''));
-      return `<tr><td class="r m nw">${i.rank}</td><td>${esc(f.label)}</td><td>${esc(where)}</td><td class="nw">${esc(f.monthLabel || (f.giMonth != null ? L[f.giMonth] : '') || '')}</td><td class="r m nw">${f.score ? `${esc(f.score)}/5` : '–'}</td><td>${esc(varPackCause(i.inv))}</td></tr>`;
+      return `<tr><td class="r m nw">${i.rank}</td><td>${esc(f.label)}</td><td>${esc(where)}</td><td class="nw">${esc(f.monthLabel || (f.giMonth != null ? L[f.giMonth] : '') || '')}</td><td class="r m nw">${f.score ? `${esc(f.score)}/5` : '–'}</td><td>${esc(varPackCause(i.inv, f))}</td></tr>`;
     }).join('');
     return `<div class="cover">
       <div class="hdr"><span><b>Portfolio Management Dashboard</b> · Variance Report Pack</span><span>Prepared ${esc(prepared.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' }))}</span></div>
       <h1>The ${items.length} highest-ranked variances — ${esc(scopeText)}</h1>
-      <div class="key"><span><b>${items.length}</b> reports follow, one per page</span><span><b>${found}</b> with a likely cause found in Rent Manager</span><span><b>${unknown}</b> could not be determined</span>${failed ? `<span><b>${failed}</b> investigations unavailable</span>` : ''}</div>
-      <table class="list" style="margin-top:10px;"><thead><tr><th class="r">#</th><th>Line</th><th>Property</th><th>Month</th><th class="r">Importance</th><th>Likely cause (from the postings)</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="key"><span><b>${items.length}</b> reports follow, each starting on a new page</span><span><b>${found}</b> with a cause found in Rent Manager</span><span><b>${unknown}</b> could not be determined</span>${failed ? `<span><b>${failed}</b> investigations unavailable</span>` : ''}</div>
+      <table class="list" style="margin-top:10px;"><thead><tr><th class="r">#</th><th>Line</th><th>Property</th><th>Month</th><th class="r">Importance</th><th>What came back</th></tr></thead><tbody>${rows}</tbody></table>
       <div class="foot">Ranked by importance score, then tier, then dollars — the order of the Top 5 on the Variances dashboard, for the same filter. The likely cause is a Demo Portfolio analysis of Rent Manager data (Report 51 General Ledger, accrual; AP bills for invoice, approval and payment status); “could not determine” means the postings do not show one. Source: Rent Manager Report 45 (P&amp;L recap by month), accrual basis · internal, not for distribution</div>
     </div>`;
   }
   function varReportPackHtml(items, prepared, scopeText) {
     const day = prepared.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' });
     return varReportDoc(`Variance Report Pack — ${day}`, varReportPackCover(items, prepared, scopeText)
-      + items.map(i => `<div class="rpt">${i.body}</div>`).join(''));
+      + items.map(i => `<div class="rpt">${i.body}</div>`).join('')
+      + '<style>@page{size:letter portrait;margin:10mm;} .rpt{break-before:page;page-break-before:always;} .rpt details{display:none;}</style>');
   }
   window.varPrintReportPack = async function () {
     const flags = _varPackFlags.slice(0, VAR_PACK_SIZE);
@@ -18645,6 +19751,7 @@ async function downloadBudgetExcel(){
     const ranked = varRankVariances(variances, staleOf);
     const top = ranked.slice(0, 5);
     _varPackFlags = ranked.slice(0, VAR_PACK_SIZE);
+    varWarmReviews(ranked.slice(0, 10));
     // Roll-ups counted the way the board counts them: entity / portfolio flags on
     // the same line, set aside because their properties are flagged themselves.
     const rollupsByKey = new Map();
@@ -18820,7 +19927,7 @@ async function downloadBudgetExcel(){
     // ── (e) Resolved: a grey line, bottom right — a place to check, not work ──
     const foot = `<div class="vh-foot"><button class="vh-resolved" onclick="varSeeAll('resolved')">✓ ${countByCat.resolved || 0} resolved · open</button></div>`;
 
-    return `<div class="vh-grid">
+    return `${varStartHereHtml()}<div class="vh-grid">
       <div class="vh-col">${topCard}${goodCard}${patternCard}</div>
       <div class="vh-col">${postCard}${moveCard}</div>
     </div>${foot}`;
@@ -20796,8 +21903,9 @@ async function downloadBudgetExcel(){
       }
       label.textContent = txt;
     }
-    if (_currentView !== 'yoy') renderHeatmap(_hmYear);
-    else render(_currentFilter);
+    // The board must follow the filter even if the grid under it cannot draw (no move data yet).
+    try { if (_currentView !== 'yoy') renderHeatmap(_hmYear); else render(_currentFilter); }
+    catch (e) { console.error('variance grid:', e); }
     if (typeof renderFlaggedSummary === 'function') renderFlaggedSummary();
   };
 
@@ -21056,7 +22164,7 @@ async function downloadBudgetExcel(){
   async function extractPdfText(file, hintEl) {
     const pdfjsLib = window.pdfjsLib || window['pdfjs-dist/build/pdf'];
     if (!pdfjsLib) throw new Error('PDF reader failed to load. Refresh the page and try again.');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '/vendor/pdf.worker.min.js';
     const url = URL.createObjectURL(file);
     let pdf;
     try {
@@ -21491,7 +22599,7 @@ const UW_DEFAULTS = {
   benchmark_management_fee:0, benchmark_asset_management_fee:0,
   replacement_reserves_per_unit_yr:250, max_opex_pct_egi:0.50,
   irr_target:0.16, year2_cash_on_cash_target:0.03,
-  refi_cap_rate:0.055, refi_ltv:0.70, refi_closing_cost_pct:0.01, refi_interest_rate:0.055,
+  refi_cap_rate:0.06, refi_ltv:0.70, refi_closing_cost_pct:0.01, refi_interest_rate:0.045,
   loss_to_lease_capture_year1_pct:0.50, amortization_period_years:0,
   upfront_closing_cost_pct:0.03, disposition_cost_pct:0.05,
 };
@@ -21588,7 +22696,8 @@ function uwRenderSlots(){
       (f.meta.source_format?' · <span style="color:#6B645A">'+uwEsc(f.meta.source_format)+'</span>':'')+
       uwCostChip(f.usage, f.elapsedMs)+uwWarnHtml(f.warnings); },
     om: ()=>{ const f=UW.om, p=f.extracted?.property||{}; return '<div class="uw-slot-name">'+uwEsc(f.filename)+'</div>'+
-      uwEsc(p.name||'?')+' · '+(p.units||'?')+' units · built '+(p.year_built||'?')+
+      (f.merged ? f.meta.files+' OMs, one per building — read together<br>' : '')+
+      uwEsc(p.name||'?')+' · '+(p.units||'?')+' units'+(f.merged ? '' : ' · built '+(p.year_built||'?'))+
       '<br>'+f.meta.pages+' pages read'+(f.meta.image_pages?' ('+f.meta.image_pages+' read as images)':'')+' · '+((f.extracted?.rent_comps||[]).length)+' rent comps found'+
       ((f.extracted?.properties||[]).length>1?'<br>Portfolio: '+f.extracted.properties.map(q=>uwEsc(q.name||q.address||'?')+(q.units?' ('+q.units+')':'')).join(' · '):'')+
       uwCostChip(f.usage, f.elapsedMs)+
@@ -21603,7 +22712,7 @@ function uwRenderSlots(){
     const body = document.getElementById('uw-slot-'+kind+'-body');
     const spin = '<span class="uw-spin"></span> '+(kind==='om'?'extracting with Claude — a long OM takes a minute or two':'Claude is reading the workbook'+(UW.pending[kind]>1?'s ('+UW.pending[kind]+')':'')+' — a big rent roll can take a few minutes…');
     if(UW.pending[kind] && !has[kind]){ slot.className='uw-slot busy'; body.innerHTML=spin; }
-    else if(has[kind]){ slot.className='uw-slot '+(UW.pending[kind]?'busy':'ok'); body.innerHTML=summaries[kind]()+(UW.pending[kind]?'<div style="margin-top:6px">'+spin+'</div>':'')+(kind!=='om'&&UW.errors[kind]?'<div class="uw-chip-warn">'+uwEsc(UW.errors[kind])+'</div>':''); }
+    else if(has[kind]){ slot.className='uw-slot '+(UW.pending[kind]?'busy':'ok'); body.innerHTML=summaries[kind]()+(UW.pending[kind]?'<div style="margin-top:6px">'+spin+'</div>':'')+(UW.errors[kind]?'<div class="uw-chip-warn">'+uwEsc(UW.errors[kind])+'</div>':''); }
     else if(UW.errors[kind]){ slot.className='uw-slot err'; body.innerHTML='<div class="uw-chip-warn">'+uwEsc(UW.errors[kind])+'</div><div class="empt" style="padding-top:6px">click to try another file</div>'; }
     else { slot.className='uw-slot'; body.innerHTML=UW_SLOT_EMPTY[kind]; }
   });
@@ -21761,7 +22870,7 @@ function uwPropertyBreakdown(){
   const omProps = (UW.om && UW.om.extracted && UW.om.extracted.properties) || [];
   byName.forEach(e=>{
     const q = omProps.find(x => x.name === e.name || x.address === e.name);
-    if(q){ e.address = q.address || null; e.year_built = q.year_built || null; e.om_units = q.units || null; }
+    if(q){ e.address = q.address || null; e.year_built = q.year_built || null; e.om_units = q.units || null; e.asking_price = q.asking_price || null; }
   });
   return byName.size > 1 ? [...byName.values()] : null;
 }
@@ -21881,27 +22990,131 @@ async function uwProcessExcel(file, hint, opts){
   return !!(res && (res.kind==='rent_roll' || res.kind==='t12'));
 }
 
+// Several OMs, one deal: the merged view every OM reader below works from. One OM
+// is returned as it is, so a single-property deal is exactly what it always was.
+// Sums are only sums when every OM states the figure (one unknown → unknown, as for
+// the T12s); page and confidence badges stay only where one OM is the source.
+function uwMergeOMs(list){
+  const oms = (list||[]).filter(o=>o && o.extracted);
+  if(oms.length<=1) return oms[0] || null;
+  const ex = oms.map(o=>o.extracted);
+  const num = v => typeof v==='number' && isFinite(v) && v>0 ? v : null;
+  const sum = get => { const v = ex.map(get).map(num); return v.some(x=>x==null) ? null : v.reduce((a,b)=>a+b,0); };
+  // a per-unit figure averaged by each OM's units (premium, unit size)
+  const wavg = (get, w) => { let s=0, n=0; ex.forEach(e=>{ const v=num(get(e)), k=num(w(e)); if(v!=null && k!=null){ s+=v*k; n+=k; } }); return n ? Math.round(s/n) : null; };
+  const units = e => (e.property||{}).units;
+  // One building under two names ("Birchwood Glen" in the portfolio summary, "Birchwood Glen Apartments" in its
+  // own OM) is one building: names compare without the generic words. Its fields merge, its own OM's
+  // facts first, the portfolio's asking price where only the portfolio states one.
+  const bkey = s => String(s||'').toLowerCase().replace(/\b(the|apartments?|apts?|homes|residences|community|at)\b/g,'').replace(/[^a-z0-9]/g,'');
+  const props = [];
+  const ordered = ex.map((e,i)=>({e,i,n:(e.properties||[]).filter(p=>p && (p.name||p.address)).length})).sort((a,b)=>(a.n>1)-(b.n>1));
+  ordered.forEach(({e})=>{
+    const list = (e.properties||[]).filter(p=>p && (p.name||p.address));
+    const single = list.length<=1;
+    (list.length ? list : [Object.assign({}, e.property||{})]).forEach(p=>{
+      const q = Object.assign({}, p);
+      if(single){
+        // a one-building OM: its property facts and asking price are that building's
+        const ep = e.property||{};
+        ['address','year_built','units','site_acres','avg_unit_size_sf'].forEach(k=>{ if(q[k]==null && ep[k]!=null) q[k] = ep[k]; });
+        if(q.asking_price==null && num(e.asking_price)!=null) q.asking_price = e.asking_price;
+      }
+      const k = bkey(q.name||q.address);
+      const had = props.find(x=>bkey(x.name||x.address)===k);
+      if(!had) props.push(q);
+      else Object.keys(q).forEach(f=>{ if(had[f]==null && q[f]!=null) had[f] = q[f]; });
+    });
+  });
+  // a portfolio OM that lists every building carries the deal's own name and price
+  const whole = ex.find(e=>(e.properties||[]).length>1 && props.every(p=>(e.properties||[]).some(q=>bkey(q.name||q.address)===bkey(p.name||p.address))));
+  if(whole){   // ...and its order: the first building listed gives the deal's headline address
+    const at = p => (whole.properties||[]).findIndex(q=>bkey(q.name||q.address)===bkey(p.name||p.address));
+    props.sort((a,b)=>at(a)-at(b));
+  }
+  const allNum = get => props.length && props.every(p=>num(get(p))!=null) ? props.reduce((a,p)=>a+num(get(p)),0) : null;
+  const key = s => String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  // the subject itself is not a comp (Greyeagle's OM lists "Greyeagle (subject)" in its comp table)
+  const isSubject = c => /\bsubject\b/i.test(String(c && c.property_name || '')) || props.some(p=>bkey(p.name)===bkey(String(c && c.property_name || '').replace(/\(.*\)/,'')));
+  const dedupe = rows => { const seen = new Set(); return rows.filter(c=>{ const k = key(c && c.property_name); if(!k || seen.has(k) || isSubject(c)) return false; seen.add(k); return true; }); };
+  // comps that state a rent first: the model's comp table holds five
+  const rentFirst = rows => rows.filter(c=>num(c.market_rent)!=null||num(c.achieved_rent)!=null).concat(rows.filter(c=>num(c.market_rent)==null&&num(c.achieved_rent)==null));
+  const taxVals = ex.map(e=>num((e.tax||{}).current_taxable_value));
+  const mills = ex.map(e=>num((e.tax||{}).current_millage_rate));
+  // millage: weighted by taxable value when every OM gives both, else only when they agree
+  const millage = taxVals.every(v=>v!=null) && mills.every(v=>v!=null)
+    ? mills.reduce((s,m,i)=>s+m*taxVals[i],0)/taxVals.reduce((a,b)=>a+b,0)
+    : (new Set(mills.filter(v=>v!=null)).size===1 && mills.every(v=>v!=null) ? mills[0] : null);
+  const confidence = {};
+  ex.forEach(e=>Object.entries(e.confidence||{}).forEach(([k,v])=>{ if(typeof v==='number') confidence[k] = k in confidence ? Math.min(confidence[k], v) : v; }));
+  const p0 = ex[0].property || {};
+  return {
+    kind:'om', merged:true, parts:oms,
+    filename: oms.map(o=>o.filename).join(' + '),
+    meta: { pages: oms.reduce((a,o)=>a+((o.meta&&o.meta.pages)||0),0), files: oms.length,
+            image_pages: oms.reduce((a,o)=>a+((o.meta&&o.meta.image_pages)||0),0), truncated: oms.some(o=>o.meta&&o.meta.truncated) },
+    extracted: {
+      property: {
+        name: (whole && whole.property && whole.property.name) || props.map(p=>p.name||p.address).join(' + '),
+        address: (props.find(p=>p.address)||{}).address || p0.address || null, city: p0.city || null,
+        year_built: null,                       // one per building — uwCollectDeal writes the label
+        site_acres: allNum(p=>p.site_acres),
+        units: allNum(p=>p.units) ?? sum(units),
+        avg_unit_size_sf: props.every(p=>num(p.avg_unit_size_sf)!=null && num(p.units)!=null)
+          ? Math.round(props.reduce((a,p)=>a+p.avg_unit_size_sf*p.units,0)/props.reduce((a,p)=>a+p.units,0))
+          : wavg(e=>(e.property||{}).avg_unit_size_sf, units),
+      },
+      value_add: {
+        value_add_units: sum(e=>(e.value_add||{}).value_add_units),
+        value_add_premium_per_unit_month: wavg(e=>(e.value_add||{}).value_add_premium_per_unit_month, e=>(e.value_add||{}).value_add_units),
+        plan_note: ex.map((e,i)=>(e.value_add||{}).plan_note ? ((e.property||{}).name||oms[i].filename)+': '+e.value_add.plan_note : null).filter(Boolean).join(' ') || null,
+      },
+      tax: {
+        county_pin: ex.map(e=>(e.tax||{}).county_pin).filter(Boolean).join(', ') || null,
+        current_taxable_value: sum(e=>(e.tax||{}).current_taxable_value),
+        current_millage_rate: millage,
+        non_ad_valorem_tax: sum(e=>(e.tax||{}).non_ad_valorem_tax),
+      },
+      properties: props,
+      asking_price: (whole && num(whole.asking_price)) ?? allNum(p=>p.asking_price),
+      rent_comps: rentFirst(dedupe([].concat(...ex.map(e=>e.rent_comps||[])))),
+      sale_comps: dedupe([].concat(...ex.map(e=>e.sale_comps||[]))),
+      confidence,
+      source_pages: {},
+    },
+    usage: uwSumUsage(oms),
+    elapsedMs: Math.max(...oms.map(o=>o.elapsedMs||0)),
+  };
+}
+
 async function uwProcessOM(file, opts){
-  UW.pending.om = true; UW.errors.om = null;
+  // a count, not a flag: several OMs read at once, and the first to finish must not clear the spinner
+  UW.pending.om = (+UW.pending.om||0) + 1; UW.errors.om = null;
   uwRenderSlots();
   try{
     const t0 = performance.now();
     const b64 = await uwFileToB64(file);
     const res = await apiFetchJson('/api/underwriting/om-extract',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:file.name,data:b64})});
     if(res.error) throw new Error(res.error);
-    UW.om = res; UW.om.filename = file.name; UW.om.elapsedMs = performance.now() - t0;
+    res.filename = file.name; res.elapsedMs = performance.now() - t0;
+    // A portfolio sold with one OM per building (Lakeview, 2026-10-29: Birchwood Glen and
+    // Greyeagle each had their own) — every OM is kept; UW.om is their merged view.
+    // Before this a second OM replaced the first.
+    UW.oms = (UW.oms||[]).filter(o=>o.filename!==file.name).concat([res]);
+    UW.om = uwMergeOMs(UW.oms);
     uwRecombine();   // property names from the OM relabel a multi-property deal
     (UW.rawFiles = UW.rawFiles||{}).om = file;
     if(!(opts&&opts.skipLookups)){
-      // fire-and-forget online research: county millage, area occupancy
+      // fire-and-forget online research: county millage, area occupancy. The area
+      // search follows the first OM's address, so a later OM only re-runs the tax one.
       uwTaxLookup();
-      uwOccLookup();
+      if(UW.oms.length===1) uwOccLookup();
     }
   }catch(err){
-    UW.om = null;
-    UW.errors.om = 'OM extraction failed: '+(err.message||err);
+    UW.om = uwMergeOMs(UW.oms||[]);
+    UW.errors.om = 'OM extraction failed for "'+file.name+'": '+(err.message||err);
   }
-  UW.pending.om = false;
+  UW.pending.om = Math.max(0, (+UW.pending.om||1) - 1);
   uwRenderSlots();
   uwMaybeReview();
   uwLoadUsage();
@@ -22290,6 +23503,8 @@ function uwBuildReview(){
     let val = omPath ? (om(omPath) ?? UW_DEFAULTS[name]) : UW_DEFAULTS[name];
     let src = (omPath && om(omPath)!=null) ? 'om' : 'def';
     if(name==='stabilized_occupancy_target'){ val = rr.official_occupancy ?? UW_DEFAULTS[name]; src = 'rr'; }
+    // the broker's ask is the price whenever the OM states one (2026-10-31); NOI / cap rate only when it does not
+    if(name==='purchase_price_override' && +om('asking_price')>0){ val = +om('asking_price'); src = 'om'; }
     // Demo mode: the sample OM carries the showcase deal's house terms (extracted.demo_assumptions), so the sample files rebuild it.
     const demoA = om('demo_assumptions');
     if(demoA && demoA[name]!=null){ val = demoA[name]; src = 'om'; }
@@ -22376,7 +23591,7 @@ function uwBuildReview(){
     '<div class="uw-chip-warn" style="margin-bottom:14px">Value-add unit count and renovation cost/unit below came from the OM (or a house default) — sellers and brokers routinely lowball scope and cost to flatter the numbers. Verify both against your own diligence before generating.</div>'+
     '<div class="uw-grid">'+
       A('purchase_cap_rate','Purchase cap rate %')+
-      A('purchase_price_override','Price override $','0 = derive from NOI / cap')+
+      A('purchase_price_override','Price $ (broker ask)','from the OM when it states one; 0 = derive from NOI / cap')+
       A('ltv','LTV %')+A('loan_interest_rate','Interest rate %','placeholder until lender quote')+
       A('hold_period_years','Hold period (yrs, 1-8 — sets the sale year)')+A('exit_cap_rate','Exit cap rate %')+
       A('income_growth','Income growth %')+A('expense_growth','Expense growth %')+
@@ -22387,7 +23602,7 @@ function uwBuildReview(){
       A('value_add_premium_per_unit_month','Premium $/unit/mo','OM/broker figure — verify')+
       A('interior_renovation_cost_per_unit','Reno cost $/unit','OM/broker figure — verify')+
       A('common_exterior_capex','Common/ext capex $')+
-      A('misc_expense_annual','Misc expense $ (one-time, Yr 1)')+
+      A('misc_expense_per_unit','Misc expense $/unit (one-time, Yr 1)','house estimate; times the unit count')+
       A('units_renovated_per_month','Reno pace units/mo')+
       A('renovation_downtime_months','Reno downtime (mo rent lost/unit)')+
       A('renovation_online_start_month','Reno start month')+
@@ -22556,7 +23771,7 @@ function uwBackToReview(){
 
 // Full reset — start a brand-new deal
 function uwNewUnderwriting(){
-  UW.files = {}; UW.om = null; UW.taxLookup = null; UW.flags = {}; UW.fixedDeal = null;
+  UW.files = {}; UW.om = null; UW.oms = []; UW.taxLookup = null; UW.flags = {}; UW.fixedDeal = null;
   UW.occLookup = null; UW.rawFiles = {}; UW.recheckSummary = null;
   UW.rechecking = false;
   UW.generating = false;
@@ -22727,7 +23942,7 @@ async function uwChipRun(chip){
     if(chip.kind==='om'){
       if(chip.ext==='xlsx'||chip.ext==='xls'||chip.ext==='xlsm'||chip.ext==='csv'||chip.ext==='tsv') throw new Error('A spreadsheet can\'t be read as an OM — pick Rent roll or T12.');
       await uwProcessOM(f);
-      ok = !!(UW.om && UW.om.filename===f.name);
+      ok = (UW.oms||[]).some(o=>o.filename===f.name);
       if(!ok) chip.msg = UW.errors.om || 'OM could not be read.';
     } else if(chip.kind==='workbook'){
       ok = await uwProcessExcel(f,'rr');            // also reads its T12 tab into the T12 slot
@@ -22737,7 +23952,7 @@ async function uwChipRun(chip){
       if(!ok) chip.msg = UW.errors[key] || 'Could not read this file.';
       else {
         // the reader routes by what is IN the file: a T12 the first look took for a rent roll lands in the T12 slot
-        // (Estates Wellington's July T12, 2026-10-22), and the chip must say so, not keep the first guess
+        // (Estates Meadow's July T12, 2026-10-22), and the chip must say so, not keep the first guess
         const tail = '|'+f.name+'|'+f.size+'|'+f.lastModified;
         const landed = ['rr','t12'].find(k=>(UW.parts[k]||[]).some(p=>String(p.fileKey||'').endsWith(tail)));
         const landedKind = landed==='rr' ? 'rent_roll' : landed==='t12' ? 't12' : chip.kind;
@@ -22763,7 +23978,7 @@ function uwChipSetKind(id, kind){
 function uwChipUndo(chip){
   const f = chip.file, tail = '|'+f.name+'|'+f.size+'|'+f.lastModified;
   ['rr','t12'].forEach(k=>{ UW.parts[k] = (UW.parts[k]||[]).filter(p=>!String(p.fileKey||'').endsWith(tail)); });
-  if(UW.om && UW.om.filename===f.name){ UW.om = null; }
+  if((UW.oms||[]).some(o=>o.filename===f.name)){ UW.oms = UW.oms.filter(o=>o.filename!==f.name); UW.om = uwMergeOMs(UW.oms); }
   uwRecombine();
   uwRenderSlots();
   if(UW.files.rent_roll && UW.files.t12) uwBuildReview();
@@ -22849,7 +24064,7 @@ function uwProvenance(){
   [['rent_roll',UW.parts.rr],['t12',UW.parts.t12]].forEach(pair=>{
     (pair[1]||[]).forEach(p=>sources.push({ kind:pair[0], filename:p.filename, method:(p.meta&&p.meta.extraction_method)||(p.meta&&p.meta.source_format)||'', warnings:(p.warnings||[]).length, notes:(p.warnings||[]).slice(0,6) }));
   });
-  if(UW.om) sources.push({ kind:'om', filename:UW.om.filename, method:'read by Claude', pages:UW.om.meta&&UW.om.meta.pages });
+  (UW.oms||[]).forEach(o=>sources.push({ kind:'om', filename:o.filename, method:'read by Claude', pages:o.meta&&o.meta.pages }));
   const fields = [];
   document.querySelectorAll('#uw-review .uw-field').forEach(f=>{
     const inp = f.querySelector('[data-uw]'), lab = f.querySelector('label');
@@ -22906,10 +24121,13 @@ function uwDealCard(p, opts){
   const verdict = c.meets_target==null ? '' : c.meets_target ? 'pass' : 'fail';
   const open = uwDealOpen.has(p.key);
   const gap = c.gap_to_max;
+  const hand = !!(e.review && e.review.current);   // underwritten by hand on this very run: the gate's flag is answered by the review box
   const nrv = !!c.needs_review;          // the plausibility gate: this deal's inputs cannot support a decision, so its price and returns print as not reliable
   const tags = [];
-  if(nrv) tags.push('<span class="uwd-tag red" title="'+uwEsc((c.review_reasons||[]).join('\n'))+'">NEEDS REVIEW</span>');
+  if(nrv && hand) tags.push('<span class="uwd-tag amber" title="The model on its own cannot price this deal, so its numbers stay withheld; it was underwritten by hand instead (see the box on the card).">REVIEWED BY HAND</span>');
+  else if(nrv) tags.push('<span class="uwd-tag red" title="'+uwEsc((c.review_reasons||[]).join('\n'))+'">NEEDS REVIEW</span>');
   if(((e.sources||[]).some(s=>(s.notes||[]).some(n=>/adjusted month|annualized/i.test(n))))) tags.push('<span class="uwd-tag amber" title="A month with no gross potential rent and far less revenue and expense than a normal one was left out and the T12 annualized (house estimate). Details are on the PDF.">T12 month adjusted *</span>');
+  if((c.buildings||[]).length>1) tags.push('<span class="uwd-tag btn" onclick="uwDealToggle(\''+uwEsc(p.key)+'\')" title="'+uwEsc(c.buildings.map(b=>b.name).join(', '))+'">'+c.buildings.length+' buildings</span>');
   if(p.run_count>1) tags.push('<span class="uwd-tag btn" onclick="uwDealToggle(\''+uwEsc(p.key)+'\')" title="Show every run on this property">'+p.run_count+' runs</span>');
   if(e.imported) tags.push('<span class="uwd-tag" title="A finished model dropped onto this tab">imported</span>');
   if(!c.computed) tags.push('<span class="uwd-tag red" title="This model has no calculated values saved; open it in Excel to compute">not calculated</span>');
@@ -22923,14 +24141,14 @@ function uwDealCard(p, opts){
   const vcls = nrv ? 'bad' : c.meets_target==null ? '' : c.meets_target ? 'good' : 'bad';
   const revSub = c.non_revenue_units>0 && c.revenue_units ? (Number(c.revenue_units).toLocaleString('en-US')+' revenue units'+(c.revenue_occupancy!=null?' · '+uwFmtPct(c.revenue_occupancy,0)+' occ.':'')) : null;
   const tiles = [
-    num('Price run', nrv?NR:uwMoneyK(c.price), nrv?'not reliable':(c.price_per_door!=null?uwMoneyK(c.price_per_door)+'/door':''), nrv?'nr':''),
+    num(c.price_from_ask?'Their ask':c.lease_up?'OM-implied price':'No ask · income price', nrv?NR:uwMoneyK(c.price), nrv?'not reliable':(c.price_per_door!=null?uwMoneyK(c.price_per_door)+'/door':'')+(c.price_from_ask?'':' · T12 NOI ÷ our cap'), nrv?'nr':''),
     num('Units', c.units!=null?Number(c.units).toLocaleString('en-US'):'—', c.occupancy!=null?uwFmtPct(c.occupancy,0)+' occ. (all units)':'', '', '', revSub),
     num('T12 NOI', uwMoneyK(c.t12_noi), c.year1_noi!=null?'Yr 1 '+uwMoneyK(c.year1_noi):''),
     num('In-place cap *', nrv?NR:(c.cap_rate!=null?uwFmtPct(c.cap_rate,2):'—'), nrv?'not reliable':'House est.', nrv?'nr':''),
     // the best-deal cards lead with IRR and cash-on-cash in the hero row, so this slot shows equity multiple there
     top ? num('Equity multiple', nrv?NR:(c.equity_multiple!=null?Number(c.equity_multiple).toFixed(2)+'x':'—'), c.hold_years!=null?c.hold_years+'-yr hold':'', nrv?'nr':'')
         : num('Levered IRR', irrTxt, verdictTxt, nrv?'nr':vcls, vcls, 'Yr-2 cash-on-cash '+cocTxt),
-    num('Max price @ '+tgtTxt, nrv?NR:uwMoneyK(c.max_price), nrv?'not reliable':(gap==null?(c.max_price==null?'not solved in the 3%-12% cap range':''):(gap>=0?'+':'')+uwMoneyK(gap)+' ('+(gap>=0?'+':'−')+Math.abs(Math.round(c.gap_pct*100))+'%)'), nrv?'nr':'', nrv?'':gap==null?'':gap>=0?'good':'bad'),
+    num('Our bid @ '+tgtTxt, nrv?NR:uwMoneyK(c.max_price), nrv?'not reliable':(gap==null?(c.max_price==null?'not solved in the 3%-12% cap range':''):(gap>=0?'+':'')+uwMoneyK(gap)+' ('+(gap>=0?'+':'−')+Math.abs(Math.round(c.gap_pct*100))+'%) vs '+(c.price_from_ask?'their ask':'income price')), nrv?'nr':'', nrv?'':gap==null?'':gap>=0?'good':'bad'),
   ].join('');
   const hero = top ? '<div class="uwd-hero"><div><div class="l">Levered IRR'+(c.hold_years!=null?' · yr '+c.hold_years+' sale':'')+'</div><div class="v'+(nrv?' nr':vcls==='bad'?' bad':'')+'">'+irrTxt+'</div><div class="s">'+(verdictTxt||'&nbsp;')+'</div></div>'+
     '<div><div class="l">Year-2 cash-on-cash</div><div class="v'+(nrv?' nr':'')+'">'+cocTxt+'</div><div class="s">'+(nrv?'&nbsp;':c.dscr!=null?'Yr-1 DSCR '+Number(c.dscr).toFixed(2)+'x':'&nbsp;')+'</div></div></div>' : '';
@@ -22946,6 +24164,7 @@ function uwDealCard(p, opts){
     more = '<div class="uwd-more">'+
       '<div class="uwd-kv">'+kv('Avg in-place rent', c.avg_rent!=null?uwFmtMoney(c.avg_rent):'—')+kv('Equity multiple', c.equity_multiple!=null?Number(c.equity_multiple).toFixed(2)+'x':'—')+kv('Year-1 DSCR', c.dscr!=null?Number(c.dscr).toFixed(2)+'x':'—')+
         kv('Capex', uwMoneyK(c.capex))+kv('Hold', c.hold_years!=null?c.hold_years+' yrs':'—')+kv('Built', c.year_built!=null?uwEsc(c.year_built):'—')+'</div>'+
+      uwBuildingsHtml(c)+
       scoreRows+
       ((c.scenarios||[]).length ? '<div><h4>Exit scenarios (model\'s own)</h4><table class="uw-table"><tbody>'+c.scenarios.map(s=>'<tr><td>'+uwEsc(s.scenario)+'</td><td><b>'+uwFmtPct(s.irr,1)+'</b></td><td>'+(s.equity_multiple!=null&&!/cash-on-cash/i.test(s.scenario)?Number(s.equity_multiple).toFixed(2)+'x':'')+'</td></tr>').join('')+'</tbody></table></div>' : '')+
       ((c.deal_score&&c.deal_score.parts||[]).length ? '<div><h4>Why this score: '+c.deal_score.score+' / 100 ('+uwEsc(c.deal_score.grade||'')+')</h4><table class="uw-table"><tbody>'+c.deal_score.parts.map(x=>'<tr><td>'+uwEsc(x.label)+'</td><td style="text-align:right"><b>'+x.points+'</b> / '+x.weight+'</td><td style="color:#736C61">'+uwEsc(x.why)+'</td></tr>').join('')+'</tbody></table></div>' : (c.needs_review ? '<div><h4>Score</h4><div style="font-size:11.5px">Not scored: the deal needs review (see the box above).</div></div>' : ''))+
@@ -22959,13 +24178,20 @@ function uwDealCard(p, opts){
     ? '<button class="uwd-link quiet" data-file="'+uwEsc(e.file)+'" onclick="uwHideDeal(this,false)">Restore</button>'
     : '<button class="uwd-link quiet" data-file="'+uwEsc(e.file)+'" onclick="uwHideDeal(this,true)" title="Moves it to Hidden deals; the model file stays on the disk">Hide</button>';
   const rank = (p.rank && uwDealView.sort==='best' && !p.hidden) ? '<span class="uwd-rank" title="Rank by levered IRR, then Year-2 cash-on-cash">#'+p.rank+'</span>' : '';
-  const reviewBox = nrv ? '<div class="uwd-review"><b>NEEDS REVIEW: do not rely on this deal\'s price or returns</b>'+(c.review_reasons||[]).map(r=>'<div>• '+uwEsc(r)+'</div>').join('')+(c.review_fix||[]).map(r=>'<div style="margin-top:4px"><b style="display:inline">What would fix it:</b> '+uwEsc(r)+'</div>').join('')+'</div>' : '';
+  // softer than NEEDS REVIEW (2026-10-31): Year 1 far from the T12, or a price that is not the broker's ask
+  // a deal underwritten by hand shows what was checked and the conclusion instead (2026-10-31)
+  const rv = e.review;
+  const li = (h,xs)=>(xs||[]).length ? '<div style="margin-top:4px"><b style="display:inline">'+h+'</b></div>'+xs.map(r=>'<div>• '+uwEsc(r)+'</div>').join('') : '';
+  const reviewedBox = rv ? '<div class="uwd-reviewed"><b>Underwritten by hand '+uwEsc(rv.reviewed||'')+(rv.current?'':' (an earlier run; this run is newer)')+'</b><div>'+uwEsc(rv.summary)+'</div>'+
+    (open ? li('What was checked',rv.checked)+li('What was wrong and is fixed',rv.fixed) : '')+li('Still open',rv.open)+'</div>' : '';
+  const cautionBox = rv ? reviewedBox : !nrv && (c.cautions||[]).length ? '<div class="uwd-caution"><b>Check before relying on this score</b>'+c.cautions.map(r=>'<div>• '+uwEsc(r)+'</div>').join('')+'</div>' : '';
+  const reviewBox = nrv && !hand ? '<div class="uwd-review"><b>NEEDS REVIEW: do not rely on this deal\'s price or returns</b>'+(c.review_reasons||[]).map(r=>'<div>• '+uwEsc(r)+'</div>').join('')+(c.review_fix||[]).map(r=>'<div style="margin-top:4px"><b style="display:inline">What would fix it:</b> '+uwEsc(r)+'</div>').join('')+'</div>' : '';
   return '<div class="uwd-card '+(nrv?'review':verdict)+(top?' top':'')+'">'+
     '<div class="uwd-top"><div style="min-width:0"><div class="uwd-name">'+rank+uwEsc(c.name)+'</div><div class="uwd-addr">'+uwEsc(c.address||'address not in the model')+'</div></div>'+scoreBadge+
       '<div class="uwd-when">'+(e.hidden&&p.hidden?'hidden by '+uwEsc(e.hidden.by):'')+'</div></div>'+
     '<div class="uwd-ran" title="When this model was built (your time zone)">Ran '+uwEsc(uwDealStamp(e.created))+(p.run_count>1?' <span>&middot; '+p.run_count+' runs</span>':'')+'</div>'+
     (tags.length?'<div class="uwd-tags">'+tags.join('')+'</div>':'')+
-    reviewBox+
+    reviewBox+cautionBox+
     hero+
     '<div class="uwd-nums">'+tiles+'</div>'+
     '<div class="uwd-foot"><a class="uwd-dl" href="'+e.download+'" title="'+uwEsc(e.file)+'">⬇ Excel model</a>'+
@@ -23022,7 +24248,7 @@ function uwRenderDealView(){
   const NR = 'not reliable';
   const priced = '<div class="card"><div class="card-title">Is it priced right?</div><table class="uw-table"><tbody>'+
     kv('Price run', nrv?NR:M(c.price), nrv?'':(c.price_per_door!=null?M(c.price_per_door)+' per unit':''))+
-    kv('Max price at '+tgtTxt+' IRR', nrv?NR:(c.max_price!=null?M(c.max_price):(c.meets_target?'above range':'none in range')), nrv||gap==null?'':(gap>=0?'+':'−')+M(Math.abs(gap))+' vs the price run')+
+    kv('Our bid at '+tgtTxt+' IRR', nrv?NR:(c.max_price!=null?M(c.max_price):(c.meets_target?'above range':'none in range')), nrv||gap==null?'':(gap>=0?'+':'−')+M(Math.abs(gap))+' vs the price run')+
     kv('In-place cap rate', nrv?NR:(c.cap_rate!=null?P(c.cap_rate,2):'—'), 'T12 NOI ÷ price (house estimate)')+
     kv('T12 NOI', M(c.t12_noi), '')+kv('Year-1 NOI', M(c.year1_noi), '')+kv('Capex', M(c.capex), '')+
     '</tbody></table></div>';
@@ -23047,6 +24273,7 @@ function uwRenderDealView(){
       '<div style="font-size:13px;color:#5C564B">'+uwEsc(unitsLine)+'</div>'+
       '<div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap"><a class="uwd-dl" href="'+e.download+'">⬇ Excel model</a><a class="uwd-dl pdf" href="'+e.report+'" target="_blank" rel="noopener">PDF report</a></div></div>'+
     '<div class="dv-read"><b>The read.</b><ul style="margin:6px 0 0 18px;padding:0">'+read.map(r=>'<li>'+r+'</li>').join('')+'</ul></div>'+
+    ((c.buildings||[]).length>1?'<div class="card uwd-more" style="margin-bottom:14px">'+uwBuildingsHtml(c)+'</div>':'')+
     '<div class="dv-grid">'+priced+returns+score+rankCard+runs+src+'</div>';
 }
 
@@ -23075,15 +24302,15 @@ async function uwRetryDeal(btn){
 // score every deal on the board with that copy, without saving it.
 const UWSE_FIELDS = [
   ['Weights (points out of 100; they are scaled to add up to 100)', [
-    ['weights.irr', 'Levered IRR vs target', 1], ['weights.timing', 'How soon the target is hit', 1], ['weights.price', 'Price headroom vs max price', 1],
+    ['weights.irr', 'Levered IRR vs target', 1], ['weights.timing', 'How soon the target is hit', 1], ['weights.price', 'Our bid vs their price', 1],
     ['weights.coc', 'Year-2 cash-on-cash', 1], ['weights.em', 'Equity multiple', 1], ['weights.dscr', 'Year-1 DSCR', 1], ['weights.risk', 'Risk and data confidence', 1]]],
   ['IRR curve (points of IRR around the deal\'s target)', [
     ['irr.pointsBelowTargetForZero', 'Zero marks this far BELOW the target', 0.01], ['irr.pointsAboveTargetForFull', 'Full marks this far ABOVE the target', 0.01]]],
   ['How soon the target is hit (share of the timing points)', [
     ['timing.byYear.3', 'Plain sale clears it at year 3', 0.05], ['timing.byYear.5', '...at year 5', 0.05], ['timing.byYear.8', '...at year 8', 0.05],
     ['timing.onlyWithRefi', 'Only with a refinance', 0.05], ['timing.neverClears', 'Never clears it', 0.05]]],
-  ['Price headroom (gap between the price run and the max price that clears the target)', [
-    ['price.headroomForFull', 'Full marks at this much headroom', 0.05], ['price.overpayForZero', 'Zero marks at this much over', 0.05]]],
+  ['Our bid vs their price (their ask, or the price the income supports when there is no ask)', [
+    ['price.headroomForFull', 'Full marks when we could pay this much more than their price', 0.05], ['price.overpayForZero', 'Zero marks when our bid is this far below their price', 0.05]]],
   ['Returns and coverage', [
     ['coc.zeroAt', 'Cash-on-cash: zero at', 0.01], ['coc.fullAt', 'Cash-on-cash: full at', 0.01], ['em.zeroAt', 'Equity multiple: zero at', 0.1], ['em.fullAt', 'Equity multiple: full at', 0.1],
     ['dscr.zeroAt', 'DSCR: zero at', 0.05], ['dscr.fullAt', 'DSCR: full at', 0.05]]],
@@ -25280,7 +26507,7 @@ async function exportPropertyRoster(btn) {
           : '') +
         (bk.bill.postDate && bk.bill.postDate !== bk.bill.date
           ? kvh('Posted', `${esc(bk.bill.postDate)} <span style="color:#736C61;">(the invoice is dated ${esc(bk.bill.date)})</span>`) : '') +
-        (bk.bill.enteredBy ? kv('Entered by', `${esc(bk.bill.enteredBy)}${bk.bill.enteredOn ? ` on ${esc(bk.bill.enteredOn)}` : ''}`) : ''));
+        (bk.bill.enteredBy ? kvh('Entered by', `${esc(bk.bill.enteredBy)}${bk.bill.enteredOn ? ` on ${esc(bk.bill.enteredOn)}` : ''}`) : ''));
 
       // The invoice, line by line. What the bill actually covers, which is the
       // question behind "this charge is $4,200 of an $11,000 invoice".
@@ -25314,7 +26541,8 @@ async function exportPropertyRoster(btn) {
       const w = bk.worksheet;
       parts.push(`<div style="font-weight:700;color:${w.agrees ? '#14653B' : '#8C2020'};margin:8px 0 4px;">` +
         `${w.agrees ? '✓' : '⚠'} Bill worksheet cross-check</div>` +
-        kv('Worksheet line', money(w.worksheetAmount)) + kv('GL posting', money(w.glAmount)) +
+        kv('Worksheet line', money(w.worksheetAmount)
+          + (w.oneLineOf ? ` (one of ${w.oneLineOf} lines on this account)` : '')) + kv('GL posting', money(w.glAmount)) +
         (w.agrees ? '' : kv('Difference', money(w.diff))) +
         (w.unitFromWorksheet ? kv('Unit on worksheet', w.unitFromWorksheet) : ''));
     }

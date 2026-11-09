@@ -9,7 +9,7 @@
  },
  "assumptions": {
   "purchase_cap_rate": 0.062,
-  "purchase_price_override": 0,
+  "purchase_price_override": 8500000,
   "ltv": 0.7,
   "loan_interest_rate": 0.055,
   "hold_period_years": 5,

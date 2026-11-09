@@ -831,6 +831,20 @@ async function build({ now = new Date() } = {}) {
 
   const shortlist = propertiesWithSpend(fromYM, toYM);
   const charges = [];
+  // chargeId is cut to 64 characters, so postings that agree on property, date,
+  // account, reference, amount and the start of the description share an id — a
+  // bulk invoice does exactly that: one appliance vendor's bill posts forty $799
+  // lines for forty units, and three of them came back as one id, so opening one
+  // charge's backup opened another's and the board showed repeats.
+  // The first keeps its id (the coverage sweep and invoice index know it by
+  // that); each later one gets #2, #3… in Rent Manager's row order.
+  const idsSeen = new Map();
+  const uniqueId = (charge) => {
+    const n = (idsSeen.get(charge.id) || 0) + 1;
+    idsSeen.set(charge.id, n);
+    if (n > 1) charge.id = `${charge.id}#${n}`;
+    return charge;
+  };
   const perPropertyErrors = [];
   let mode;
   let reportRuns = 0;
@@ -872,7 +886,7 @@ async function build({ now = new Date() } = {}) {
           for (const r of rows) {
             if (!isPosting(r)) continue;
             diagnostics.postingRowsKept += 1;
-            charges.push(...splitAcrossUnits(toCharge(r, {
+            charges.push(...splitAcrossUnits(uniqueId(toCharge(r, {
               propertyId: pid,
               propertyName: meta.name,
               entity: meta.entity,
@@ -880,7 +894,7 @@ async function build({ now = new Date() } = {}) {
               unitsById: units.byId,
               refByAccountId,
               costTypeByAccountId,
-            }), units.byProperty.get(pid) || []));
+            })), units.byProperty.get(pid) || []));
           }
         } catch (err) {
           // One property failing must not sink the pull — the tab is more useful
@@ -915,7 +929,7 @@ async function build({ now = new Date() } = {}) {
       diagnostics.postingRowsKept += 1;
       const nameKey = String(r.PropertyShortName || r.PropertyName || '').trim().toUpperCase();
       const hit = byName.get(nameKey);
-      charges.push(...splitAcrossUnits(toCharge(r, {
+      charges.push(...splitAcrossUnits(uniqueId(toCharge(r, {
         propertyId: hit ? hit.pid : null,
         propertyName: hit ? hit.meta.name : (r.PropertyShortName || '(unattributed)'),
         entity: hit ? hit.meta.entity : null,
@@ -923,7 +937,7 @@ async function build({ now = new Date() } = {}) {
         unitsById: units.byId,
         refByAccountId,
         costTypeByAccountId,
-      }), units.byProperty.get(hit ? hit.pid : null) || []));
+      })), units.byProperty.get(hit ? hit.pid : null) || []));
     }
   }
 
@@ -1131,7 +1145,7 @@ async function build({ now = new Date() } = {}) {
 // starts recording the vendor id and the invoice number produces charges the old
 // one cannot stand in for — and without this the tab would keep serving
 // yesterday's rows, with the invoice lookup quietly finding nothing.
-const CHARGE_SHAPE = 2;   // 2: +vendorId, +invoiceNo, +txnId (2026-08-26)
+const CHARGE_SHAPE = 3;   // 2: +vendorId, +invoiceNo, +txnId (2026-08-26) · 3: repeated ids get #2, #3 (2026-10-29)
 
 function mappingFingerprint() {
   return [

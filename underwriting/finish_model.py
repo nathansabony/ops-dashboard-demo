@@ -193,7 +193,7 @@ def bake_values_into_xlsx(path, lookup):
                     return m.group(0)
                 # The formula engine hands back the text "empty" for a formula that points at a blank cell (Excel
                 # shows 0). Written under an existing t="n" it made `<v>empty</v>` in a numeric cell - invalid XML that
-                # neither openpyxl nor Excel can open: Station Heights and Harbor City Apartments (2026-08-02)
+                # neither openpyxl nor Excel can open: Summit Heights and Harbor City Apartments (2026-08-02)
                 # could not be opened at all. A blank reference is 0; any other text is typed as text.
                 if isinstance(val, str) and val.strip().lower() == "empty":
                     val = 0

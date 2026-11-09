@@ -249,6 +249,19 @@ const CHARGE = {
   check('...and a posting that genuinely disagrees is still caught',
     docs.worksheetCheck(SPLIT_BILL, { accountId: 466, propertyId: 112, amount: 2500 }).agrees === false);
 
+  // A bulk invoice for ONE building: forty $799 lines on one account, each its
+  // own GL posting (Metro Appliance, Birch Cove, 2022). Summing them read as a
+  // $31,161 gap on a charge that ties.
+  const BULK = { ID: 111755, BillDetails: [
+    ...Array.from({ length: 40 }, () => ({ GLAccountID: 605, PropertyID: 184, Amount: 799 })),
+    ...Array.from({ length: 15 }, () => ({ GLAccountID: 609, PropertyID: 184, Amount: 199 })),
+  ] };
+  w = docs.worksheetCheck(BULK, { accountId: 605, propertyId: 184, amount: 799 });
+  check('one posting of a bulk invoice ties to its own line, not the sum of forty',
+    w.agrees === true && w.worksheetAmount === 799 && w.oneLineOf === 40, JSON.stringify({ a: w.agrees, amt: w.worksheetAmount, of: w.oneLineOf }));
+  check('...and a posting no single line accounts for is still caught',
+    docs.worksheetCheck(BULK, { accountId: 605, propertyId: 184, amount: 750 }).agrees === false);
+
   // Worksheets that name no property must not become a $0 worksheet.
   const NO_PROP = { ID: 2, BillDetails: [{ GLAccountID: 466, Amount: 1900 }] };
   w = docs.worksheetCheck(NO_PROP, { accountId: 466, propertyId: 112, amount: 1900 });
@@ -767,6 +780,57 @@ const CHARGE = {
 
   const notCard = await docs.creditCardStatementCharge({ paidByCreditCard: false, paidOn: '2026-08-14', amount: 10 });
   check('a check payment does not go looking for a statement line', notCard === null);
+
+  console.log('\nAn unpaid bill is not an unreachable one');
+  {
+    const UNPAID = { ID: 261826, BillDetails: [{ BillDetailID: 9001, PropertyID: 184, GLAccountID: 5156, Amount: 150 }] };
+    const C = { id: 'zg', propertyId: 184, accountId: 5156, amount: 150, date: '2026-08-14' };
+    let outcome = {};
+    stub.get = async (p) => { if (p === '/CheckDetails') return []; throw new Error('not stubbed'); };
+    let pay = await docs.paymentFor(UNPAID, C, outcome);
+    check('a lookup that answers with no payment says it answered', pay === null && outcome.answered === true, JSON.stringify(outcome));
+    outcome = {};
+    stub.get = async () => { throw new Error('(500) Unspecified Error'); };
+    pay = await docs.paymentFor(UNPAID, C, outcome);
+    check('...and one that was refused does not', pay === null && !outcome.answered, JSON.stringify(outcome));
+  }
+
+  console.log('\nA bill line names its own bill (Hyperlink id = BillID)');
+  // Metro Appliance, 2022: one $91,160 bulk invoice, 120 lines, reference not in
+  // the description — every rung of findBill missed it. The posting's own id
+  // points straight at it. Figures are the live shape, trimmed.
+  const TOWN = {
+    id: 'ta-1', propertyId: 184, accountId: 605, txnType: 'BILLITM', txnId: '111755', vendorId: 6296,
+    date: '2022-11-04', amount: 799, vendor: 'Metro Appliance', reference: '408234', invoiceNo: 'SID0007',
+  };
+  const townBill = {
+    ID: 111755, AccountID: 6296, Reference: '408234', Amount: 91160, TransactionDate: '2022-11-04T00:00:00',
+    BillDetails: [
+      { BillDetailID: 492389, Amount: 199, PropertyID: 184, GLAccountID: 609 },
+      { BillDetailID: 492449, Amount: 799, PropertyID: 184, GLAccountID: 605 },
+      { BillDetailID: 492479, Amount: 799, PropertyID: 184, GLAccountID: 606 },
+    ],
+    Attachments: [],
+  };
+  const askedOwn = [];
+  stub.get = async (p) => { askedOwn.push(p); if (p === '/Bills/111755') return townBill; throw new Error('not stubbed'); };
+  let own = await docs.billFromPosting(TOWN);
+  check('the bill the posting names is taken, on the line with its amount AND account',
+    own && own.row.ID === 111755 && own.by === 'posting id' && own.line && own.line.BillDetailID === 492449,
+    JSON.stringify(own && { by: own.by, line: own.line }));
+  check('...in one request, not a search', askedOwn.length === 1 && askedOwn[0] === '/Bills/111755', JSON.stringify(askedOwn));
+
+  own = await docs.billFromPosting({ ...TOWN, vendorId: 9999 });
+  check('a bill from a different vendor is not believed', own === null);
+  own = await docs.billFromPosting({ ...TOWN, amount: 123.45 });
+  check('...nor one with no line of this amount', own === null);
+  own = await docs.billFromPosting({ ...TOWN, propertyId: 107 });
+  check('...nor one whose matching line is another property\'s', own === null);
+  own = await docs.billFromPosting({ ...TOWN, txnType: 'CHKITM' });
+  check('a check posting is not treated as a bill id', own === null);
+  stub.get = async () => { throw new Error('(500) One or more errors occurred.'); };
+  own = await docs.billFromPosting(TOWN);
+  check('an id Rent Manager will not answer falls through to the search', own === null);
 
   console.log(`\n${fails === 0 ? '✓' : '✗'} ${checks - fails}/${checks} checks passed`);
   process.exit(fails === 0 ? 0 : 1);

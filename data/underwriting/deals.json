@@ -35,12 +35,14 @@
     "Exit cap rate % (edited)"
    ],
    "report": {
-    "v": 10,
-    "at": "2026-10-27T20:22:12.725Z",
-    "pages": 3
+    "v": 16,
+    "at": "2026-11-09T14:19:50.490Z",
+    "pages": 3,
+    "name": "Riverbend Apartments",
+    "review": ""
    },
-   "mtime": 1793133130392.949,
-   "v": 6,
+   "mtime": 1794233984517.4302,
+   "v": 9,
    "card": {
     "computed": true,
     "name": "Riverbend Apartments",
@@ -49,73 +51,79 @@
     "units": 96,
     "occupancy": 0.9375,
     "avg_rent": 1089.5833333333333,
-    "price": 8442177.41935484,
-    "price_per_door": 87939.34811827958,
+    "price": 8500000,
+    "price_per_door": 88541.66666666667,
     "t12_noi": 523415,
-    "year1_noi": 484834.8818373657,
+    "year1_noi": 492063.48846666666,
     "capex": 883600,
-    "cap_rate": 0.06199999999999999,
+    "cap_rate": 0.06157823529411765,
     "cap_note": "T12 NOI / the model's purchase price - a house estimate, not a quoted cap rate",
-    "irr": 0.1904325573907768,
+    "irr": 0.16622951507423012,
     "irr_target": 0.16,
     "irr_failed": false,
     "meets_target": true,
-    "equity_multiple": 2.209921225120345,
-    "coc": 0.10061882593926758,
-    "dscr": 1.4916902581419489,
+    "equity_multiple": 2.024493063956899,
+    "coc": 0.08560623017766456,
+    "dscr": 1.503631744741533,
     "hold_years": 5,
-    "max_price": 8912387.386848105,
-    "gap_to_max": 470209.96749326587,
-    "gap_pct": 0.05569771211100653,
+    "max_price": 8596765.566797301,
+    "gap_to_max": 96765.56679730117,
+    "gap_pct": 0.011384184329094256,
     "checks": {
-     "ok": 12,
-     "needs_input": 2,
+     "ok": 11,
+     "needs_input": 0,
      "review": 0
     },
     "scenarios": [
      {
       "scenario": "Sale Year 3",
-      "irr": 0.2221319730711171,
-      "equity_multiple": 1.7815366343943966
+      "irr": 0.1854270984121491,
+      "equity_multiple": 1.6346252488622763
      },
      {
       "scenario": "Sale Year 5",
-      "irr": 0.1904325573907768,
-      "equity_multiple": 2.209921225120345
+      "irr": 0.16622951507423012,
+      "equity_multiple": 2.024493063956899
      },
      {
       "scenario": "Sale Year 8",
-      "irr": 0.17158252373255345,
-      "equity_multiple": 2.9223389217164066
+      "irr": 0.15393807434580342,
+      "equity_multiple": 2.6747266786802477
      },
      {
       "scenario": "Refi Yr3 + Sale Yr5",
-      "irr": 0.21428408246271613,
-      "equity_multiple": 2.109588336368814
+      "irr": 0.18368550602249067,
+      "equity_multiple": 1.934018328967772
      },
      {
       "scenario": "Refi Yr3 + Sale Yr8",
-      "irr": 0.2071723356267623,
-      "equity_multiple": 2.706483275221838
+      "irr": 0.18121303639900188,
+      "equity_multiple": 2.482310428969345
      },
      {
       "scenario": "Refi Yr5 + Sale Yr8",
-      "irr": 0.19016912794009544,
-      "equity_multiple": 2.7588605988713835
+      "irr": 0.16873195615188963,
+      "equity_multiple": 2.526483100366071
      },
      {
       "scenario": "Year 2 Cash-on-Cash",
-      "irr": 0.10061882593926758,
+      "irr": 0.08560623017766456,
       "equity_multiple": null
      }
     ],
     "non_revenue_units": 0,
     "uncomputed_formulas": 0,
+    "buildings": [],
+    "combos": [],
+    "lease_up": null,
     "revenue_units": 96,
     "revenue_occupancy": null,
     "review_reasons": [],
     "needs_review": false,
-    "review_fix": []
+    "review_fix": [],
+    "price_from_ask": true,
+    "purchase_cap": 0.062,
+    "cautions": []
    }
   }
  }

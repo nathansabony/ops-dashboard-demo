@@ -180,17 +180,31 @@ console.log('\nBest deal first (IRR, then Year-2 cash-on-cash)');
   check('the seven parts add up to the score and the weights to 100', Math.abs(sc.parts.reduce((t, x) => t + x.points, 0) - sc.score) <= 1 && sc.parts.reduce((t, x) => t + x.weight, 0) === 100);
   check('a deal that clears its target at every price tested (no solved max) keeps full price marks, one that fails at every price gets none',
     deals.scoreDeal(deals.shapeCard(raw({ irr: 0.2, max_price: 0, meets_target: true }))).parts.find(x => x.key === 'price').points > 0 && deals.scoreDeal(deals.shapeCard(raw({ irr: -0.03, max_price: 0 }))).parts.find(x => x.key === 'price').points === 0);
-  check('a deal that needs review is not scored', deals.scoreDeal({ computed: true, needs_review: true }).score === null);
+  const flaggedStrong = deals.scoreDeal({ computed: true, needs_review: true, irr: 0.25, irr_target: 0.16, coc: 0.12, equity_multiple: 2.6, dscr: 1.6, gap_pct: 0.25, occupancy: 0.95 });
+  check('a deal that needs review is still scored, but held to an F however good its numbers read', flaggedStrong.score === 15 && flaggedStrong.grade === 'F' && flaggedStrong.capped && /held to 15/.test(flaggedStrong.note) && flaggedStrong.parts.length === 7);
+  check('...and a flagged deal with worse numbers keeps its lower score', deals.scoreDeal({ computed: true, needs_review: true, irr: null, irr_failed: true, occupancy: 0.398 }).score < 15);
+  check('a multi-building card carries its buildings and mixes', deals.shapeCard(raw({ buildings: [{ name: 'A' }, { name: 'B' }], combos: [{ rank: 1, mix: 'A + B' }] })).buildings.length === 2 && deals.shapeCard(raw({})).combos.length === 0);
+  const harbor = deals.shapeCard(raw({ purchase_cap: 0.055 }));
+  check('Year 1 more than 20% under the T12 (Harbor, -34%) is a caution, and so is a price that is NOI / cap, not the ask',
+    harbor.cautions.length === 2 && /34% below the T12/.test(harbor.cautions[0]) && /5\.5% cap rate, not the broker's ask/.test(harbor.cautions[1]) && !harbor.needs_review);
+  check('a deal priced at the ask with Year 1 near the T12 has no cautions',
+    deals.shapeCard(raw({ price_from_ask: true, year1_noi: 600000 })).cautions.length === 0);
+  check('a Year-1 lift over 20% is a caution too (Villa Serena, +22%)', /22% above the T12/.test(deals.shapeCard(raw({ price_from_ask: true, year1_noi: 616456 * 1.22 })).cautions[0] || ''));
+  const reviews = { harborrowportfolio: { reviewed: '2026-10-31', summary: 'Checked.', checked: ['rent roll'], files: ['harbor-run2.xlsx'] } };
+  const rv = deals.reviewFor('Harbor Row Portfolio', 'harbor-run2.xlsx', reviews);
+  check('a deal underwritten by hand carries its review, matched by property name', rv && rv.summary === 'Checked.' && rv.current === true && rv.checked.length === 1);
+  check('a newer run than the one reviewed says so instead of borrowing the review', deals.reviewFor('Harbor Row Portfolio', 'harbor-run3.xlsx', reviews).current === false);
+  check('a deal nobody reviewed has no review', deals.reviewFor('Villa Serena', 'x.xlsx', reviews) === null);
   const strong = { irr: 0.18, coc: 0.09, max_price: 12000000, price: 9000000, equity_multiple: 2.2, dscr: 1.4 };
   const y3 = deals.scoreDeal(deals.shapeCard(raw(Object.assign({}, strong, { scenarios: [{ scenario: 'Sale Year 3', irr: 0.17 }, { scenario: 'Sale Year 8', irr: 0.18 }] }))));
   const y8 = deals.scoreDeal(deals.shapeCard(raw(Object.assign({}, strong, { scenarios: [{ scenario: 'Sale Year 3', irr: 0.05 }, { scenario: 'Sale Year 8', irr: 0.18 }] }))));
   const refi = deals.scoreDeal(deals.shapeCard(raw(Object.assign({}, strong, { scenarios: [{ scenario: 'Sale Year 8', irr: 0.1 }, { scenario: 'Refi Yr3 + Sale Yr8', irr: 0.18 }] }))));
   check('a deal that clears the target only at year 8, or only with a refinance, scores below one that clears it at year 3', y3.score > y8.score && y8.score > refi.score, [y3.score, y8.score, refi.score]);
   const t = k => x => x.parts.find(p => p.key === k).points;
-  check('...through the timing line, which says why', t('timing')(y3) === 15 && t('timing')(y8) < t('timing')(y3) && /year 8/.test(y8.parts.find(p => p.key === 'timing').why) && /refinance/.test(refi.parts.find(p => p.key === 'timing').why));
+  check('...through the timing line, which says why', t('timing')(y3) === 8 && t('timing')(y8) < t('timing')(y3) && /year 8/.test(y8.parts.find(p => p.key === 'timing').why) && /refinance/.test(refi.parts.find(p => p.key === 'timing').why));
   check('a stabilised deal with its checks answered earns more on risk than an empty one with inputs outstanding',
     t('risk')(deals.scoreDeal(deals.shapeCard(raw({ occupancy: 0.95, checks: { needs_input: 0 } }))) ) > t('risk')(deals.scoreDeal(deals.shapeCard(raw({ occupancy: 0.72, checks: { needs_input: 3 } })))));
-  check('the weights and thresholds come from config/deal-score.json', JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'config', 'deal-score.json'), 'utf8')).weights.irr === 25 && /deal-score\.json/.test(fs.readFileSync(path.join(__dirname, '..', 'services', 'underwritingDeals.js'), 'utf8')));
+  check('the weights and thresholds come from config/deal-score.json', JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'config', 'deal-score.json'), 'utf8')).weights.irr === 12 && /deal-score\.json/.test(fs.readFileSync(path.join(__dirname, '..', 'services', 'underwritingDeals.js'), 'utf8')));
   check('an unsolved IRR earns nothing on the IRR line', deals.scoreDeal(deals.shapeCard(raw({ irr: null, irr_failed: true }))).parts[0].points === 0);
   const tie = deals.rankProperties([prop('a', 0.1, 0.02), prop('b', 0.1, 0.06)]);
   check('equal IRRs are broken by cash-on-cash', tie.find(p => p.name === 'b').rank === 1);
@@ -215,9 +229,24 @@ async function store() {
     }
     return out;
   };
+  {
+    // 30 stale models, the reader dies on the second chunk: the first chunk's cards are kept, and the next look reads
+    // only what is left; two looks at once share one read
+    const big = fs.mkdtempSync(path.join(os.tmpdir(), 'uwd-big-'));
+    for (let k = 0; k < 30; k++) fs.writeFileSync(path.join(big, `Deal${k}-2026-10-${String(k % 28 + 1).padStart(2, '0')}-00-00-00.xlsx`), 'x');
+    let calls = 0, fail = true;
+    const flaky = async files => { calls += 1; if (fail && calls === 2) throw new Error('timed out'); const o = {}; for (const f of files) o[f] = raw({ name: path.basename(f) }); return o; };
+    const bs = deals.createStore({ dir: big, readCards: flaky });
+    const first = await bs.list();
+    check('a reader that dies part-way through a big re-read keeps the chunks it finished', first.length === 30 - 12 && calls === 3, [first.length, calls]);
+    fail = false; calls = 0;
+    const [a1, a2] = await Promise.all([bs.list(), bs.list()]);
+    check('...the next look reads only the chunk that failed, and two looks at once share it', a1.length === 30 && a2.length === 30 && calls === 1, [a1.length, calls]);
+    fs.rmSync(big, { recursive: true, force: true });
+  }
   const s = deals.createStore({ dir, readCards });
   let list = await s.list();
-  check('every model on the disk is a deal; lock files, text files and non-models are not', list.length === 2 && reads === 1);
+  check('every model on the disk is a deal; lock files, half-written repairs, text files and non-models are not', list.length === 2 && reads === 1);
   list = await s.list();
   check('the second look reads nothing: cards are cached against the file\'s mtime', reads === 1);
   const later = new Date(Date.now() + 5000);
@@ -233,9 +262,9 @@ async function store() {
   s.setHidden('Willow-2026-09-14-19-45-10.xlsx', true, 'owner@example.com');
   const fresh = deals.createStore({ dir, readCards });
   list = await fresh.list();
-  const essex = list.find(d => /Harbor/.test(d.file)), willow = list.find(d => /Willow/.test(d.file));
+  const harbor = list.find(d => /Harbor/.test(d.file)), willow = list.find(d => /Willow/.test(d.file));
   check('who/what/when survives a restart (it is a file on the Render disk)',
-    essex.confirmed_by_hand === 3 && essex.sources[0].filename === 'rr.xlsx' && willow.hidden && willow.hidden.by === 'owner@example.com' && reads === 3);
+    harbor.confirmed_by_hand === 3 && harbor.sources[0].filename === 'rr.xlsx' && willow.hidden && willow.hidden.by === 'owner@example.com' && reads === 3);
   fresh.setHidden('Willow-2026-09-14-19-45-10.xlsx', false, 'x');
   check('restoring clears the hide', (await fresh.list()).find(d => /Willow/.test(d.file)).hidden === null);
   check('hiding never deletes the model', fs.existsSync(path.join(dir, 'Willow-2026-09-14-19-45-10.xlsx')));

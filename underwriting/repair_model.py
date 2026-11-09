@@ -7,7 +7,7 @@ Written 2026-10-22 after auditing every model on the live board. Three defects h
 already on the Render disk, and the source files for most of them are not available to re-run:
 
   1. Invalid cached values. An older bake wrote the text "empty" into numeric cells (Pro Forma D16..D20, 11 cells)
-     of Station Heights and Harbor City Apartments (2026-08-02): neither openpyxl nor Excel could open
+     of Summit Heights and Harbor City Apartments (2026-08-02): neither openpyxl nor Excel could open
      them, so they never appeared on the board. The bad <v> elements are removed and Excel recalculates them.
   2. Unit Mix totals that sum only the first 20 unit types (the template's B6:B25). Extended to every type row.
   3. An "official" occupancy that the unit rows contradict (100-106 Maple Court: 0 of 56 occupied while 54

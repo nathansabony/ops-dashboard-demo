@@ -32,9 +32,12 @@ MAX_COLS = 40
 T12_HEAD_ROWS = 12
 T12_MAX_LABEL_ROWS = 500
 
+# ResMan heads its month columns "Sep 2025 Actual" (Lakeview, 2026-10-29): without the optional
+# "Actual" the statement was not seen as a T12, its expense rows were sampled out, and the mapping
+# came back with other income, EGI, controllable expenses and insurance all blank.
 MONTH_PAT = re.compile(
     r"^((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[ .\-/]*'?\d{2,4}"
-    r"|\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{1,2}[/-]\d{4})$", re.IGNORECASE)
+    r"|\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{1,2}[/-]\d{4})(\s+actuals?)?$", re.IGNORECASE)
 
 
 def _cell(v):
@@ -80,13 +83,19 @@ def _t12_lines(df, header_row):
         lines.append(f"R{i + 1}: " + " | ".join(row))
     lines.append("--- every remaining row, labels + row total only "
                  "(monthly numbers omitted) ---")
+    # The row total is the column headed "Total" when the header names one: ResMan's statement
+    # runs "Adjusted Total | Variance", and "last number wins" showed the variance as the total.
+    hdr_cells = [_cell(v).lower() for v in df.iloc[header_row - 1, :MAX_COLS]]
+    total_cols = [j for j, h in enumerate(hdr_cells) if re.search(r"\btotal\b", h)]
+    total_col = total_cols[-1] if total_cols else None
     for i in range(head, min(len(df), head + T12_MAX_LABEL_ROWS)):
         labels, total = [], ""
-        for v in df.iloc[i, :MAX_COLS]:
+        for j, v in enumerate(df.iloc[i, :MAX_COLS]):
             if pd.isna(v) or _cell(v) == "":
                 continue
             if isinstance(v, (int, float)):
-                total = _cell(v)  # last numeric wins = the Total column
+                if total_col is None or j == total_col:
+                    total = _cell(v)  # the Total column; with none named, the last number
             elif len(labels) < 3:
                 labels.append(_cell(v))
         if not labels and not total:
