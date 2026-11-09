@@ -332,8 +332,8 @@ console.log('\nThe demo\'s showcase deal (data/underwriting, read from its sidec
   const meta = fs.existsSync(path.join(dir, 'deals.json')) ? JSON.parse(fs.readFileSync(path.join(dir, 'deals.json'), 'utf8')) : { models: {} };
   const rec = xlsx.length ? meta.models[xlsx[0]] : null;
   check('its card was read from the model, passes the plausibility gate and is computed', !!rec && rec.card.computed === true && !rec.card.needs_review && rec.card.units === 96);
-  const sc = rec ? deals.scoreDeal(rec.card) : { score: null };
-  check('it meets its IRR target and scores B or better (the showcase should look like a good deal)', !!rec && rec.card.meets_target === true && sc.score >= 75 && /^[AB]$/.test(sc.grade), JSON.stringify(sc.score));
+  const sc = rec ? deals.scoreDeal(deals.shapeCard(rec.card)) : { score: null };
+  check('it is an average deal: scored in the 60s, a C, priced at the ask (the showcase is a realistic middling deal, not a perfect one)', !!rec && sc.score >= 60 && sc.score < 70 && sc.grade === 'C' && rec.card.price_from_ask === true, JSON.stringify(sc.score));
   check('its PDF report sits beside the model', xlsx.length === 1 && fs.existsSync(path.join(dir, xlsx[0].replace(/\.xlsx$/i, '.pdf'))));
   const sample = path.join(__dirname, '..', 'underwriting', 'sample');
   check('the sample documents behind "Try with sample documents" are all there', ['Riverbend Apartments - Rent Roll.xlsx', 'Riverbend Apartments - T12.xlsx', 'Riverbend Apartments - Offering Memorandum.pdf', 'riverbend-om-extracted.json', 'riverbend-lookups.json', 'riverbend-deal.json'].every(f => fs.existsSync(path.join(sample, f))));
