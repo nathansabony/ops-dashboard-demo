@@ -116,8 +116,38 @@ function probeWindow() {
   return { from: iso(from), to: iso(to) };
 }
 
+// A person clicking 📎 Backup is waiting on this, and the full probe is about a
+// minute of sequential requests — the first panel after every restart, and again
+// every six hours, took that minute (measured live, 2026-10-29: 62 s, then 1–2 s
+// for the next). So a click is answered from the last answer, and a stale one is
+// refreshed behind it. The last answer survives a restart because the renovation
+// snapshot carries it (documentCapabilities). Only `force` — the snapshot build —
+// waits for a fresh probe.
+let _probeRefreshing = null;
+function lastKnownProbe() {
+  try {
+    // Required here, not at the top: renovationExpenses requires this file.
+    const snap = require('./renovationExpenses').get();
+    const held = snap && snap.data && snap.data.documentCapabilities;
+    return held && Array.isArray(held.resources) ? held : null;
+  } catch { return null; }
+}
+
 async function capabilities({ force = false } = {}) {
   if (_probe && !force && Date.now() - _probe.at < PROBE_TTL_MS) return _probe.payload;
+  if (!force) {
+    const last = _probe ? _probe.payload : lastKnownProbe();
+    if (last) {
+      if (!_probeRefreshing) {
+        _probeRefreshing = probeAll().catch(() => null).finally(() => { _probeRefreshing = null; });
+      }
+      return last;
+    }
+  }
+  return probeAll();
+}
+
+async function probeAll() {
 
   // Sequential, not parallel: Rent Manager caps concurrent sessions and this is a
   // background curiosity, not something a person is waiting on.
@@ -563,6 +593,44 @@ async function findBill(charge) {
     if (full) best = { ...best, row: { ...best.row, ...full } };
   }
   return best ? { ...best, searched } : { row: null, searched };
+}
+
+// ── the bill a bill line names itself ───────────────────────────────────────
+// A GL row's Hyperlink is "type:id", and for a bill line (BILLITM) the id is the
+// BillID. Checked live on 2026-10-29 against 27 bill postings, 2022 and 2026:
+// every one came back as a bill from the same vendor with a line of the posting's
+// amount on the posting's property. findBill infers the bill from dates, amounts
+// and invoice numbers, and that is where it went wrong:
+//   • Metro Appliance — 120 lines on one $91,160 bulk invoice whose reference is
+//     not in the description, so no rung could find it ("No AP bill matched");
+//   • a $150 Zvi Grossman line matched ANOTHER bill of the same amount and date
+//     (amount+date rung) while the posting named its own;
+//   • a Tubs Refinishing line found nothing at all.
+// The bill is still checked against the posting before it is believed — same
+// vendor, and a line with this amount, account and property — so an id that ever
+// meant something else on another build falls through to the search instead of
+// attaching the wrong invoice.
+async function billFromPosting(charge) {
+  if (String(charge.txnType || '').toUpperCase() !== 'BILLITM' || charge.txnId == null) return null;
+  const row = await billById(charge.txnId);
+  if (!row) return null;
+  const account = pick(row, ['AccountID', 'AccountId']);
+  if (charge.vendorId != null && account != null && String(account) !== String(charge.vendorId)) return null;
+  const target = Math.abs(charge.amount);
+  const details = Array.isArray(row.BillDetails) ? row.BillDetails : [];
+  const line = details.find(d => {
+    if (Math.abs(Math.abs(money(pick(d, ['Amount', 'LineAmount', 'Total']))) - target) > 0.01) return false;
+    const dAcct = pick(d, ['GLAccountID', 'GLAccountId', 'AccountID']);
+    if (dAcct != null && charge.accountId != null && String(dAcct) !== String(charge.accountId)) return false;
+    const dProp = pick(d, ['PropertyID', 'PropertyId']);
+    if (dProp != null && charge.propertyId != null && String(dProp) !== String(charge.propertyId)) return false;
+    return true;
+  });
+  // No line detail came back (an embed this build refuses): the total is the only
+  // thing left to agree on.
+  const totalAgrees = !details.length && Math.abs(Math.abs(money(pick(row, ['Amount', 'TotalAmount', 'BillAmount', 'Total']))) - target) <= 0.01;
+  if (!line && !totalAgrees) return null;
+  return { row, confidence: 'exact', by: 'posting id', line: line || undefined, searched: { byPostingId: true, billId: String(charge.txnId) } };
 }
 
 // One bill, with the things a list request will not carry. Never throws: a bill we
@@ -1249,7 +1317,10 @@ function detailRelevance(d, charge) {
  * find bills; this walks it forwards, starting from the line that matches the
  * charge rather than from whichever line the bill happens to list first.
  */
-async function paymentFor(bill, charge) {
+// `outcome.answered` is set when Rent Manager answered at least one of the
+// line→payment lookups. A null payment then means "nothing applied yet", not "could
+// not ask" — see the wording in backupFor.
+async function paymentFor(bill, charge, outcome = {}) {
   const billId = pick(bill, ['BillID', 'BillId', 'ID', 'Id']);
   if (billId == null) return null;
 
@@ -1291,6 +1362,7 @@ async function paymentFor(bill, charge) {
     try {
       rows = asRows(await rentManager.get('/CheckDetails',
         { filters: `BillDetailID,eq,${line.id}`, pageSize: 10 }));
+      outcome.answered = true;
     } catch (err) {
       continue;
     }
@@ -1602,7 +1674,20 @@ function worksheetCheck(bill, charge) {
   const narrowedToUnit = byUnit.length > 0 && byUnit.length < mine.length;
   if (byUnit.length) mine = byUnit;
 
-  const total = mine.reduce((s, l) => s + l.amount, 0);
+  let total = mine.reduce((s, l) => s + l.amount, 0);
+  // ── one posting per line ──────────────────────────────────────────────────
+  // The same mistake one level down: a bulk invoice for ONE building can carry
+  // many lines on one account — Metro Appliance's $91,160 bill (2022) is forty
+  // $799 ranges for forty units at Birch Cove, each its own GL posting. Summing
+  // them compared $31,960 against one $799 posting and reported a $31,161 gap on
+  // a charge that ties exactly. When the sum does not agree but a single line is
+  // this posting's amount, that line IS the posting.
+  let oneLineOf = null;
+  if (Math.abs(total - charge.amount) >= 0.01 && mine.length > 1
+    && mine.some(l => Math.abs(l.amount - charge.amount) < 0.01)) {
+    oneLineOf = mine.length;
+    total = charge.amount;
+  }
   const diff = Math.round((total - charge.amount) * 100) / 100;
 
   return {
@@ -1615,6 +1700,9 @@ function worksheetCheck(bill, charge) {
     invoiceAmountOnAccount: Math.round(onAccount.reduce((s, l) => s + l.amount, 0) * 100) / 100,
     splitAcrossProperties: onAccount.length > mine.length,
     narrowedToUnit,
+    // Set when the posting is one of several same-account lines (see above), so
+    // the panel can say "one of 40 lines" rather than imply the bill is $799.
+    oneLineOf,
     worksheetAmount: total,
     glAmount: charge.amount,
     diff,
@@ -1781,11 +1869,20 @@ async function backupFor(charge, { force = false } = {}) {
     return payload;
   }
 
+  // The posting names its own bill: a bill line's Hyperlink id IS the BillID.
+  // Asked before the sweep and the search, because both of those infer the bill
+  // and this one is read off the ledger — see billFromPosting.
+  const own = await billFromPosting(charge);
+  if (own) {
+    bill = own.row;
+    billMatch = own;
+  }
+
   // The sweep has already placed this charge against a bill, across the vendor's
   // whole ledger rather than a fortnight of it. Read that back rather than
   // repeating a narrower search — this is what makes a click quick and what stops
   // the tab from finding less than the coverage number promises.
-  const known = backupIndex.lookup(charge.id);
+  const known = bill ? null : backupIndex.lookup(charge.id);
   if (known && known.billId) {
     const row = await billById(known.billId);
     if (row) {
@@ -1900,9 +1997,14 @@ async function backupFor(charge, { force = false } = {}) {
       }
     }
 
-    payment = await paymentFor(bill, charge);
+    // The probe asks /CheckDetails for an unfiltered list, which this Rent Manager
+    // refuses ("Unspecified Error") while the filtered lookup works — so the probe
+    // alone called the link unreachable on every unpaid bill (a $150 Zvi Grossman
+    // bill, 2026-10-29). What the lookup itself got back is the better witness.
+    const paymentOutcome = {};
+    payment = await paymentFor(bill, charge, paymentOutcome);
     if (!payment) {
-      unavailable.push(available.has('checkDetails')
+      unavailable.push(paymentOutcome.answered || available.has('checkDetails')
         ? 'No check or EFT has been applied to this bill. On an accrual basis this usually means the bill is entered but not yet paid.'
         : 'The bill-to-payment link could not be reached on this refresh, so whether this was paid has to be checked in Rent Manager.');
     } else if (payment.bank && !payment.bank.known) {
@@ -2026,6 +2128,7 @@ module.exports = {
   capabilities,
   verdictFor,
   findBill,
+  billFromPosting,
   attachmentsFor,
   fetchAttachment,
   paymentFor,

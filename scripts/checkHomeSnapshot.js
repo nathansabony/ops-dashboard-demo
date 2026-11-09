@@ -85,14 +85,14 @@ console.log('\nBrowser input is rebuilt, not trusted');
 
 console.log('\nLatest underwriting deal');
 {
-  const card = o => ({ computed: true, name: 'Casa Bella', address: '1 Main St, Miami OH', units: 48, price: 9000000, irr: 0.21, irr_target: 0.16, meets_target: true, t12_noi: 600000, ...o });
+  const card = o => ({ computed: true, name: 'Villa Serena', address: '1 Main St, Miami OH', units: 48, price: 9000000, irr: 0.21, irr_target: 0.16, meets_target: true, t12_noi: 600000, ...o });
   const props = [
     { name: 'Old', hidden: false, run_count: 1, latest: { created: '2026-09-01T10:00:00Z', card: card({ name: 'Old', meets_target: false }) } },
-    { name: 'Casa Bella', hidden: false, run_count: 3, latest: { created: '2026-10-21T10:00:00Z', card: card({}) } },
+    { name: 'Villa Serena', hidden: false, run_count: 3, latest: { created: '2026-10-21T10:00:00Z', card: card({}) } },
     { name: 'Hidden', hidden: true, run_count: 0, latest: { created: '2026-10-22T10:00:00Z', card: card({ name: 'Hidden' }) } },
   ];
   const d = hs.latestDeal(props);
-  check('the newest live run is chosen, hidden deals skipped', d && d.name === 'Casa Bella' && d.ranOn === '2026-10-21' && d.runs === 3);
+  check('the newest live run is chosen, hidden deals skipped', d && d.name === 'Villa Serena' && d.ranOn === '2026-10-21' && d.runs === 3);
   check('it says whether the model cleared its target', d.verdict === 'meets' && hs.latestDeal([props[0]]).verdict === 'below');
   const text = JSON.stringify(d);
   // 2026-10-22 (the owner): the deal box now shows the deal's real numbers, so this
@@ -102,25 +102,25 @@ console.log('\nLatest underwriting deal');
   check('the buy price is the max price that clears the target IRR', hs.latestDeal([{ name: 'M', hidden: false, run_count: 1, latest: { created: '2026-10-22T10:00:00Z', card: card({ max_price: 8000000, coc: 0.07, gap_pct: 0.1 }) } }]).buyPrice === 8000000);
   const flagged = hs.latestDeal([{ name: 'Bad', hidden: false, run_count: 1, latest: { created: '2026-10-22T10:00:00Z', card: card({ needs_review: true, review_reasons: ['Occupancy is 39.8%'] }) } }]);
   check('the latest deal carries the board key so Home can open its analysis', d.key === '' || typeof d.key === 'string');
-  check('a deal that needs review withholds price and returns, and says why', flagged.verdict === 'review' && flagged.buyPrice === null && flagged.irr === null && flagged.score === null && flagged.problems.length === 1);
+  check('a deal that needs review withholds price and returns, says why, and is scored no better than an F', flagged.verdict === 'review' && flagged.buyPrice === null && flagged.irr === null && typeof flagged.score === 'number' && flagged.score <= 15 && flagged.grade === 'F' && flagged.problems.length === 1);
   const unsolved = hs.latestDeal([{ name: 'U', hidden: false, run_count: 1, latest: { created: '2026-10-22T10:00:00Z', card: card({ irr: null, irr_failed: true, meets_target: false }) } }]);
   check('an unsolved IRR is reported as unsolved, with a reason', unsolved.irr === null && unsolved.problems.length === 1 && unsolved.unsolvedCount === 1);
   check('no deals reads as null', hs.latestDeal([]) === null);
   // the box must never read as empty: the newest runs were flagged and withheld their numbers
   const board = [
-    { key: 'ok', name: 'Overlook', hidden: false, run_count: 1, latest: { created: '2026-10-22T17:00:00Z', card: card({ name: 'Overlook', irr: 0.187, meets_target: true, max_price: 95e6, coc: 0.089 }) } },
-    { key: 'h', name: 'Hilliard', hidden: false, run_count: 1, latest: { created: '2026-10-22T19:00:00Z', card: card({ name: 'Hilliard', irr: null, irr_failed: true, needs_review: true, review_reasons: ['The equity multiple is negative (-0.45x)'] }) } },
-    { key: 'a', name: 'Avondale', hidden: false, run_count: 1, latest: { created: '2026-10-22T21:00:00Z', card: card({ name: 'Avondale', irr: null, irr_failed: true, needs_review: true, review_reasons: ['Occupancy is 39.8%'] }) } },
+    { key: 'ok', name: 'Ridgeview', hidden: false, run_count: 1, latest: { created: '2026-10-22T17:00:00Z', card: card({ name: 'Ridgeview', irr: 0.187, meets_target: true, max_price: 95e6, coc: 0.089 }) } },
+    { key: 'h', name: 'Elmhurst', hidden: false, run_count: 1, latest: { created: '2026-10-22T19:00:00Z', card: card({ name: 'Elmhurst', irr: null, irr_failed: true, needs_review: true, review_reasons: ['The equity multiple is negative (-0.45x)'] }) } },
+    { key: 'a', name: 'Pinecrest', hidden: false, run_count: 1, latest: { created: '2026-10-22T21:00:00Z', card: card({ name: 'Pinecrest', irr: null, irr_failed: true, needs_review: true, review_reasons: ['Occupancy is 39.8%'] }) } },
   ];
   const shown = hs.latestDeal(board);
   const withFix = hs.latestDeal([Object.assign({}, board[2], { latest: Object.assign({}, board[2].latest, { card: Object.assign({}, board[2].latest.card, { review_fix: ['Send the asking price.'] }) }) }), board[0]]);
   check('a flagged run carries its what-would-fix-it line to Home', withFix.newerNotScored[0].fix === 'Send the asking price.');
-  check('with the two newest runs flagged, the box shows the latest SCORED deal with its numbers', shown.name === 'Overlook' && shown.irr === 0.187 && shown.coc === 0.089 && shown.buyPrice === 95e6 && typeof shown.score === 'number' && shown.noneSolved === false);
+  check('with the two newest runs flagged, the box shows the latest SCORED deal with its numbers', shown.name === 'Ridgeview' && shown.irr === 0.187 && shown.coc === 0.089 && shown.buyPrice === 95e6 && typeof shown.score === 'number' && shown.noneSolved === false);
   check('...and lists the newer runs that could not be scored, newest first, each with its reason and no numbers',
-    shown.newerNotScored.length === 2 && shown.newerNotScored[0].name === 'Avondale' && /39\.8%/.test(shown.newerNotScored[0].reason) && shown.newerNotScored[1].name === 'Hilliard' && !('irr' in shown.newerNotScored[0]) && shown.newerNotScored.every(n => n.needsReview));
+    shown.newerNotScored.length === 2 && shown.newerNotScored[0].name === 'Pinecrest' && /39\.8%/.test(shown.newerNotScored[0].reason) && shown.newerNotScored[1].name === 'Elmhurst' && !('irr' in shown.newerNotScored[0]) && shown.newerNotScored.every(n => n.needsReview && n.grade === 'F'));
   check('a flagged deal never becomes the headline while a scored one exists', shown.verdict !== 'review' && shown.problems.length === 0);
   const nothing = hs.latestDeal(board.slice(1));
-  check('when no deal has a result the box says so (noneSolved) and still names the newest run and why', nothing.noneSolved === true && nothing.name === 'Avondale' && nothing.irr === null && nothing.problems.length >= 1 && nothing.newerNotScored.length === 0);
+  check('when no deal has a result the box says so (noneSolved) and still names the newest run and why', nothing.noneSolved === true && nothing.name === 'Pinecrest' && nothing.irr === null && nothing.problems.length >= 1 && nothing.newerNotScored.length === 0);
   check('the newest scored deal is shown even when it is the newest run (nothing newer to list)', hs.latestDeal(board.slice(0, 1)).newerNotScored.length === 0);
 }
 

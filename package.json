@@ -36,6 +36,7 @@
     "check:variance-good-news": "node scripts/checkVarianceGoodNews.js",
     "check:variance-pattern": "node scripts/checkVariancePattern.js",
     "check:variance-investigation": "node scripts/checkVarianceInvestigation.js",
+    "check:variance-review": "node scripts/checkVarianceReview.js",
     "check:variance-first-seen": "node scripts/checkVarianceFirstSeen.js",
     "check:entity-board": "node scripts/checkEntityBoard.js",
     "check:entity-actions": "node scripts/checkEntityActions.js",

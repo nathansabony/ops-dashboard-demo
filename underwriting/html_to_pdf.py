@@ -53,6 +53,11 @@ td { padding: 1.1pt 4pt; border-bottom: 1px solid #E6E1D6; vertical-align: top; 
 .band h1 { color: #14342A; }
 .band p { color: #6B645A; }
 .review { border-left: 4px solid #8C2020; background-color: #F7EDEC; padding: 4pt 8pt; color: #8C2020; }
+.reviewed { border-left: 4px solid #2F6B3A; background-color: #EEF5EA; padding: 4pt 8pt; color: #23452A; }
+.vs { border-top: 2px solid #14532D; background-color: #F6F9F4; padding: 4pt 8pt; }
+.bottom { border-left: 4px solid #14532D; background-color: #EEF3EC; padding: 5pt 9pt; color: #14342A; }
+.bottom .big { font-size: 12.5pt; font-weight: bold; margin-bottom: 3pt; }
+.caution { border-left: 4px solid #A06A00; background-color: #FBF4E4; padding: 4pt 8pt; color: #6B4A00; }
 .note { border-left: 3px solid #B98A2E; background-color: #F7F1E3; padding: 4pt 7pt; margin: 4pt 0; }
 .tot td { font-weight: bold; border-top: 1px solid #14342A; }
 """

@@ -213,12 +213,23 @@ def extract_t12(book_path, m):
     if None not in (egi, opex, noi) and abs(egi - opex - noi) > max(2, abs(noi) * 0.001):
         warnings.append(f"Tie-out: EGI ({egi:,.0f}) - OpEx ({opex:,.0f}) does not equal "
                         f"NOI ({noi:,.0f}) — check the bucket mapping.")
+    # "other" is optional and usually absent: unmapped counts as 0, so the check still runs (before, a
+    # null there skipped it for every statement whose expenses all fit the named buckets)
     buckets = [data.get(f) for f in ("controllable_expenses", "utilities",
-               "management_fee_actual", "insurance", "property_taxes_actual",
-               "other_property_expenses")]
+               "management_fee_actual", "insurance", "property_taxes_actual")] + [data.get("other_property_expenses") or 0]
     if opex is not None and None not in buckets and abs(sum(buckets) - opex) > max(2, abs(opex) * 0.001):
         warnings.append(f"Tie-out: expense buckets sum to {sum(buckets):,.0f} but total "
                         f"OpEx is {opex:,.0f} — check the bucket mapping.")
+    # The controllable sub-sections can never add up to MORE than controllable expenses. Greyeagle (2026-10-29)
+    # had its whole Legal/Finance & Insurance section in G&A as well as in Insurance: $833,747 of sub-sections
+    # against $739,617 controllable. Less is fine - contract services belong in none of the five and the Pro
+    # Forma carries the remainder as "Other Controllable" at the T12 figure.
+    ctrl = data.get("controllable_expenses")
+    subs = [data.get(f) or 0 for f in ("repairs_maintenance", "turnover_costs", "labor_costs",
+                                       "advertising_promotions", "general_admin")]
+    if ctrl is not None and sum(subs) - ctrl > max(2, abs(ctrl) * 0.001):
+        warnings.append(f"Tie-out: the controllable sub-sections (R&M, turnover, labor, advertising, G&A) sum to {sum(subs):,.0f}, "
+                        f"more than controllable expenses of {ctrl:,.0f} — a section is in two buckets.")
     vcb = data.get("vacancy_concessions_bad_debt")
     if vcb is not None and vcb > 0:
         warnings.append("vacancy_concessions_bad_debt came out positive — the model "

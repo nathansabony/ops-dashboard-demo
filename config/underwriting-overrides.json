@@ -1,0 +1,3 @@
+{
+  "_about": "Corrections found by hand-reviewing a specific deal's documents, applied by underwriting/model_fixes.py deal_overrides() whenever a deal is generated or rerun. Keyed by the property name (lower case, letters and digits only). The demo ships none: the sample deal needs no corrections."
+}

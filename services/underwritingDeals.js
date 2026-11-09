@@ -28,6 +28,24 @@ const isPlaceholder = v => typeof v === 'string' && /^\s*\[[A-Z _]+\]\s*$/.test(
 const clean = v => (v == null || v === '' || isPlaceholder(v) ? null : v);
 const finite = v => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 
+// A deal someone actually underwrote by hand (2026-10-31, the owner: "you're supposed to be underwriting it ... what am I
+// checking?"). One record per property in config/underwriting-reviews.json: what was checked against the documents,
+// what was wrong and fixed, what is still open, and the conclusion. The card and the PDF show it in place of the
+// automatic "check before relying" box. A review covers the runs it lists; a newer run says so instead of borrowing it.
+const REVIEWS_FILE = path.join(__dirname, '..', 'config', 'underwriting-reviews.json');
+function reviewFor(name, file, reviews) {
+  let all = reviews;
+  if (!all) { try { all = JSON.parse(fs.readFileSync(REVIEWS_FILE, 'utf8')); } catch { return null; } }
+  const r = all && all[propertyKey(name)];
+  if (!r || typeof r !== 'object') return null;
+  const files = Array.isArray(r.files) ? r.files : [];
+  return {
+    reviewed: r.reviewed || null, by: r.by || null, summary: String(r.summary || ''),
+    checked: (r.checked || []).slice(0, 12), fixed: (r.fixed || []).slice(0, 8), open: (r.open || []).slice(0, 6),
+    ask: r.ask || null, current: !files.length || files.includes(file),
+  };
+}
+
 // Run date: the generator stamps every file "<slug>-YYYY-MM-DD-HH-MM-SS.xlsx".
 // A model copied from another machine keeps that stamp even though the file's
 // own mtime is the copy time, so the name wins.
@@ -67,6 +85,9 @@ const gPct = v => (v * 100).toFixed(1) + '%';
 
 function reviewReasons(c) {
   const out = [];
+  // a lease-up the model itself underwrites (occupancy ramp on its Inputs tab, 2026-11-02): 40% occupancy, a price per door off the
+  // T12 and a negative first year are the plan, not a broken input
+  if (c.lease_up) return out;
   const num = v => (typeof v === 'number' && Number.isFinite(v) ? v : null);
   const occ = num(c.occupancy), units = num(c.units), nonRev = num(c.non_revenue_units);
   if (occ != null && occ < GATE.minOccupancy) {
@@ -126,7 +147,7 @@ function reviewFix(c) {
 //   Year-2 cash-on-cash ................ 20   full marks at 8%
 //   Equity multiple .................... 10   0 points at 1.0x, full at 2.0x
 //   Year-1 DSCR ........................ 10   0 at 1.0x, full at 1.25x
-// A deal flagged NEEDS REVIEW gets no score at all: its numbers are not facts. A deal
+// A deal flagged NEEDS REVIEW is scored on its numbers but held to reviewCap (an F). A deal
 // whose IRR the model cannot solve scores zero on that line and says it is unsolved.
 const SCORE_CONFIG_FILE = path.join(__dirname, '..', 'config', 'deal-score.json');
 const SCORE_DEFAULTS = {
@@ -137,6 +158,7 @@ const SCORE_DEFAULTS = {
   coc: { zeroAt: 0.02, fullAt: 0.10 }, em: { zeroAt: 1, fullAt: 2.5 }, dscr: { zeroAt: 1, fullAt: 1.5 },
   risk: { occupancyZeroAt: 0.7, occupancyFullAt: 0.93, needsInputPenaltyEach: 0.2, occupancyShare: 0.5 },
   grades: { A: 85, B: 75, C: 65, D: 55 },
+  reviewCap: 15,       // the most a NEEDS REVIEW deal can score: always an F
 };
 let scoreCfgCache = null;
 let scoreOverrideFile = null;         // set by the server: data/underwriting/score-config.json on the Render disk (shared, editable on the tab)
@@ -154,6 +176,7 @@ function sanitizeScoreConfig(input, base) {
   else if (Math.abs(sum - 100) > 0.001) { WEIGHT_KEYS.forEach(k => { cfg.weights[k] = Math.round(cfg.weights[k] * 100 / sum * 10) / 10; }); }
   const g = cfg.grades;
   if (!(g.A > g.B && g.B > g.C && g.C > g.D && g.D >= 0 && g.A <= 100)) cfg.grades = { ...SCORE_DEFAULTS.grades };
+  cfg.reviewCap = Math.min(num(cfg.reviewCap, 0, 100, SCORE_DEFAULTS.reviewCap), Math.max(0, cfg.grades.D - 1));    // stays an F
   for (const k of Object.keys(cfg.timing.byYear)) cfg.timing.byYear[k] = num(cfg.timing.byYear[k], 0, 1, 0);
   for (const k of ['afterYear8', 'onlyWithRefi', 'neverClears']) cfg.timing[k] = num(cfg.timing[k], 0, 1, SCORE_DEFAULTS.timing[k]);
   cfg.price.noSolvedMaxButMeetsTarget = num(cfg.price.noSolvedMaxButMeetsTarget, 0, 1, 0.7);
@@ -209,7 +232,7 @@ function resetScoreConfig() {
   return scoreConfigInfo();
 }
 const SCORE_LABELS = {
-  irr: 'Levered IRR vs target', timing: 'How soon the target is hit', price: 'Price vs max that clears target',
+  irr: 'Levered IRR vs target', timing: 'How soon the target is hit', price: 'Our bid vs their price',
   coc: 'Year-2 cash-on-cash', em: 'Equity multiple', dscr: 'Year-1 DSCR', risk: 'Risk and data confidence',
 };
 const SCORE_ORDER = ['irr', 'timing', 'price', 'coc', 'em', 'dscr', 'risk'];
@@ -241,7 +264,6 @@ function timingFraction(c, target, irr, cfg) {
 
 function scoreDeal(c, cfgOverride) {
   if (!c || c.computed === false) return { score: null, grade: null, parts: [], note: 'The model has no calculated values yet' };
-  if (c.needs_review) return { score: null, grade: null, parts: [], note: 'Needs review: not scored' };
   const cfg = cfgOverride || scoreConfig();
   const f = v => (typeof v === 'number' && Number.isFinite(v) ? v : null);
   const target = f(c.irr_target) || 0.16;
@@ -265,15 +287,25 @@ function scoreDeal(c, cfgOverride) {
   const why = {
     irr: irr == null ? 'IRR not solved' : `${(irr * 100).toFixed(1)}% against a ${Math.round(target * 100)}% target`,
     timing: tm.why,
-    price: gap == null ? (c.meets_target === true ? 'clears the target at every price tested' : 'no price in the solver range clears the target') : gap >= 0 ? `${(gap * 100).toFixed(0)}% under the max price` : `${(Math.abs(gap) * 100).toFixed(0)}% over the max price`,
+    price: gap == null ? (c.meets_target === true ? 'clears the target at every price tested' : 'no price in the solver range clears the target')
+      : gap >= 0 ? `we could pay ${(gap * 100).toFixed(0)}% more than ${c.price_from_ask ? 'their ask' : c.lease_up ? 'the OM-implied price' : 'the income supports at our cap'} and still make the target`
+      : `our bid is ${(Math.abs(gap) * 100).toFixed(0)}% below ${c.price_from_ask ? 'their ask' : c.lease_up ? 'the OM-implied price' : 'the price the income supports at our cap'}: the gap to negotiate`,
     coc: coc == null ? 'not available' : `${(coc * 100).toFixed(1)}% in year 2`,
     em: em == null ? 'not available' : `${em.toFixed(2)}x`,
     dscr: dscr == null ? 'not available' : `${dscr.toFixed(2)}x`,
     risk: `${occ == null ? 'occupancy unknown' : (occ * 100).toFixed(0) + '% occupied'}${needsInput ? `, ${needsInput} model check${needsInput > 1 ? 's' : ''} still need an input` : ', no model checks waiting on an input'}`,
   };
   const parts = SCORE_ORDER.map(key => ({ key, label: SCORE_LABELS[key], weight: cfg.weights[key], points: Math.round(frac[key] * cfg.weights[key] * 10) / 10, why: why[key] }));
-  const score = Math.round(parts.reduce((t, p) => t + p.points, 0));
-  return { score, grade: dealGrade(score, cfg), parts, note: irr == null ? 'IRR not solved: scored without it' : '' };
+  let score = Math.round(parts.reduce((t, p) => t + p.points, 0));
+  let note = irr == null ? 'IRR not solved: scored without it' : '';
+  // 2026-10-30, the owner: a flagged deal (Pinecrest, 39.8% occupied) is still underwritten and still scored - "just give it a
+  // very bad grade". Its points are the model's own, held to the review cap (an F) until the inputs are fixed.
+  if (c.needs_review) {
+    const cap = cfg.reviewCap;
+    if (score > cap) score = cap;
+    note = `Needs review: scored on the model's numbers, held to ${cap} or below (an F) until the inputs are fixed`;
+  }
+  return { score, grade: dealGrade(score, cfg), parts, note, capped: !!c.needs_review };
 }
 
 function shapeCard(raw) {
@@ -316,14 +348,40 @@ function shapeCard(raw) {
     checks: raw.checks || {},
     scenarios: Array.isArray(raw.scenarios) ? raw.scenarios : [],
     non_revenue_units: finite(raw.non_revenue_units),
-    uncomputed_formulas: finite(raw.uncomputed_formulas),     // formulas the file saved without a value: a model that is not finished
+    uncomputed_formulas: finite(raw.uncomputed_formulas),
+    buildings: Array.isArray(raw.buildings) ? raw.buildings.slice(0, 12) : [],   // a deal of several buildings: one row each (Portfolio Breakdown tab)
+    combos: Array.isArray(raw.combos) ? raw.combos.slice(0, 32) : [],          // ...and every mix of them, ranked (Deal Combinations tab)     // formulas the file saved without a value: a model that is not finished
+    lease_up: raw.lease_up && finite(raw.lease_up.start) != null ? { start: finite(raw.lease_up.start), target: finite(raw.lease_up.target), months: finite(raw.lease_up.months) } : null,
     revenue_units: finite(raw.non_revenue_units) != null && units != null ? units - raw.non_revenue_units : null,
     revenue_occupancy: finite(raw.non_revenue_units) && units && units > raw.non_revenue_units && finite(raw.occupancy) != null ? Math.round(raw.occupancy * units) / (units - raw.non_revenue_units) : null,
   };
   card.review_reasons = reviewReasons(card);
   card.needs_review = card.review_reasons.length > 0;
   card.review_fix = card.needs_review ? reviewFix(card) : [];
+  card.price_from_ask = !!raw.price_from_ask;
+  card.purchase_cap = finite(raw.purchase_cap);
+  card.cautions = dealCautions(card);
   return card;
+}
+
+// Softer than the gate (2026-10-31 review of every live deal): things that do not make a deal unusable but that a
+// reader must know before trusting its score. They show on the card and the PDF; they do not cap the score.
+const CAUTION = { year1Swing: 0.20 };
+function dealCautions(c) {
+  const out = [];
+  const num = v => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+  const y1 = num(c.year1_noi), noi = num(c.t12_noi);
+  if (y1 != null && noi != null && noi > 0 && y1 >= 0 && Math.abs(y1 / noi - 1) > CAUTION.year1Swing) {
+    const d = y1 / noi - 1;
+    out.push(`Year-1 NOI is ${Math.abs(Math.round(d * 100))}% ${d < 0 ? 'below' : 'above'} the T12 (${gMoney(y1)} vs ${gMoney(noi)}): check the Pro Forma's ${d < 0 ? 'tax reset, benchmarks and one-time costs' : 'rent and occupancy lift'} before relying on the score.`);
+  }
+  if (c.lease_up) {
+    out.push(`A lease-up, not an in-place deal: occupancy is modeled climbing from ${gPct(c.lease_up.start)} to ${gPct(c.lease_up.target)} over ${c.lease_up.months} months after a rebuild, so Year 1 is a loss by design. The price is the OM-implied one (our inference, not an ask) and the rebuild cost is an house estimate until contractors bid.`);
+  } else if (!c.price_from_ask && num(c.price) != null) {
+    const cap = num(c.purchase_cap);
+    out.push(`The price is T12 NOI ÷ a ${cap != null ? gPct(cap) : 'house'} cap rate, not the broker's ask: enter the ask (Price on the Inputs tab) and run it again.`);
+  }
+  return out;
 }
 
 // The same building is often run twice or three times (Willow Bay: three models in
@@ -374,7 +432,12 @@ function groupByProperty(entries) {
 
 // 2 = cards carry cash-on-cash; 3 = an unsolvable IRR (the model shows 0%) reads as n/a;
 // 4 = the earlier template's "NM" IRR text reads as unsolved too (2026-10-22)
-const CARD_VERSION = 6;
+// 7 = a multi-building deal's card carries each building and every mix of them (2026-10-30)
+// 8 = where the price came from (ask or NOI / cap) and the cautions: Year 1 far from T12 (2026-10-31)
+// 9 = the max price is our bid, solved exactly on the model's cash flows (levers.py), as the PDF prints it (2026-11-01)
+const CARD_VERSION = 9;
+const CARD_CHUNK = 12;              // models per card-reader run
+const CARD_BUDGET_MS = 150000;       // a board request stops starting new chunks after this
 
 // A rent roll read can hand back "official" counts that its own unit rows contradict - 100-106 Maple Court
 // Boulevard (2026-09-03): official occupied = 0 and occupancy = 0%, with 54 of its 56 unit rows carrying a rent
@@ -436,10 +499,18 @@ function createStore({ dir, readCards }) {
   // mtime; anything new or changed is read in ONE Python call (openpyxl start-up
   // dominates, not the reading).
   let unreadable = [];
-  async function list() {
+  // Requests that arrive while the board is being read share that read: several open tabs after a deploy each used
+  // to start their own pass over every stale model, queued one behind another on the single Python slot.
+  let listing = null;
+  function list() {
+    if (!listing) listing = listOnce().finally(() => { listing = null; });
+    return listing;
+  }
+
+  async function listOnce() {
     const m = load();
     unreadable = [];
-    const files = fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => /\.xlsx$/i.test(f) && !f.startsWith('~$')) : [];
+    const files = fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => /\.xlsx$/i.test(f) && !f.startsWith('~$') && !f.startsWith('.partial-')) : [];
     const stale = [];
     for (const f of files) {
       const st = fs.statSync(path.join(dir, f));
@@ -448,18 +519,31 @@ function createStore({ dir, readCards }) {
       // say) is rebuilt from its model, not served as it was
       if (!rec || rec.mtime !== st.mtimeMs || !rec.card || rec.v !== CARD_VERSION) stale.push({ f, mtime: st.mtimeMs });
     }
+    // In chunks, each saved as it lands: a CARD_VERSION bump makes every model on the disk stale at once (157 on
+    // 2026-11-01), and one batch that outlives the reader's timeout used to throw all of its work away, so every
+    // later request started the same batch again and the board stayed empty. Newest first, so today's deals show
+    // first; a request that has spent its budget returns what is done and the next one carries on.
     if (stale.length) {
-      let cards = {};
-      try { cards = await readCards(stale.map(s => path.join(dir, s.f))); } catch (e) { cards = {}; console.error('deal cards:', e.message); }
-      for (const s of stale) {
-        const raw = cards[path.join(dir, s.f)];
-        if (!raw) { unreadable.push({ file: s.f, reason: 'the card reader returned nothing for this file' }); continue; }   // try again next time
-        const rec = m.models[s.f] || (m.models[s.f] = {});
-        rec.mtime = s.mtime;
-        rec.v = CARD_VERSION;
-        rec.card = shapeCard(raw);
+      stale.sort((a, b) => b.mtime - a.mtime);
+      const started = Date.now();
+      for (let i = 0; i < stale.length; i += CARD_CHUNK) {
+        const chunk = stale.slice(i, i + CARD_CHUNK);
+        if (Date.now() - started > CARD_BUDGET_MS) {
+          for (const s of chunk) unreadable.push({ file: s.f, reason: 'still being read; it will show on the next refresh' });
+          continue;
+        }
+        let cards = {};
+        try { cards = await readCards(chunk.map(s => path.join(dir, s.f))); } catch (e) { cards = {}; console.error('deal cards:', e.message); }
+        for (const s of chunk) {
+          const raw = cards[path.join(dir, s.f)];
+          if (!raw) { unreadable.push({ file: s.f, reason: 'the card reader returned nothing for this file' }); continue; }   // try again next time
+          const rec = m.models[s.f] || (m.models[s.f] = {});
+          rec.mtime = s.mtime;
+          rec.v = CARD_VERSION;
+          rec.card = shapeCard(raw);
+        }
+        save();
       }
-      save();
     }
     const out = [];
     for (const f of files) {
@@ -479,6 +563,7 @@ function createStore({ dir, readCards }) {
         confirmed_fields: rec.confirmed_fields || [],
         imported: !!rec.imported,
         hidden: rec.hidden || null,
+        review: reviewFor(rec.card.name, f),
       });
     }
     return out;
@@ -553,4 +638,4 @@ function createStore({ dir, readCards }) {
   return { list, problems, setHidden, setProvenance, inheritRepairedProvenance, provenanceOf, reportMeta, markReport, metaFile };
 }
 
-module.exports = { scoreDeal, dealGrade, scoreConfig, scoreConfigInfo, saveScoreConfig, resetScoreConfig, sanitizeScoreConfig, useScoreOverride, SCORE_PARTS, GATE, reviewReasons, reviewFix, reconcileOfficialCounts, shapeCard, bestOrder, rankProperties, cocFromScenarios, groupByProperty, propertyKey, runDate, createStore, isPlaceholder };
+module.exports = { scoreDeal, dealGrade, scoreConfig, scoreConfigInfo, saveScoreConfig, resetScoreConfig, sanitizeScoreConfig, useScoreOverride, SCORE_PARTS, GATE, reviewReasons, reviewFix, dealCautions, CAUTION, reviewFor, reconcileOfficialCounts, shapeCard, bestOrder, rankProperties, cocFromScenarios, groupByProperty, propertyKey, runDate, createStore, isPlaceholder };

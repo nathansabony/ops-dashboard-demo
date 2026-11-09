@@ -68,10 +68,10 @@ const txt = textOf(html);
     check(`section present: ${h}`, txt.includes(h));
   }
   check('nothing reads undefined / NaN / null / Infinity anywhere', clean(html), (html.match(/.{30}(undefined|NaN|\[object|Infinity).{30}/) || [])[0]);
-  check('the six headline tiles are The owner\'s price-test six', full.tiles.map(t => t.label.split(' @')[0]).join('|') === 'PRICE RUN|UNITS|T12 NOI|IN-PLACE CAP RATE|LEVERED IRR|MAX PRICE');
+  check('the six headline tiles are the owner\'s price-test six', full.tiles.map(t => t.label.split(' @')[0]).join('|') === 'NO ASK · INCOME PRICE|UNITS|T12 NOI|IN-PLACE CAP RATE|LEVERED IRR|OUR BID');
   check('price, units, T12 NOI, IRR and max price read right', txt.includes('$11.21M') && txt.includes('$229K') === false ? txt.includes('$228,741 per unit') : txt.includes('$11.21M'));
   check('IRR 4.6% is below the 16% target and says so', txt.includes('4.6%') && txt.includes('below 16% target'));
-  check('the gap to max price is stated, in dollars and percent, and labelled an estimate', /−\$3\.08M \(−27%\) vs price run — house estimate/.test(txt));
+  check('the gap to max price is stated, in dollars and percent, and labelled an estimate', /−\$3\.08M \(−27%\) vs the income price — house estimate/.test(txt));
   check('in-place cap rate is T12 NOI over price and is labelled a house estimate', txt.includes('5.50%') && /house estimate: T12 NOI ÷ price run/.test(txt));
   check('the verdict sentence uses the model\'s own numbers', /levered IRR over the 8-year hold is 4\.6%, below the 16% target/.test(txt) && /put[s]? the most that could be paid .* at \$8\.13M/.test(txt));
   check('the T12 section names the months covered', txt.includes('Jun 2025 – May 2026 (12 months)'));
@@ -115,11 +115,11 @@ console.log('\nA deal flagged NEEDS REVIEW');
   const tb = textOf(report.renderHtml(rb));
   check('page 1 carries a NEEDS REVIEW banner with every reason', rb.review.needs && /NEEDS REVIEW: do not rely on this deal's price or returns/.test(tb) && rb.review.reasons.length === 4 && /Occupancy is 39\.8%/.test(tb));
   check('price, cap rate, IRR, max price, cash-on-cash, equity multiple and DSCR print as n/r, not as numbers',
-    ['PRICE RUN', 'IN-PLACE CAP RATE', 'LEVERED IRR', 'MAX PRICE'].every(l => rb.tiles.find(t => t.label.startsWith(l)).value === 'n/r') && rb.tiles2.slice(0, 3).every(t => t[1] === 'n/r') && !/\$6\.62M/.test(tb.slice(0, tb.indexOf('Property and deal facts'))));
+    ['NO ASK', 'IN-PLACE CAP RATE', 'LEVERED IRR', 'OUR BID'].every(l => rb.tiles.find(t => t.label.startsWith(l)).value === 'n/r') && rb.tiles2.slice(0, 3).every(t => t[1] === 'n/r') && !/\$6\.62M/.test(tb.slice(0, tb.indexOf('Property and deal facts'))));
   check('the verdict sentence is replaced by the review note, not by a rosy IRR sentence', /flagged NEEDS REVIEW/.test(rb.verdict) && !/levered IRR over the/.test(rb.verdict));
   check('physical and revenue units are both shown (996 physical, 637 revenue, 62.2% of revenue units occupied)', /Revenue units \(not down, model or employee\) 637 of 996/.test(tb) && /Occupancy of revenue units 62\.2%/.test(tb));
   const good = textOf(report.renderHtml(report.buildReport(facts(), {})));
-  check('a scored deal\'s PDF explains its score, factor by factor, and a flagged one prints none', /Deal score: \d+ \/ 100/.test(good) && /Levered IRR vs target/.test(good) && /How soon the target is hit/.test(good) && !/Deal score:/.test(tb));
+  check('a scored deal\'s PDF explains its score, factor by factor, and a flagged one is held to an F and says so', /Deal score: \d+ \/ 100/.test(good) && /Levered IRR vs target/.test(good) && /How soon the target is hit/.test(good) && /Deal score: \d+ \/ 100 \(F\)/.test(tb) && /held to 15 or below/.test(tb));
   check('a healthy deal has no banner and keeps its numbers', !/NEEDS REVIEW/.test(good) && /\$11\.21M/.test(good));
   const adj = textOf(report.renderHtml(report.buildReport(facts(), { provenance: { sources: [{ kind: 't12', filename: 'T12.xlsx', method: 'row-mapped (pandas)', notes: ['ADJUSTED MONTH: Oct 2025 has no gross potential rent. It is left out and every T12 figure is annualized (x12/11). This is a house estimate.'] }] } })));
   check('a T12 the reader annualized says so under "Adjusted by us (house estimate)"', /Adjusted by us \(house estimate\)/.test(adj) && /ADJUSTED MONTH: Oct 2025/.test(adj));
@@ -157,6 +157,49 @@ console.log('\nWhatever the facts look like');
   check('a deal name is escaped', !nasty.includes('<script>') && nasty.includes('&lt;script&gt;'));
 }
 
+console.log('\nThe bottom line, our bid and how to make it work');
+{
+  // Lakeview-shaped: the ask, Year 1 under the T12 for tax / insurance / reserves, negative leverage
+  const lv = { price: 78e6, units: 564, irr: -0.055, target: 0.16, hold: 8, t12_noi: 4404554.54,
+    bid: { price: 52577370, per_unit: 93222, vs_price: -0.326, cap_on_t12: 0.0838 },
+    levers: [
+      { key: 'rate', label: 'Debt 0.5 pt cheaper (5.50% instead of 6.00%)', how: 'Agency debt.', irr: -0.0437, change: 0.0113, bid: 53433030 },
+      { key: 'ltv', label: 'Borrow 60% of the price instead of 70%', how: 'Negative leverage.', irr: -0.0271, change: 0.0278, bid: null },
+      { key: 'opex', label: 'Run it $250/unit a year cheaper', how: 'Payroll.', irr: -0.0314, change: 0.0236, bid: 54240793 },
+      { key: 'income', label: '$25/unit a month more other income', how: 'RUBS.', irr: -0.0279, change: 0.027, bid: 54496769 },
+      { key: 'exit', label: 'Sell at a 5.25% cap instead of 5.50%', how: 'Not ours.', irr: -0.0351, change: 0.0198, bid: 53800000 }],
+    together: { label: 'together', irr: 0.002, change: 0.057, bid: 57070000 } };
+  const lines = [
+    { label: 'Base Gross Potential Rent', t12: 8339179, year1: 8162706 }, { label: 'Vacancy Loss', t12: -608696, year1: -406283 },
+    { label: 'Bad Debt', t12: -39942, year1: -163674 }, { label: 'Effective Gross Income', t12: 8419743, year1: 8335948 },
+    { label: 'Insurance and Bonds', t12: 318319, year1: 620400 }, { label: 'Property Taxes', t12: 922132, year1: 1418880 },
+    { label: 'Replacement Reserves', t12: 0, year1: 141000 }, { label: 'Net Operating Income', t12: 4404554, year1: 3060915 }];
+  const f = facts({ levers: lv, card: Object.assign({}, facts().card, { name: 'Lakeview Portfolio', price: 78e6, price_per_door: 138298, price_from_ask: true, units: 564, t12_noi: 4404554.54, year1_noi: 3060915, irr: -0.055, max_price: 52500000, hold_years: 8 }),
+    pro_forma: Object.assign({}, facts().pro_forma, { lines, after_debt: { 1: -381803 } }) });
+  const r = report.buildReport(f, { file: 'Lakeview-2026-10-30.xlsx' });
+  const html = report.renderHtml(r), t = textOf(html);
+  check('the page leads with the bottom line: does not work at the ask, and our bid', t.includes('Does not work at $78.00M (−5.5%). Our bid: $52.58M ($93K a unit), 33% below') && t.indexOf('Does not work') < t.indexOf('THEIR ASK'), t.slice(0, 400));
+  check('...it says the price is the broker\'s ask and the cap rate on the T12', t.includes('The asking price is $78.00M ($138K a unit), a 5.65% cap rate'));
+  check('...reads "an 8-year hold" and "an 8.38% cap rate"', t.includes('over an 8-year hold') && t.includes('is an 8.38% cap rate'));
+  check('...names why Year 1 is under the T12, biggest first, in plain words', /31% below the seller's \$4\.40M, because .*property tax re-set on the purchase price \(−\$497K\); insurance at \$1,100 a unit \(the seller pays \$564\) \(−\$302K\)/.test(t), (t.match(/Our Year-1 NOI.{0,400}/) || [])[0]);
+  check('...and says when the loan costs more than the property earns', t.includes('earns 3.9% on the price in Year 1 while the loan costs 6.0%, so borrowing lowers our return instead of raising it (Year 1 loses $381,803 after the loan and our fee). That is the main reason'));
+  check('the bid tile shows the exact bid, not the solver\'s interpolated one', r.tiles.find(x => x.label.startsWith('OUR BID')).value === '$52.58M');
+  check('the levers table lists each lever with its IRR and the bid it allows; borrowing less has no bid', t.includes('How to make it work') && t.includes('$53.43M') && /Borrow 60%.*?n\/a/.test(t) && t.includes('$57.07M'));
+  check('...and ends with what the levers can and cannot do', t.includes('Even with cheaper debt, lower costs and more income together, it reaches only 0.2% at $78.00M. The price is what has to move'));
+  check('...with nothing printed as undefined / NaN', clean(html), (html.match(/.{30}(undefined|NaN|\[object|Infinity).{30}/) || [])[0]);
+  const mixCard = combos => Object.assign({}, f.card, { combos });
+  const split = textOf(report.renderHtml(report.buildReport(Object.assign({}, f, { card: mixCard([
+    { mix: 'A + B + C', units: 564, ask: 78e6, irr: -0.055, max_price: 52.58e6 }, { mix: 'A', units: 216, ask: 31e6, irr: -0.048, max_price: 20.86e6 },
+    { mix: 'A + B', units: 408, ask: 58.5e6, irr: -0.069 }, { mix: 'C', units: 156, ask: 21.5e6, irr: -0.116 }]) }), { file: 'g.xlsx' })));
+  check('a portfolio says when buying only part of it does better, and that it still falls short', split.includes('Buying only A does better: −4.8% at its $31.00M ask, with our bid at $20.86M — still short of 16%.'));
+  const whole = textOf(report.renderHtml(report.buildReport(Object.assign({}, f, { card: mixCard([
+    { mix: 'A + B + C', units: 564, ask: 78e6, irr: -0.055 }, { mix: 'A', units: 216, ask: 31e6, irr: -0.07 },
+    { mix: 'A + B', units: 408, ask: 58.5e6, irr: -0.069 }, { mix: 'C', units: 156, ask: 21.5e6, irr: -0.116 }]) }), { file: 'g.xlsx' })));
+  check('...and when every smaller mix does worse than the whole package', whole.includes('Splitting it up does not help: each of the 3 smaller mixes of the buildings does worse than the whole package (the best, A + B on its own ask, makes −6.9%).'));
+  const noLv = report.buildReport(facts({ levers: { error: 'does not tie' } }), { file: 'x.xlsx' });
+  check('a model the levers could not tie keeps the one-line verdict and no levers table', !noLv.bottom && !textOf(report.renderHtml(noLv)).includes('How to make it work'));
+}
+
 console.log('\nWhere the PDF lives (PDF engine stubbed)');
 async function disk() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'uwr-'));
@@ -192,6 +235,11 @@ async function disk() {
   check('a model rewritten after its report makes the report stale', (await reports.ensure(model)).built === true);
   metas[model] = { v: report.REPORT_VERSION - 1 };
   check('a report built by an older layout is rebuilt', (await reports.ensure(model)).built === true);
+  check('...and it records the hand review it printed', metas[model].name === 'Harbor Row Portfolio' && typeof metas[model].review === 'string');
+  { const past = new Date(Date.now() - 60000); fs.utimesSync(path.join(dir, model), past, past); }   // the model is older than its report again
+  check('a report whose hand review has not changed is not rebuilt', (await reports.ensure(model)).built === false);
+  metas[model] = Object.assign({}, metas[model], { review: 'an-older-one' });
+  check('a hand review edited after the report was built makes it stale', (await reports.ensure(model)).built === true);
   check('a file name that is not a model is refused', await reports.ensure('../../etc/passwd').then(() => false, () => true) && await reports.ensure('notes.txt').then(() => false, () => true));
   check('building leaves no scratch files on the disk', fs.readdirSync(dir).every(f => /\.(xlsx|pdf)$/.test(f)));
   const past = new Date(Date.now() - 60000);
@@ -341,9 +389,9 @@ except Exception: out['fixedOpens'] = False
 sys.__stdout__.write(json.dumps(out) + chr(10))   # the imported modules point sys.stdout at stderr`;
   let gen = null;
   try { gen = JSON.parse(execFileSync(py, ['-c', mkModel], { stdio: ['ignore', 'pipe', 'pipe'] }).toString().trim().split('\n').pop()); } catch (e) { gen = { error: String((e.stderr || e.message)).slice(-500) }; }
-  check('the Unit Mix summary spans all 30 unit types, not the template\'s first 20 (Overlook 351 of 532, Estates 102 of 400)',
+  check('the Unit Mix summary spans all 30 unit types, not the template\'s first 20 (Ridgeview 351 of 532, Estates 102 of 400)',
     gen && /^=SUM\(B6:B35\)$/.test(gen.mixA2 || '') && /SUMPRODUCT\(B6:B35,G6:G35\)/.test(gen.mixD2 || ''), JSON.stringify(gen));
-  check('the bake turns the engine\'s "empty" into 0 and keeps text typed as text (it wrote invalid XML before: Station Heights / International City could not be opened)',
+  check('the bake turns the engine\'s "empty" into 0 and keeps text typed as text (it wrote invalid XML before: Summit Heights / Metro Central could not be opened)',
     gen && gen.bakeB1 === 0 && gen.bakeB2 === 'x', JSON.stringify(gen));
   check('a workbook with an invalid cached value fails to open, and repair removes it so it does', gen && gen.badOpens === false && gen.removed >= 1 && gen.fixedOpens === true, JSON.stringify(gen));
   // doc_peek: an OM whose first pages are bare cover photos is still an OM (Estates at Fairway Green, 2026-10-22)
